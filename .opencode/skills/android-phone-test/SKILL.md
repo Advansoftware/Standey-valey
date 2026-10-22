@@ -118,19 +118,26 @@ ip -brief addr show
 
 ## Testar a API local no celular
 
-Para validar a descoberta mDNS e a sincronização sem abrir o Stardew Valley:
+Para validar a descoberta mDNS e a sincronização sem abrir o Stardew Valley, use o mock e o
+anunciador incluídos nesta skill:
 
-1. No PC, suba um mock em `0.0.0.0:7882` (o script de teste usado nesta
-   sessão está em `/tmp/opencode/mock_api.py`; recrie se não existir).
-2. Anuncie `_stardewapi._tcp` na porta 7882. O utilitário de teste desta
-   sessão fica em `/tmp/opencode/mdtest`.
-3. No app, abra **Sobre e ajustes → Servidor do jogo (API)** e toque em
-   **Procurar na rede**. Se o mDNS falhar, informe
-   `http://IP_DO_PC:7882` e toque em **Conectar**.
-4. Confira no log do mock as chamadas `/api/v1/mods`, `/world`,
-   `/players/main` e `/players/main/inventory`.
-5. A data da tela inicial deve mudar para a data do mock. O modo automático
-   sincroniza a cada 60 segundos e ao voltar ao app.
+```sh
+# terminal 1: API falsa em 0.0.0.0:7882
+python3 .opencode/skills/android-phone-test/scripts/mock_api.py
+
+# terminal 2: anúncio _stardewapi._tcp por 20 minutos (precisa de .NET 6)
+cd .opencode/skills/android-phone-test/scripts/mdtest
+dotnet run
+```
+
+1. No app, abra **Sobre e ajustes → Servidor do jogo (API)** e toque em **Procurar na rede**.
+   Se o mDNS falhar, informe `http://IP_DO_PC:7882` e toque em **Conectar**.
+2. Confira no log do mock as chamadas `/api/v1/mods`, `/world`, `/players/main` e
+   `/players/main/inventory`.
+3. A data da tela inicial deve mudar para a data do mock. O modo automático sincroniza a cada
+   60 segundos e ao voltar ao app.
+4. O mock não substitui um teste com save real; ele só confirma o caminho de rede e o formato
+   esperado dos dados.
 
 ## Coordenadas e screenshots
 

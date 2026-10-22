@@ -1,0 +1,11 @@
+using Makaretu.Dns;
+var mdns = new MulticastService();
+var sd = new ServiceDiscovery(mdns);
+var profile = new ServiceProfile("Teste Guia do Vale", "_stardewapi._tcp", 7882);
+profile.AddProperty("path", "/");
+sd.Advertise(profile);
+mdns.Start();
+Console.WriteLine("started");
+await Task.Delay(TimeSpan.FromMinutes(20));
+mdns.Dispose();
+Console.WriteLine("done");
