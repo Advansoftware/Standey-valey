@@ -99,7 +99,7 @@ for en, pt, est, fonte, preco_sem, dias, rebrota, venda, rend, emoji, nota in D.
     crops.append({
         "id": "crop_" + slug(en), "en": en, "pt": pt, "emoji": emoji,
         "sub": f"{est} · {dias} dias" + (f" · rebrota {rebrota}d" if rebrota else ""),
-        "tags": seasons_in(est) + (["Rebrota"] if rebrota else []),
+        "tags": seasons_in(est) + (["Refloresce"] if rebrota else []),
         "img": png(en), "fields": fields,
         "desc": nota or f"Cultura de {est.lower()} que leva {dias} dias para crescer.",
         "meta": {"price": venda, "profit": lucro},
