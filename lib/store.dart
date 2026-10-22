@@ -13,6 +13,7 @@ class Store extends ChangeNotifier {
   int day;
   ThemeMode themeMode;
   bool aiModelInstalled;
+  bool aiDownloading;
   String aiModelUrl;
   String aiModelId;
 
@@ -24,6 +25,7 @@ class Store extends ChangeNotifier {
         day = _p.getInt('day') ?? 1,
         themeMode = ThemeMode.values[(_p.getInt('theme') ?? 0).clamp(0, 2)],
         aiModelInstalled = _p.getBool('aiok') ?? false,
+        aiDownloading = _p.getBool('aidl') ?? false,
         aiModelUrl = _p.getString('aiurl') ?? '',
         aiModelId = _p.getString('aimodel') ?? defaultAiModel.id;
 
@@ -95,6 +97,15 @@ class Store extends ChangeNotifier {
   void setAiInstalled(bool v) {
     aiModelInstalled = v;
     _p.setBool('aiok', v);
+    notifyListeners();
+  }
+
+  /// Marca que há um download de modelo em andamento. Fica salvo para que,
+  /// se o app for fechado, o download em segundo plano seja retomado na
+  /// próxima abertura (o WorkManager do Android continua baixando).
+  void setAiDownloading(bool v) {
+    aiDownloading = v;
+    _p.setBool('aidl', v);
     notifyListeners();
   }
 

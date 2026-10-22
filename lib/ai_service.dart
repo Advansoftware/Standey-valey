@@ -63,18 +63,18 @@ class AiService extends ChangeNotifier {
           await FlutterEdgeAi.installModel(
             modelType: model.type,
             fileType: ModelFileType.litertlm,
-          ).fromHuggingFace(model.repo).withProgress(onProgress).install();
+          ).fromHuggingFace(model.repo, foreground: true).withProgress(onProgress).install();
         } catch (_) {
           await FlutterEdgeAi.installModel(
             modelType: model.type,
             fileType: ModelFileType.litertlm,
-          ).fromNetwork(url).withProgress(onProgress).install();
+          ).fromNetwork(url, foreground: true).withProgress(onProgress).install();
         }
       } else {
         await FlutterEdgeAi.installModel(
           modelType: model.type,
           fileType: ModelFileType.litertlm,
-        ).fromNetwork(url).withProgress(onProgress).install();
+        ).fromNetwork(url, foreground: true).withProgress(onProgress).install();
       }
       downloading = false;
       notifyListeners();
@@ -116,17 +116,24 @@ class AiService extends ChangeNotifier {
 /// Monta o prompt RAG com os trechos recuperados.
 String buildPrompt(String question, List<Hit> hits) {
   final b = StringBuffer();
-  b.writeln('Você é o assistente de um guia do jogo Stardew Valley para iniciantes.');
-  b.writeln('Responda em português do Brasil, de forma curta, clara e amigável.');
-  b.writeln('Use SOMENTE as informações do contexto. Se a resposta não estiver no contexto, diga que não encontrou.');
+  b.writeln('Você é o assistente do Guia do Vale, um guia de Stardew Valley em português do Brasil para iniciantes.');
+  b.writeln('Responda em português do Brasil, de forma curta (até 6 frases), clara e amigável.');
+  b.writeln('Use SOMENTE as informações do contexto abaixo. Não invente preços, nomes ou mecânicas.');
+  b.writeln('Quando o contexto tiver "Utilidade" ou "Preço de venda", use esses dados: diga para que serve e quanto rende.');
+  b.writeln('Se a pergunta pedir uma recomendação ("devo...", "vale a pena...", "quais as vantagens..."), '
+      'responda com os prós e contras que estão no contexto e termine com uma sugestão prática.');
+  b.writeln('Se o contexto tiver informação relacionada, use-a para responder mesmo que não seja a resposta exata. '
+      'Só diga que não encontrou se realmente não houver nada útil.');
+  b.writeln('Formate com parágrafos curtos e listas com hífen quando ajudar; use **negrito** para nomes e valores. '
+      'Não use tabelas, HTML nem blocos de código.');
   b.writeln();
   b.writeln('Contexto:');
   var total = 0;
   var i = 1;
   for (final h in hits) {
     var t = h.doc.text.replaceAll(RegExp(r'\s+'), ' ').trim();
-    if (t.length > 700) t = '${t.substring(0, 700)}…';
-    if (total + t.length > 3000) break;
+    if (t.length > 900) t = '${t.substring(0, 900)}…';
+    if (total + t.length > 4500) break;
     total += t.length;
     b.writeln('[$i] ${h.doc.title}: $t');
     i++;
@@ -142,5 +149,12 @@ String cleanAnswer(String s) {
   var t = s.replaceAll(RegExp(r'<think>.*?</think>', dotAll: true), '');
   final open = t.indexOf('<think>');
   if (open >= 0) t = t.substring(0, open);
-  return t.trim();
+  // Tokens especiais que alguns modelos .litertlm deixam escapar.
+  t = t.replaceAll(RegExp(r'<\|?/?[a-zA-Z0-9_]+\|?>'), '');
+  t = t.replaceAll(RegExp(r'<end_of_turn>|<start_of_turn>|<eos>|<bos>|</s>', caseSensitive: false), '');
+  t = t.replaceAll(RegExp(r'\[\/?INST\]'), '');
+  // Não repete o rótulo do prompt.
+  t = t.replaceFirst(RegExp(r'^\s*Resposta:\s*', caseSensitive: false), '');
+  // Espaços em excesso no começo/fim de cada linha.
+  return t.split('\n').map((l) => l.trimRight()).join('\n').trim();
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+import 'ai_models.dart';
 import 'ai_service.dart';
 import 'app_scope.dart';
 import 'app_theme.dart';
@@ -19,7 +20,17 @@ Future<void> main() async {
   runApp(StardewGuiaApp(store: store, repo: repo, search: search, ai: ai));
 
   // Em segundo plano: motor de IA local e wiki offline (se existir).
-  ai.init();
+  ai.init().then((_) async {
+    // Se o app foi fechado no meio de um download, o Android continuou
+    // baixando em segundo plano (WorkManager). Ao abrir de novo, retomamos o
+    // acompanhamento para concluir a instalação do arquivo.
+    if (!store.aiDownloading) return;
+    final model = aiModelById(store.aiModelId) ?? defaultAiModel;
+    final custom = store.aiModelUrl.trim();
+    final ok = await ai.install(model, urlOverride: custom.isEmpty ? null : custom);
+    store.setAiDownloading(false);
+    if (ok) store.setAiInstalled(true);
+  });
   WidgetsBinding.instance.addPostFrameCallback((_) => search.loadWiki());
 }
 

@@ -58,8 +58,10 @@ class _AssistantScreenState extends State<AssistantScreen> {
   String _fallback(List<Hit> hits) {
     final search = AppScope.of(context).search;
     if (hits.isEmpty) return 'Não encontrei isso no guia. Tente outras palavras.';
+    final entries = hits.where((h) => h.doc.entryId != null).take(2).toList();
+    final wiki = hits.where((h) => h.doc.entryId == null).take(entries.isEmpty ? 3 : 2).toList();
     final b = StringBuffer('Encontrei isto no guia:\n');
-    for (final h in hits.take(3)) {
+    for (final h in [...entries, ...wiki]) {
       var t = h.doc.text.replaceAll(RegExp(r'\s+'), ' ').trim();
       if (t.length > 280) t = '${t.substring(0, 280)}…';
       final name = search.entryOf(h.doc)?.name ?? (h.doc.pageTitle ?? h.doc.title);
@@ -72,7 +74,7 @@ class _AssistantScreenState extends State<AssistantScreen> {
     final q = question.trim();
     if (q.isEmpty || _asking) return;
     final scope = AppScope.of(context);
-    final hits = scope.search.search(q, limit: 6);
+    final hits = scope.search.search(q, limit: 8);
     final answer = ChatMessage(user: false, sources: hits, busy: true);
     setState(() {
       _asking = true;
@@ -129,7 +131,9 @@ class _AssistantScreenState extends State<AssistantScreen> {
     scope.store.setAiModelId(model.id);
     final custom = urlOverride.trim();
     if (custom.isNotEmpty) scope.store.setAiUrl(custom);
+    scope.store.setAiDownloading(true);
     final ok = await scope.ai.install(model, urlOverride: custom);
+    scope.store.setAiDownloading(false);
     if (ok) scope.store.setAiInstalled(true);
   }
 

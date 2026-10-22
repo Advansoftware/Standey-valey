@@ -5,6 +5,7 @@ import '../app_theme.dart';
 import '../models.dart';
 import '../search.dart';
 import 'common.dart';
+import 'markdown_lite.dart';
 
 /// Uma mensagem do chat (do usuário ou do assistente).
 class ChatMessage {
@@ -42,7 +43,12 @@ class AssistantBubble extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (msg.text.isEmpty && msg.busy) const Text('pensando…') else SelectableText(msg.text),
+            if (msg.text.isEmpty && msg.busy)
+              const Text('pensando…')
+            else if (msg.user)
+              SelectableText(msg.text)
+            else
+              MarkdownLite(msg.text),
             if (!msg.user && !msg.busy && entries.isNotEmpty) ...[
               const SizedBox(height: 8),
               Wrap(

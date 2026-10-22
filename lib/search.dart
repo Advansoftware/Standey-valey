@@ -17,6 +17,12 @@ const _stop = <String>{
   'nos', 'nas', 'um', 'uma', 'que', 'para', 'por', 'com', 'como', 'qual',
   'quais', 'onde', 'quando', 'se', 'eu', 'meu', 'minha', 'ao', 'ou', 'the',
   'of', 'to', 'in', 'is', 'sao', 'ser', 'tem', 'ter', 'posso', 'devo',
+  'sobre', 'explique', 'explicar', 'explica', 'fale', 'falar', 'conte',
+  'conta', 'queria', 'quero', 'gostaria', 'saber', 'sabe', 'funciona',
+  'funcionam', 'serve', 'servem', 'usar', 'usado', 'usada', 'usam', 'pra',
+  'pro', 'mim', 'ele', 'ela', 'eles', 'elas', 'isso', 'isto', 'aqui', 'ali',
+  'me', 'te', 'lhe', 'lhes', 'seu', 'sua', 'seus', 'suas', 'quanto', 'quantos',
+  'quanta', 'quantas', 'porque', 'jogo',
 };
 
 /// Remove acentos e coloca em minúsculas.
@@ -68,7 +74,7 @@ class Bm25Index {
   static const _k1 = 1.4;
   static const _b = 0.75;
 
-  void add(Doc d, {int titleBoost = 3}) {
+  void add(Doc d, {int titleBoost = 5}) {
     final id = docs.length;
     docs.add(d);
     final tf = <String, int>{};
@@ -125,7 +131,7 @@ class Bm25Index {
         var count = 0;
         for (final term in _post.keys) {
           if (term != q && term.startsWith(q)) {
-            scoreTerm(term, 0.5);
+            scoreTerm(term, 0.35);
             if (++count >= 25) break;
           }
         }

@@ -13,20 +13,20 @@ class CalendarScreen extends StatefulWidget {
 }
 
 class _CalendarScreenState extends State<CalendarScreen> {
-  int? _season;
-
   @override
   Widget build(BuildContext context) {
     final scope = AppScope.of(context);
     final store = scope.store;
     final repo = scope.repo;
-    final season = _season ?? store.season;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Calendário')),
       body: ListenableBuilder(
         listenable: store,
         builder: (context, _) {
+          // Sempre a estação atual do jogo: mudar a data em outra tela
+          // (início, por exemplo) atualiza o calendário na hora.
+          final season = store.season;
           return ListView(
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
             children: [
@@ -40,7 +40,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                         child: ChoiceChip(
                           label: Text('${seasonEmojis[s]} ${seasonNames[s]}'),
                           selected: season == s,
-                          onSelected: (_) => setState(() => _season = s),
+                          onSelected: (_) => store.setDate(s, store.day),
                         ),
                       ),
                   ],
@@ -132,6 +132,7 @@ class _DayCell extends StatelessWidget {
   }
 
   void _showDay(BuildContext context, List<CalendarEvent> events) {
+    final store = AppScope.of(context).store;
     showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
@@ -144,7 +145,7 @@ class _DayCell extends StatelessWidget {
             children: [
               Text('${seasonNames[season]} $day', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900)),
               const SizedBox(height: 8),
-              if (events.isEmpty) const Text('Sem eventos. Segure o dedo no dia para defini-lo como "hoje".'),
+              if (events.isEmpty) const Text('Sem eventos neste dia.'),
               for (final ev in events)
                 ListTile(
                   contentPadding: EdgeInsets.zero,
@@ -155,6 +156,18 @@ class _DayCell extends StatelessWidget {
                     openEntry(context, ev.entry);
                   },
                 ),
+              const SizedBox(height: 8),
+              FilledButton.icon(
+                icon: const Icon(Icons.today_rounded),
+                label: Text('Definir ${seasonNames[season]} $day como hoje'),
+                onPressed: () {
+                  store.setDate(season, day);
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Data do jogo: ${seasonNames[season]} $day')),
+                  );
+                },
+              ),
             ],
           ),
         ),

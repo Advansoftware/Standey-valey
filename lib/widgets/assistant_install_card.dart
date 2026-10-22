@@ -76,6 +76,19 @@ class _AssistantInstallCardState extends State<AssistantInstallCard> {
             LinearProgressIndicator(value: ai.progress > 0 ? ai.progress.clamp(0.0, 1.0) : null),
             const SizedBox(height: 4),
             Text('Baixando… ${(ai.progress * 100).toStringAsFixed(0)}%'),
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                const Icon(Icons.notifications_active_rounded, size: 16),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    'Pode sair do app: o download continua em segundo plano e aparece na notificação.',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ),
+              ],
+            ),
           ] else
             FilledButton.icon(
               icon: const Icon(Icons.download_rounded),
