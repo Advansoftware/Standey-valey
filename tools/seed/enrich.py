@@ -26,6 +26,82 @@ EXTRA = {
     "Oak Tree": "Carvalho", "Summer Spangle": "Flor-Miçanga", "Maple Tree": "Bordo", "Pine Tree": "Pinheiro", "Mahogany Tree": "Mogno",
     "Mushroom Tree": "Árvore de cogumelo", "Mystic Tree": "Árvore mística", "Fiddlehead Stalk": "Samambaia-gigante",
     "Palm Tree": "Palmeira", "Acorn": "Bolota", "Maple Seed": "Semente de bordo", "Pine Cone": "Pinha",
+    # Produtos e máquinas usados nos textos de "Utilidade".
+    "Pine Tar": "Alcatrão de Pinho", "Oak Resin": "Resina de Carvalho", "Maple Syrup": "Xarope de Bordo",
+    "Mystic Syrup": "Xarope Místico", "Wine": "Vinho", "Juice": "Suco", "Jelly": "Geleia", "Pickles": "Picles",
+    "Dried Fruit": "Fruta seca", "Dried Mushrooms": "Cogumelos desidratados", "Roe": "Ova", "Aged Roe": "Ova maturada",
+    "Caviar": "Caviar", "Smoked Fish": "Peixe defumado", "Mayonnaise": "Maionese", "Cheese": "Queijo",
+    "Goat Cheese": "Queijo de cabra", "Honey": "Mel", "Truffle Oil": "Óleo de trufa",
+    "Keg": "Barril", "Preserves Jar": "Jarra de Conserva", "Bee House": "Apiário", "Dehydrator": "Desidratador",
+    "Cheese Press": "Prensa de Queijo", "Mayonnaise Machine": "Máquina de Maionese", "Oil Maker": "Gerador de Óleo",
+    "Recycling Machine": "Máquina de Reciclagem", "Charcoal Kiln": "Fornalha de Carvão", "Furnace": "Fornalha",
+    "Slime Egg-Press": "Prensa de Ovos de Slime", "Slime Incubator": "Incubadora de Slime",
+    "Deluxe Scarecrow": "Espantalho Deluxe", "Warp Totem: Desert": "Totem de Teletransporte: Deserto",
+    "Warrior Ring": "Anel do Guerreiro", "Ring of Yoba": "Anel de Yoba", "Sturdy Ring": "Anel Resistente",
+    "Iridium Band": "Anel de Irídio", "Glow Ring": "Anel Brilhante", "Magnet Ring": "Anel Magnético",
+    "Slime Charmer Ring": "Anel Encantador de Slime", "Savage Ring": "Anel Selvagem",
+    "Vampire Ring": "Anel de Vampiro", "Napalm Ring": "Anel de Napalm", "Thorns Ring": "Anel de Espinhos",
+    "Lucky Ring": "Anel da Sorte", "Hot Java Ring": "Anel de Café", "Protection Ring": "Anel de Proteção",
+    "Soul Sapper Ring": "Anel Sugador de Alma", "Phoenix Ring": "Anel da Fênix",
+    "Immunity Band": "Anel de Imunidade", "Amethyst Ring": "Anel de Ametista",
+    "Aquamarine Ring": "Anel de Água-marinha", "Emerald Ring": "Anel de Esmeralda",
+    "Jade Ring": "Anel de Jade", "Ruby Ring": "Anel de Rubi", "Topaz Ring": "Anel de Topázio",
+    "Crystalarium": "Cristalário", "Staircase": "Escada", "Fairy Dust": "Pó de fada", "Tapper": "Torneirinha",
+    "Heavy Tapper": "Torneirinha Pesada", "Lightning Rod": "Para-raios", "Speed-Gro": "Adubo de Crescimento",
+    "Deluxe Speed-Gro": "Adubo de Crescimento Deluxe", "Quality Fertilizer": "Fertilizante de Qualidade",
+    "Basic Fertilizer": "Fertilizante Básico", "Tree Fertilizer": "Fertilizante de Árvore",
+    "Grass Starter": "Sementes de Grama", "Scarecrow": "Espantalho",
+    # Produtos dos animais (o dataset usa nomes próprios que não estavam no mapa).
+    "Egg": "Ovo", "Brown Egg": "Ovo marrom", "Large Brown Egg": "Ovo grande marrom",
+    "Golden Egg": "Ovo dourado", "Milk": "Leite",
+    # Receitas de artesanato (nomes que ainda apareciam em inglês na "Utilidade").
+    "Anvil": "Bigorna", "Bait": "Isca", "Bait Maker": "Fabricante de Isca",
+    "Barbed Hook": "Anzol Farpado", "Barrel Brazier": "Braseiro de Barril",
+    "Basic Retaining Soil": "Solo Retentor Básico", "Big Chest": "Baú Grande",
+    "Big Stone Chest": "Baú de Pedra Grande", "Blue Grass Starter": "Sementes de Grama Azul",
+    "Bomb": "Bomba", "Bone Mill": "Triturador de Ossos", "Brick Floor": "Piso de Tijolo",
+    "Bug Steak": "Bife de Inseto", "Campfire": "Fogueira", "Carved Brazier": "Braseiro Entalhado",
+    "Cask": "Barril de Madeira", "Challenge Bait": "Isca Desafio", "Cherry Bomb": "Bombinha",
+    "Chest": "Baú", "Cobblestone Path": "Caminho de Pedra", "Cookout Kit": "Kit de Churrasco",
+    "Cork Bobber": "Boia de Cortiça", "Crab Pot": "Armadilha de Caranguejo",
+    "Crystal Floor": "Piso de Cristal", "Crystal Path": "Caminho de Cristal",
+    "Dark Sign": "Placa Escura", "Deluxe Bait": "Isca Deluxe", "Deluxe Fertilizer": "Fertilizante Deluxe",
+    "Deluxe Retaining Soil": "Solo Retentor Deluxe", "Deluxe Worm Bin": "Minhocário Deluxe",
+    "Dressed Spinner": "Girador Decorado", "Drum Block": "Bloco de Tambor",
+    "Explosive Ammo": "Munição Explosiva", "Fall Seeds": "Sementes de Outono",
+    "Farm Computer": "Computador da Fazenda", "Fish Smoker": "Defumador de Peixes",
+    "Flute Block": "Bloco de Flauta", "Garden Pot": "Vaso de Jardim", "Gate": "Portão",
+    "Geode Crusher": "Triturador de Geodos", "Glowstone Ring": "Anel de Pedra Luminosa",
+    "Gold Brazier": "Braseiro de Ouro", "Gravel Path": "Caminho de Cascalho",
+    "Hardwood Fence": "Cerca de Madeira de Lei", "Heavy Furnace": "Fornalha Pesada",
+    "Hopper": "Funil", "Hyper Speed-Gro": "Adubo de Crescimento Hiper",
+    "Iridium Sprinkler": "Aspersor de Irídio", "Iron Fence": "Cerca de Ferro",
+    "Iron Lamp-post": "Poste de Luz de Ferro", "Jack-O-Lantern": "Lanterna de Abóbora",
+    "Loom": "Tear", "Magic Bait": "Isca Mágica", "Magnet": "Ímã",
+    "Marble Brazier": "Braseiro de Mármore", "Mega Bomb": "Superbomba",
+    "Mini-Forge": "Mini-fornalha", "Mini-Jukebox": "Mini-jukebox", "Mini-Obelisk": "Mini-obelisco",
+    "Mushroom Log": "Tronco de Cogumelos", "Oil of Garlic": "Óleo de Alho",
+    "Ostrich Incubator": "Incubadora de Avestruz", "Quality Bobber": "Boia de Qualidade",
+    "Quality Retaining Soil": "Solo Retentor de Qualidade", "Quality Sprinkler": "Aspersor de Qualidade",
+    "Rain Totem": "Totem de Chuva", "Rustic Plank Floor": "Piso de Tábuas Rústicas",
+    "Seed Maker": "Máquina de Sementes", "Skull Brazier": "Braseiro de Caveira",
+    "Solar Panel": "Painel Solar", "Sonar Bobber": "Boia Sonar", "Spinner": "Girador",
+    "Spring Seeds": "Sementes de Primavera", "Sprinkler": "Aspersor",
+    "Statue Of Blessings": "Estátua das Bênçãos", "Statue Of The Dwarf King": "Estátua do Rei Anão",
+    "Stepping Stone Path": "Caminho de Pedras", "Stone Brazier": "Braseiro de Pedra",
+    "Stone Chest": "Baú de Pedra", "Stone Fence": "Cerca de Pedra", "Stone Floor": "Piso de Pedra",
+    "Stone Sign": "Placa de Pedra", "Stone Walkway Floor": "Piso de Passarela de Pedra",
+    "Straw Floor": "Piso de Palha", "Stump Brazier": "Braseiro de Toco",
+    "Summer Seeds": "Sementes de Verão", "Tent Kit": "Kit de Barraca", "Text Sign": "Placa de Texto",
+    "Torch": "Tocha", "Trap Bobber": "Boia Armadilha", "Treasure Hunter": "Caçador de Tesouros",
+    "Treasure Totem": "Totem do Tesouro", "Tub o' Flowers": "Jardim de Flores",
+    "Warp Totem: Beach": "Totem de Teletransporte: Praia", "Warp Totem: Farm": "Totem de Teletransporte: Fazenda",
+    "Warp Totem: Island": "Totem de Teletransporte: Ilha", "Warp Totem: Mountains": "Totem de Teletransporte: Montanha",
+    "Weathered Floor": "Piso Desgastado", "Wedding Ring": "Anel de Casamento",
+    "Wicked Statue": "Estátua Maligna", "Wild Bait": "Isca Selvagem",
+    "Winter Seeds": "Sementes de Inverno", "Wood Fence": "Cerca de Madeira", "Wood Floor": "Piso de Madeira",
+    "Wood Lamp-post": "Poste de Luz de Madeira", "Wood Path": "Caminho de Madeira",
+    "Wood Sign": "Placa de Madeira", "Wooden Brazier": "Braseiro de Madeira", "Worm Bin": "Minhocário",
 }
 STATS = {"Farming": "Agricultura", "Fishing": "Pesca", "Foraging": "Coleta", "Mining": "Mineração",
          "Combat": "Combate", "Luck": "Sorte", "Max Energy": "Energia máx.", "Magnetism": "Magnetismo",
@@ -127,7 +203,7 @@ LOC_PHRASES = [
     ("Mountain", "montanha"),
     ("Town", "cidade"),
     ("Desert", "deserto"),
-    ("Farm", "fazenda"), ("Oasis", "oásis"),
+    ("The Farm", "a fazenda"), ("Farm", "fazenda"), ("Oasis", "oásis"),
     ("Garbage Can", "lixeira"),
     ("Haunted Skull", "crânio assombrado"),
     ("Dwarvish Sentry", "guarda anã"),
@@ -172,9 +248,9 @@ def loc_pt(s):
         return s
     out = s
     for en, p in sorted(LOC_PHRASES, key=lambda x: -len(x[0])):
-        out = re.sub(re.escape(en), p, out, flags=re.IGNORECASE)
+        out = re.sub(r"(?<!\w)" + re.escape(en) + r"(?!\w)", p, out, flags=re.IGNORECASE)
     for en, p in sorted(LOC, key=lambda x: -len(x[0])):
-        out = re.sub(r"\b" + re.escape(en) + r"\b", p, out)
+        out = re.sub(r"(?<!\w)" + re.escape(en) + r"(?!\w)", p, out)
     # nomes de itens e monstros que ficaram em inglês
     for en, p in sorted(NAMES.items(), key=lambda x: -len(x[0])):
         if len(en) > 3 and re.search(r"\b" + re.escape(en) + r"\b", out):
@@ -267,6 +343,25 @@ BUNDLE_EN = {
     "5.000 ouro": "5000 Bundle",
     "10.000 ouro": "10000 Bundle",
     "25.000 ouro": "25000 Bundle",
+    # Pacotes do modo remixado (aparecem nos itens e nas recompensas).
+    "Pacote Pegajoso": "Sticky Bundle",
+    "Pacote da Floresta": "Forest Bundle",
+    "Pacote de Medicina Selvagem": "Wild Medicine Bundle",
+    "Pacote de Culturas Raras": "Rare Crops Bundle",
+    "Pacote do Piscicultor": "Fish Farmer's Bundle",
+    "Pacote da Horta": "Garden Bundle",
+    "Pacote do Cervejeiro": "Brewer's Bundle",
+    "Pacote de Peixes de Qualidade": "Quality Fish Bundle",
+    "Pacote do Mestre Pescador": "Master Fisher's Bundle",
+    "Pacote do Caçador de Tesouros": "Treasure Hunter's Bundle",
+    "Pacote do Engenheiro": "Engineer's Bundle",
+    "Pacote das Crianças": "Children's Bundle",
+    "Pacote do Coletor": "Forager's Bundle",
+    "Pacote do Cozinheiro Caseiro": "Home Cook's Bundle",
+    "Pacote do Ajudante": "Helper's Bundle",
+    "Pacote da Noite dos Espíritos": "Spirit's Eve Bundle",
+    "Pacote da Estrela do Inverno": "Winter Star Bundle",
+    "Pacote Desaparecido": "The Missing Bundle",
 }
 
 
@@ -350,9 +445,17 @@ def trees():
             if tp:
                 fields.append(["Com torneira", pt(tp["name"]) + f" — {gold(tp['sellPrice'])}"])
             if t.get("choppedProduce"):
-                fields.append(["Ao cortar", ", ".join(pt(x["name"]) for x in t["choppedProduce"])])
+                if n == "Mushroom Tree":
+                    chopped = "Cogumelos vermelhos e roxos (5–6), Madeira, Seiva e Semente de árvore de cogumelo"
+                elif n == "Mystic Tree":
+                    chopped = "7–11 Madeiras de Lei"
+                else:
+                    chopped = ", ".join(pt(x["name"]) for x in t["choppedProduce"])
+                fields.append(["Ao cortar", chopped])
             desc = (f"Árvore selvagem. Como reconhecer: olhe a semente que ela solta — "
                     f"{pt(seed) if seed else 'nenhuma'} — e compare o sprite adulto na galeria abaixo.")
+            if n == "Maple Tree":
+                desc += " Também é chamada de ácer."
             sub = f"Selvagem · semente: {pt(seed)}" if seed else "Selvagem"
             tags = ["Selvagem"]
         out.append({"id": "tree_" + idify(n), "en": n, "pt": pt(n), "emoji": "🌳", "sub": sub, "tags": tags,

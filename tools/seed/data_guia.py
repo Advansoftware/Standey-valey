@@ -292,6 +292,43 @@ GUIDE = [
 • É preciso ter melhorado a casa pelo menos uma vez e consertado a ponte (ou feito a segunda melhoria da Robin).""",
     },
     {
+        "id": "guia_lavoura", "emoji": "🌱", "pt": "Lavouras sem mistério",
+        "sub": "Plantar, regar, colher e não perder a safra", "img": "Watering Can.png",
+        "tags": ["Iniciante", "Fazenda", "Culturas"],
+        "body": """## O básico
+• Sementes só podem ser plantadas na fazenda ou na Estufa, em terra arada com a enxada.
+• Arar e regar gastam energia; plantar e colocar fertilizante não gastam.
+• O dia do plantio não conta no tempo de crescimento: uma cultura de 4 dias plantada no dia 1 fica pronta no dia 5.
+• Regue todos os dias. Sem água a planta não morre, mas para de crescer e a colheita atrasa.
+
+## Colheita
+• A maioria das culturas é colhida uma vez e some; você precisa comprar e plantar de novo.
+• Algumas rebrotam sozinhas depois da primeira colheita, como tomate, mirtilo, morango, lúpulo e uva. Não arranque essas plantas.
+• No dia 1 da nova estação, as culturas da estação antiga morrem. Planeje para colher tudo antes do dia 28.
+• Milho, girassol, trigo, café e fruta antiga conseguem atravessar a troca de estação; as outras não.
+
+## Cuidados
+• Corvos só atacam quando há mais de 15 lavouras crescendo sem um espantalho por perto.
+• Um espantalho protege 248 espaços ao redor (cerca de 8 tiles em cada direção). Construa o primeiro no nível 1 de Cultivo.
+• Treliças (vagem, lúpulo e uva) bloqueiam a passagem. Deixe um corredor para conseguir colher e regar.
+• Plante 3x3 da mesma cultura (couve-flor, melão ou abóbora) para ter chance de nascer uma lavoura gigante; colha com o machado.
+
+## Árvores frutíferas
+• Plante no centro de um espaço 3x3 livre, sem nada em volta.
+• Levam cerca de 28 dias para crescer e depois dão 1 fruta por dia na estação certa.
+• Não produzem no inverno e não são atacadas por corvos.
+
+## Ferramentas e fertilizante
+• Aspersores regam sozinhos: o básico cobre 4 espaços, o de qualidade 8 e o de irídio 24. As receitas aparecem nos níveis 2, 6 e 9 de Cultivo.
+• Fertilizante básico, de qualidade e premium aumentam a chance de colheita de qualidade; use antes de plantar.
+• Solo retentor e solo foliar podem ser usados antes ou depois do plantio.
+
+## Para escolher o que plantar
+• Veja os roteiros de cada estação e a categoria Culturas para preço, tempo e lucro.
+• A Estufa permite plantar o ano inteiro; ela é liberada pelos pacotes do Centro Comunitário.
+• Para árvores comuns e torneiras, veja o guia das árvores.""",
+    },
+    {
         "id": "guia_erros", "emoji": "⚠️", "pt": "Erros comuns de iniciante",
         "sub": "Coisas para evitar logo no começo", "img": "Stardew Valley Almanac.png",
         "tags": ["Iniciante"],

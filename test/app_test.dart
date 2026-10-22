@@ -12,11 +12,13 @@ import 'package:stardew_guia/screens/about_screen.dart';
 import 'package:stardew_guia/screens/assistant_screen.dart';
 import 'package:stardew_guia/screens/category_screen.dart';
 import 'package:stardew_guia/screens/detail_screen.dart';
+import 'package:stardew_guia/screens/map_screen.dart';
 import 'package:stardew_guia/screens/search_screen.dart';
 import 'package:stardew_guia/screens/shell.dart';
 import 'package:stardew_guia/search.dart';
 import 'package:stardew_guia/store.dart';
 import 'package:stardew_guia/widgets/common.dart';
+import 'package:stardew_guia/widgets/markdown_lite.dart';
 
 late Repository repo;
 
@@ -145,15 +147,41 @@ void main() {
     expect(find.textContaining('Comece aqui'), findsOneWidget);
   });
 
-  testWidgets('enciclopédia abre uma categoria com cartões', (tester) async {
+  testWidgets('enciclopédia abre uma categoria em lista por padrão', (tester) async {
     await pumpFullApp(tester);
     await tester.tap(find.text('Enciclopédia').last);
     await tester.pumpAndSettle();
     expect(find.byType(CategoryTile), findsWidgets);
-    // a primeira categoria é o guia (lista); a segunda são as culturas (grade)
+    // a segunda categoria é a de culturas, que agora começa em lista
     await tester.tap(find.byType(CategoryTile).at(1));
     await tester.pumpAndSettle();
+    expect(find.byType(EntryTile), findsWidgets);
+    expect(find.byType(DexCard), findsNothing);
+    // o botão de alternância continua levando para os cartões
+    await tester.tap(find.byIcon(Icons.grid_view_rounded));
+    await tester.pumpAndSettle();
     expect(find.byType(DexCard), findsWidgets);
+    expect(find.byIcon(Icons.view_list_rounded), findsOneWidget);
+  });
+
+  testWidgets('mapa do vale mostra orientação, pinos e ficha do lugar', (tester) async {
+    await pumpScreen(tester, const MapScreen());
+    await tester.pumpAndSettle();
+    expect(find.text('Como se orientar'), findsOneWidget);
+    expect(find.byType(InteractiveViewer), findsOneWidget);
+    expect(find.text('Sua fazenda'), findsWidgets);
+    expect(find.text('Vila Pelicanos'), findsWidgets);
+    expect(find.text('Praia'), findsWidgets);
+
+    await tester.tap(find.text('Vila Pelicanos').last);
+    await tester.pumpAndSettle();
+    expect(find.text('O que tem'), findsOneWidget);
+    expect(find.text('Como chegar'), findsOneWidget);
+    expect(find.text('Página da wiki'), findsOneWidget);
+
+    await tester.tap(find.text('Página da wiki'));
+    await tester.pumpAndSettle();
+    expect(find.text('Vila_Pelicanos'), findsOneWidget);
   });
 
   testWidgets('detalhe mostra dados, alterna coletado e favorita', (tester) async {
@@ -269,8 +297,113 @@ void main() {
   testWidgets('a data do jogo muda pelo cartão "Hoje na fazenda"', (tester) async {
     final store = await pumpFullApp(tester);
     expect(store.day, 1);
-    await tester.tap(find.byIcon(Icons.chevron_right_rounded).first);
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.chevron_right_rounded));
     await tester.pumpAndSettle();
     expect(store.day, 2);
+    // O texto do cartão precisa refletir a mudança sem sair da tela.
+    expect(find.textContaining('Primavera 2'), findsWidgets);
+  });
+
+  testWidgets('o slider da data atualiza o cartão na hora', (tester) async {
+    final store = await pumpFullApp(tester);
+    expect(find.byType(Slider), findsOneWidget);
+    await tester.drag(find.byType(Slider), const Offset(360, 0));
+    await tester.pumpAndSettle();
+    expect(store.day, greaterThan(1));
+    expect(find.textContaining('Primavera ${store.day}'), findsWidgets);
+  });
+
+  testWidgets('o calendário acompanha a estação escolhida no início', (tester) async {
+    final store = await pumpFullApp(tester);
+    await tester.tap(find.text('Calendário').last);
+    await tester.pumpAndSettle();
+    // Muda a data em outra tela (como o slider/chips do início fariam).
+    store.setDate(1, 10);
+    await tester.pumpAndSettle();
+    final chip = tester.widget<ChoiceChip>(find.widgetWithText(ChoiceChip, '☀️ Verão'));
+    expect(chip.selected, isTrue);
+    expect(tester.takeException(), isNull);
+  });
+
+  test('todo item tem utilidade e toda árvore tem preço de venda', () {
+    for (final cat in repo.categories) {
+      if (cat.id == 'guia') continue;
+      for (final e in repo.byCat[cat.id]!) {
+        expect(
+          e.fields.any((f) => f[0] == 'Utilidade'),
+          isTrue,
+          reason: '${cat.id}/${e.id} sem Utilidade',
+        );
+      }
+    }
+    for (final e in repo.byCat['arvores']!) {
+      expect(
+        e.fields.any((f) => f[0].startsWith('Preço de venda')),
+        isTrue,
+        reason: '${e.id} sem preço de venda',
+      );
+    }
+  });
+
+  test('o guia das árvores responde deixar, plantar e vantagens do pinheiro', () {
+    final guia = repo.byId['guia_arvores_cultivo'];
+    expect(guia, isNotNull);
+    expect(guia!.body, contains('Devo deixar as árvores'));
+    expect(guia.body, contains('Vantagens de plantar um pinheiro'));
+    expect(guia.body, contains('Alcatrão de Pinho'));
+    final pinheiro = repo.byId['tree_pine_tree'];
+    expect(pinheiro, isNotNull);
+    expect(pinheiro!.fields.any((f) => f[0] == 'Utilidade'), isTrue);
+    expect(pinheiro.fields.any((f) => f[0].contains('Preço de venda')), isTrue);
+  });
+
+  test('o guia de lavouras explica rega, espantalho e fim de estação', () {
+    final guia = repo.byId['guia_lavoura'];
+    expect(guia, isNotNull);
+    expect(guia!.name, contains('Lavouras'));
+    expect(guia.body.toLowerCase(), contains('regue todos os dias'));
+    expect(guia.body.toLowerCase(), contains('espantalho'));
+    expect(guia.body.toLowerCase(), contains('dia 28'));
+    expect(guia.body.toLowerCase(), contains('treliça'));
+    expect(guia.img, isNotEmpty);
+  });
+
+  test('a busca por vantagens do pinheiro encontra o guia', () {
+    final s = SearchService(repo);
+    final hits = s.search('quais as vantagens de plantar um pinheiro', limit: 8);
+    expect(hits.any((h) => h.doc.entryId == 'guia_arvores_cultivo'), isTrue);
+    expect(hits.first.doc.entryId, 'guia_arvores_cultivo');
+    expect(hits, isNotEmpty);
+  });
+
+  test('pergunta natural sobre o pinheiro acha a ficha do pinheiro', () {
+    final hits = SearchService(repo).search('Me explique sobre Pinheiro', limit: 5);
+    expect(hits, isNotEmpty);
+    expect(hits.first.doc.entryId, 'tree_pine_tree');
+  });
+
+  test('o prompt da IA pede utilidade, preço e prós e contras', () {
+    final hits = SearchService(repo).search('pinheiro', limit: 4);
+    final prompt = buildPrompt('quais as vantagens de plantar um pinheiro', hits);
+    expect(prompt, contains('Utilidade'));
+    expect(prompt, contains('Preço de venda'));
+    expect(prompt, contains('prós e contras'));
+  });
+
+  testWidgets('o chat renderiza negrito, itálico e listas sem asteriscos', (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: MarkdownLite('*Olá!* **Utilidade:**\n* Primeiro item\n* Segundo item'),
+        ),
+      ),
+    );
+    final st = tester.widget<SelectableText>(find.byType(SelectableText));
+    final plain = st.textSpan!.toPlainText();
+    expect(plain, contains('Olá!'));
+    expect(plain, contains('Utilidade:'));
+    expect(plain, contains('Primeiro item'));
+    expect(plain, contains('•'));
+    expect(plain, isNot(contains('*')));
   });
 }

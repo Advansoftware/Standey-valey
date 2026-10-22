@@ -25,8 +25,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
     final store = scope.store;
     final cat = widget.cat;
     final all = scope.repo.byCat[cat.id] ?? const <Entry>[];
-    final isGuide = cat.id == 'guia';
-    final grid = _grid ?? !isGuide;
+    final grid = _grid ?? false;
 
     // Tags para filtro, na ordem de aparição.
     final tags = <String>[];

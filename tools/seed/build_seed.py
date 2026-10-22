@@ -14,6 +14,7 @@ sys.path.insert(0, HERE)
 import data_core as D  # noqa: E402
 import data_guia as G  # noqa: E402
 import enrich as E  # noqa: E402
+import utility as U  # noqa: E402
 
 OUT = os.path.abspath(os.path.join(HERE, "..", "..", "assets", "data"))
 os.makedirs(OUT, exist_ok=True)
@@ -206,7 +207,42 @@ entries["guia"].append({
     "body": "## O truque da semente\n• Bolota = Carvalho\n• Semente de bordo = Bordo\n• Pinha = Pinheiro\n"
             "Cada árvore selvagem solta a própria semente ao ser sacudida ou cortada.\n"
             "## Veja os sprites\nAbra Enciclopédia → Árvores: cada árvore mostra a semente e as fases de crescimento com os desenhos do jogo.\n"
-            "## Dica\nCarvalho dá Resina de carvalho, bordo dá Xarope de bordo e pinheiro dá Alcatrão com a torneira.",
+            "## Dica\nCarvalho dá Resina de carvalho, bordo dá Xarope de bordo e pinheiro dá Alcatrão de pinho com a torneira.",
+})
+entries["guia"].append({
+    "id": "guia_arvores_cultivo", "en": "Árvores: cortar, deixar ou plantar?", "pt": "Árvores: cortar, deixar ou plantar?",
+    "emoji": "🌳", "sub": "O que cada árvore rende e por que vale a pena manter algumas", "tags": ["Fazenda", "Árvores"],
+    "img": E.img("images/trees/pine/portrait.png"), "fields": [],
+    "desc": "Vantagens de manter e plantar árvores, com o que cada uma produz.",
+    "body": """## Devo deixar as árvores na fazenda?
+• Sim, deixe pelo menos algumas. Árvores comuns dão Madeira, Seiva e sementes quando cortadas, e com uma Torneirinha viram renda passiva: o produto fica pronto sozinho e você só precisa passar para coletar.
+• Carvalho, bordo e pinheiro produzem a cada 5–9 dias; árvores frutíferas dão 1 fruta por dia durante a estação depois de adultas (28 dias).
+• Deixe 3×3 livre ao redor da muda para ela crescer. Depois de adulta, pode colocar objetos perto sem perder produção.
+• Se estiver sem espaço, corte as árvores do meio do terreno e mantenha as da borda. Guarde as sementes para replantar onde quiser.
+• Não é preciso regar árvores. Só cuide para não deixar mato, pedras ou outras árvores encostarem na muda.
+
+## Para que serve cada árvore
+• Carvalho: Torneirinha → Resina de Carvalho (150 g). A resina é usada para fazer o Barril, que transforma fruta em Vinho e vegetal em Suco — um dos maiores saltos de lucro do jogo.
+• Bordo: Torneirinha → Xarope de Bordo (200 g). Serve para o Apiário (produz Mel) e para receitas.
+• Pinheiro: Torneirinha → Alcatrão de Pinho (100 g). Serve para o Tear, o Solo Foliar, o Totem de Chuva e o pacote Recursos Exóticos. A Madeira e a Pinha também servem para construir e replantar.
+• Mogno: Torneirinha → Seiva; ao cortar dá 8–13 Madeiras de Lei. É a melhor fonte renovável de Madeira de Lei para construções e melhorias.
+• Árvore de Cogumelo: Torneirinha → Cogumelos comum, vermelho e roxo. É comida grátis e ajuda em receitas e pacotes.
+• Árvore Mística: Torneirinha → Xarope Místico (1.000 g a cada 7 dias). É a árvore que mais rende com torneira.
+• Palmeira: não aceita Torneirinha; ao sacudir ou cortar dá Coco e, na Ilha Gengibre, Coco Dourado.
+
+## Vantagens de plantar um pinheiro
+• Renda passiva: com Torneirinha, dá Alcatrão de Pinho a cada 5–6 dias (100 g cada).
+• Madeira de graça: cortar rende Madeira, Seiva e Pinha; a Pinha replanta sem custo.
+• O Alcatrão serve para o Tear (roupas), o Solo Foliar (acelera o crescimento), o Totem de Chuva e o pacote Recursos Exóticos.
+• Cresce na primavera, no verão e no outono (não cresce no inverno) e ocupa só 1 tile.
+• Dica: plante pinheiros nas bordas da fazenda, longe das culturas, e coloque Torneirinha em todos. Você não precisa regar.
+
+## Cuidados
+• Árvores e sementes precisam de 3×3 livre; se algo estiver ao redor, param no estágio 4.
+• No inverno as árvores comuns não crescem; a Árvore Mística cresce com Fertilizante de Árvore.
+• Raio destrói árvore comum e deixa só o toco; árvores frutíferas atingidas por raio produzem carvão por alguns dias.
+• Cortar uma árvore não faz ela voltar do toco: é preciso plantar outra semente.
+• Se quiser madeira sem acabar com o bosque, corte só as árvores adultas e replante as sementes no mesmo lugar.""",
 })
 entries["arvores"] = E.trees()
 entries["minerais"] = E.minerals()
@@ -215,6 +251,12 @@ entries["culinaria"] = E.cooking()
 entries["artefatos"] = E.artifacts()
 entries["construcoes"] = E.buildings()
 entries["ferramentas"] = E.tools()
+
+# A utilidade depende da categoria; define antes de enriquecer.
+for cid, items in entries.items():
+    for e in items:
+        e["cat"] = cid
+U.enrich(entries)
 
 CATS = [
     ("guia", "Comece aqui", "📖", "#2E7D32", "Guia do iniciante: o que fazer, em que ordem e como progredir.", ""),
