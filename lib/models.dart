@@ -47,6 +47,7 @@ class Entry {
   final List<String> tags;
   final List<List<String>> fields;
   final List<String> checklist;
+  final List<List<String>> gallery;
   final Map<String, dynamic> meta;
 
   Entry({
@@ -63,6 +64,7 @@ class Entry {
     required this.tags,
     required this.fields,
     required this.checklist,
+    required this.gallery,
     required this.meta,
   });
 
@@ -87,6 +89,7 @@ class Entry {
       n: (j['n'] as num?)?.toInt() ?? 0,
       tags: ((j['tags'] as List?) ?? const []).map((e) => e.toString()).toList(),
       fields: fields,
+      gallery: ((j['gallery'] as List?) ?? const []).map((e) => (e as List).map((x) => x.toString()).toList()).toList(),
       checklist: ((j['checklist'] as List?) ?? const []).map((e) => e.toString()).toList(),
       meta: Map<String, dynamic>.from((j['meta'] as Map?) ?? const {}),
     );

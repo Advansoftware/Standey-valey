@@ -13,6 +13,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import data_core as D  # noqa: E402
 import data_guia as G  # noqa: E402
+import enrich as E  # noqa: E402
 
 OUT = os.path.abspath(os.path.join(HERE, "..", "..", "assets", "data"))
 os.makedirs(OUT, exist_ok=True)
@@ -197,6 +198,24 @@ for g in G.GUIDE:
     })
 entries["guia"] = guide
 
+E.enrich_v1(entries)
+entries["guia"].append({
+    "id": "guia_arvores", "en": "Como reconhecer as árvores", "pt": "Como reconhecer as árvores", "emoji": "🌲",
+    "sub": "Carvalho, bordo ou pinheiro? Veja pela semente", "tags": ["Fazenda"],
+    "img": E.img("images/trees/oak/portrait.png"), "fields": [], "desc": "Como diferenciar as árvores.",
+    "body": "## O truque da semente\n• Bolota = Carvalho\n• Semente de bordo = Bordo\n• Pinha = Pinheiro\n"
+            "Cada árvore selvagem solta a própria semente ao ser sacudida ou cortada.\n"
+            "## Veja os sprites\nAbra Enciclopédia → Árvores: cada árvore mostra a semente e as fases de crescimento com os desenhos do jogo.\n"
+            "## Dica\nCarvalho dá Resina de carvalho, bordo dá Xarope de bordo e pinheiro dá Alcatrão com a torneira.",
+})
+entries["arvores"] = E.trees()
+entries["minerais"] = E.minerals()
+entries["monstros"] = E.monsters()
+entries["culinaria"] = E.cooking()
+entries["artefatos"] = E.artifacts()
+entries["construcoes"] = E.buildings()
+entries["ferramentas"] = E.tools()
+
 CATS = [
     ("guia", "Comece aqui", "📖", "#2E7D32", "Guia do iniciante: o que fazer, em que ordem e como progredir.", ""),
     ("culturas", "Culturas", "🌱", "#5B8C3A", "Tudo sobre plantio: tempo de crescimento, lucro e estações.", "Já plantei"),
@@ -207,10 +226,19 @@ CATS = [
     ("coletaveis", "Coletáveis", "🍄", "#7B5E2A", "Itens da natureza por estação.", "Já coletei"),
     ("habilidades", "Habilidades", "⭐", "#FBC02D", "Habilidades e profissões.", ""),
     ("animais", "Animais", "🐄", "#A1887F", "Animais da fazenda e seus produtos.", "Tenho"),
+    ("arvores", "Árvores", "🌳", "#33691E", "Carvalho, bordo, pinheiro e frutíferas: veja o sprite e a semente.", "Já vi"),
+    ("minerais", "Minerais e geodos", "💎", "#00838F", "Gemas, minérios, barras e geodos.", "Já tenho"),
+    ("monstros", "Monstros", "👾", "#6A1B9A", "Vida, dano, onde aparecem e o que soltam.", "Já derrotei"),
+    ("culinaria", "Culinária", "🍲", "#D84315", "Receitas, bônus e como desbloquear.", "Já cozinhei"),
+    ("artefatos", "Artefatos", "🏺", "#795548", "Para doar ao museu.", "Já doei"),
+    ("construcoes", "Construções", "🏠", "#546E7A", "Celeiro, galinheiro, poço e mais.", "Já construí"),
+    ("ferramentas", "Ferramentas", "🔧", "#607D8B", "Melhorias e custos.", "Tenho"),
 ]
 index = []
 for cid, title, emoji, color, desc, collect in CATS:
     items = entries[cid]
+    for e in items:
+        e.setdefault("gallery", [])
     for i, e in enumerate(items):
         e["n"] = i + 1
         e["cat"] = cid

@@ -52,6 +52,7 @@ class DetailScreen extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                   child: Text(entry.desc, style: Theme.of(context).textTheme.bodyLarge),
                 ),
+              if (entry.gallery.length > 1) _Gallery(entry: entry, color: cat.color),
               if (entry.fields.isNotEmpty) _Fields(entry: entry, color: cat.color),
               if (entry.checklist.isNotEmpty) _Checklist(entry: entry, color: cat.color),
               if (entry.body.isNotEmpty) BodyView(text: entry.body),
@@ -266,6 +267,48 @@ class BodyView extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: parchment(context),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: widgets),
+    );
+  }
+}
+
+
+/// Faixa horizontal com os sprites do jogo (estágios de crescimento, variantes…).
+class _Gallery extends StatelessWidget {
+  final Entry entry;
+  final Color color;
+  const _Gallery({required this.entry, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 16),
+      child: SizedBox(
+        height: 112,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          itemCount: entry.gallery.length,
+          separatorBuilder: (_, __) => const SizedBox(width: 10),
+          itemBuilder: (context, i) {
+            final g = entry.gallery[i];
+            return Container(
+              width: 92,
+              padding: const EdgeInsets.all(6),
+              decoration: parchment(context, accent: color, radius: 14),
+              child: Column(
+                children: [
+                  Expanded(
+                    child: Image.asset('assets/img/${g[0]}', fit: BoxFit.contain, filterQuality: FilterQuality.none,
+                        errorBuilder: (_, __, ___) => const SizedBox()),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(g.length > 1 ? g[1] : '', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 }

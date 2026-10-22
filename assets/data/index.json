@@ -7,7 +7,7 @@
    "color": "#2E7D32",
    "desc": "Guia do iniciante: o que fazer, em que ordem e como progredir.",
    "collect": "",
-   "count": 15
+   "count": 16
   },
   {
    "id": "culturas",
@@ -80,6 +80,69 @@
    "desc": "Animais da fazenda e seus produtos.",
    "collect": "Tenho",
    "count": 10
+  },
+  {
+   "id": "arvores",
+   "title": "Árvores",
+   "emoji": "🌳",
+   "color": "#33691E",
+   "desc": "Carvalho, bordo, pinheiro e frutíferas: veja o sprite e a semente.",
+   "collect": "Já vi",
+   "count": 16
+  },
+  {
+   "id": "minerais",
+   "title": "Minerais e geodos",
+   "emoji": "💎",
+   "color": "#00838F",
+   "desc": "Gemas, minérios, barras e geodos.",
+   "collect": "Já tenho",
+   "count": 101
+  },
+  {
+   "id": "monstros",
+   "title": "Monstros",
+   "emoji": "👾",
+   "color": "#6A1B9A",
+   "desc": "Vida, dano, onde aparecem e o que soltam.",
+   "collect": "Já derrotei",
+   "count": 46
+  },
+  {
+   "id": "culinaria",
+   "title": "Culinária",
+   "emoji": "🍲",
+   "color": "#D84315",
+   "desc": "Receitas, bônus e como desbloquear.",
+   "collect": "Já cozinhei",
+   "count": 81
+  },
+  {
+   "id": "artefatos",
+   "title": "Artefatos",
+   "emoji": "🏺",
+   "color": "#795548",
+   "desc": "Para doar ao museu.",
+   "collect": "Já doei",
+   "count": 42
+  },
+  {
+   "id": "construcoes",
+   "title": "Construções",
+   "emoji": "🏠",
+   "color": "#546E7A",
+   "desc": "Celeiro, galinheiro, poço e mais.",
+   "collect": "Já construí",
+   "count": 24
+  },
+  {
+   "id": "ferramentas",
+   "title": "Ferramentas",
+   "emoji": "🔧",
+   "color": "#607D8B",
+   "desc": "Melhorias e custos.",
+   "collect": "Tenho",
+   "count": 17
   }
  ]
 }

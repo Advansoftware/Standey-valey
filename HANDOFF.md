@@ -143,3 +143,11 @@ assets/data/*.json           v1 gerado (funciona, mas sem imagens reais)
 Feito: search/favorites/about/assistant/shell/main.dart; rede removida de EntryImage/Store/detalhe;
 `tools/setup_android.sh` e `codemagic.yaml`. Código AINDA não compilado: rodar `flutter pub get && flutter analyze` e corrigir.
 Falta: gerador v2 com imagens reais (A), galeria `gallery` em Entry/detalhe, scraper wiki (D), testes/README (E), revisão (F).
+
+
+## ATUALIZAÇÃO (passo 3)
+Feito: gerador v2 (`tools/seed/enrich.py` + `build_seed.py`): 16 categorias, 562 entradas, 916 sprites em assets/img, `gallery` no modelo e no detalhe,
+guia de árvores, `verify.py` (0 problemas), test/search_test.dart, README.
+Falta: (1) `flutter pub get && flutter analyze && flutter test` e corrigir erros (nada foi compilado); (2) conferir que `normalize/tokenize` existem
+como funções públicas em search.dart (usadas no teste); (3) scraper da wiki PT (tools/scrape_wiki.py: names_pt.json e assets/wiki/pages.json.gz) — opcional;
+(4) revisão de textos PT-BR; (5) trocar campos de Pesca/Culturas v1 por dados do dataset se quiser mais precisão.
