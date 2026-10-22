@@ -4,7 +4,7 @@ import glob, json, os, re
 R = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 ids, bad = set(), 0
 for f in sorted(glob.glob(R + "/assets/data/*.json")):
-    if f.endswith("index.json"):
+    if f.endswith("index.json") or f.endswith("names_pt.json"):
         continue
     d = json.load(open(f, encoding="utf-8"))
     for e in d["entries"]:

@@ -111,6 +111,41 @@ def idify(s):
 
 
 # ------------------------------------------------------------ v1 enrich
+# nome em português do pacote -> nome no dataset (para pegar o ícone)
+BUNDLE_EN = {
+    "Forrageio de Primavera": "Spring Foraging Bundle",
+    "Forrageio de Verão": "Summer Foraging Bundle",
+    "Forrageio de Outono": "Fall Foraging Bundle",
+    "Forrageio de Inverno": "Winter Foraging Bundle",
+    "Construção": "Construction Bundle",
+    "Forrageio Exótico": "Exotic Foraging Bundle",
+    "Culturas de Primavera": "Spring Crops Bundle",
+    "Culturas de Verão": "Summer Crops Bundle",
+    "Culturas de Outono": "Fall Crops Bundle",
+    "Culturas de Qualidade": "Quality Crops Bundle",
+    "Animais": "Animal Bundle",
+    "Artesão": "Artisan Bundle",
+    "Peixes de Rio": "River Fish Bundle",
+    "Peixes de Lago": "Lake Fish Bundle",
+    "Peixes do Oceano": "Ocean Fish Bundle",
+    "Pesca Noturna": "Night Fishing Bundle",
+    "Peixes Especiais": "Specialty Fish Bundle",
+    "Armadilha de Caranguejo": "Crab Pot Bundle",
+    "Ferreiro": "Blacksmith Bundle",
+    "Geólogo": "Geologist's Bundle",
+    "Aventureiro": "Adventurer's Bundle",
+    "Chef": "Chef's Bundle",
+    "Tintureiro": "Dye Bundle",
+    "Pesquisa de Campo": "Field Research Bundle",
+    "Ração": "Fodder Bundle",
+    "Encantador": "Enchanter's Bundle",
+    "2.500 ouro": "2500 Bundle",
+    "5.000 ouro": "5000 Bundle",
+    "10.000 ouro": "10000 Bundle",
+    "25.000 ouro": "25000 Bundle",
+}
+
+
 def enrich_v1(entries):
     crops = {c["name"]: c for c in load("crops")}
     fish = {c["name"]: c for c in load("fish")}
@@ -154,7 +189,9 @@ def enrich_v1(entries):
         if g.get("img"):
             g["img"] = img(by_basename(os.path.splitext(g["img"])[0])) or ""
     for e in entries["pacotes"]:
-        e["img"] = ""
+        # o ícone do pacote vem do dataset (imagens/bundles/bundle-images)
+        en = BUNDLE_EN.get(e["pt"], "")
+        e["img"] = img(by_basename(en)) if en else ""
 
 
 # ------------------------------------------------------------ novas categorias

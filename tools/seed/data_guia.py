@@ -7,7 +7,7 @@ Os valores seguem a versão atual do jogo; podem variar ligeiramente por atualiz
 GUIDE = [
     {
         "id": "guia_comeco", "emoji": "🌅", "pt": "Seus primeiros dias",
-        "sub": "O que fazer logo no começo da fazenda", "img": "Parsnip.png",
+        "sub": "O que fazer logo no começo da fazenda", "img": "House (tier 1).png",
         "tags": ["Iniciante"],
         "body": """Você começa na Primavera, dia 1, com algumas ferramentas, 15 Sementes de Pastinaca e uma fazenda cheia de mato. O dia vai das 6h às 2h da manhã: se passar das 2h você desmaia e perde ouro e itens. Tente sempre dormir antes disso.
 
@@ -177,7 +177,7 @@ GUIDE = [
     },
     {
         "id": "guia_amizade", "emoji": "💝", "pt": "Amizade e presentes",
-        "sub": "Como ficar amigo dos moradores", "img": "Friendship.png",
+        "sub": "Como ficar amigo dos moradores", "img": "Friendship 101.png",
         "tags": ["Iniciante", "Moradores"],
         "body": """Cada morador tem uma barra de corações. Cada coração vale 250 pontos de amizade, e o máximo é 10 corações (14 se for seu cônjuge).
 
@@ -274,7 +274,7 @@ GUIDE = [
     },
     {
         "id": "guia_casamento", "emoji": "💍", "pt": "Casamento",
-        "sub": "Como namorar e casar com um morador", "img": "Mermaid's_Pendant.png",
+        "sub": "Como namorar e casar com um morador", "img": "Bouquet.png",
         "tags": ["Moradores", "Casamento"],
         "body": """12 moradores podem se casar com você: Abigail, Alex, Elliott, Emily, Haley, Harvey, Leah, Maru, Penny, Sam, Sebastian e Shane, não importa o gênero do personagem.
 
@@ -293,7 +293,7 @@ GUIDE = [
     },
     {
         "id": "guia_erros", "emoji": "⚠️", "pt": "Erros comuns de iniciante",
-        "sub": "Coisas para evitar logo no começo", "img": "Parsnip.png",
+        "sub": "Coisas para evitar logo no começo", "img": "Stardew Valley Almanac.png",
         "tags": ["Iniciante"],
         "body": """• Ficar acordado depois das 2h: você desmaia e perde ouro.
 • Vender itens que servem para os pacotes do Centro Comunitário.
