@@ -1,16 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../app_scope.dart';
 import '../app_theme.dart';
 import '../models.dart';
 import '../widgets/common.dart';
 import 'assistant_screen.dart';
-
-Future<void> openWiki(String term) async {
-  final uri = Uri.parse('https://pt.stardewvalleywiki.com/index.php?search=${Uri.encodeQueryComponent(term)}');
-  await launchUrl(uri, mode: LaunchMode.externalApplication);
-}
 
 class DetailScreen extends StatelessWidget {
   final Entry entry;
@@ -33,11 +27,6 @@ class DetailScreen extends StatelessWidget {
                 tooltip: 'Favoritar',
                 icon: Icon(fav ? Icons.star_rounded : Icons.star_border_rounded, color: fav ? const Color(0xFFF9A825) : null),
                 onPressed: () => store.toggleFav(entry.id),
-              ),
-              IconButton(
-                tooltip: 'Abrir na wiki',
-                icon: const Icon(Icons.open_in_new_rounded),
-                onPressed: () => openWiki(entry.en.isNotEmpty ? entry.en : entry.name),
               ),
             ],
           ),
@@ -78,12 +67,6 @@ class DetailScreen extends StatelessWidget {
                           builder: (_) => AssistantScreen(initialQuestion: 'Me explique sobre ${entry.name}'),
                         )),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    OutlinedButton.icon(
-                      icon: const Icon(Icons.menu_book_rounded),
-                      label: const Text('Wiki'),
-                      onPressed: () => openWiki(entry.en.isNotEmpty ? entry.en : entry.name),
                     ),
                   ],
                 ),

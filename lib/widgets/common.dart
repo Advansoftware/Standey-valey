@@ -9,7 +9,7 @@ void openEntry(BuildContext context, Entry e) {
   Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => DetailScreen(entry: e)));
 }
 
-/// Imagem da entrada: asset local (baixado pelo scraper) -> wiki na internet -> emoji.
+/// Imagem da entrada: sprite do jogo embutido em assets/img (emoji se faltar o arquivo).
 class EntryImage extends StatelessWidget {
   final Entry entry;
   final double size;
@@ -22,7 +22,6 @@ class EntryImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (entry.img.isEmpty) return SizedBox(width: size, height: size, child: _emoji());
-    final store = AppScope.of(context).store;
     return SizedBox(
       width: size,
       height: size,
@@ -30,16 +29,7 @@ class EntryImage extends StatelessWidget {
         'assets/img/${entry.img}',
         fit: BoxFit.contain,
         filterQuality: FilterQuality.none,
-        errorBuilder: (context, error, stack) {
-          if (!store.networkImages) return _emoji();
-          return Image.network(
-            'https://stardewvalleywiki.com/Special:FilePath/${Uri.encodeComponent(entry.img)}',
-            fit: BoxFit.contain,
-            filterQuality: FilterQuality.none,
-            errorBuilder: (context, error, stack) => _emoji(),
-            loadingBuilder: (context, child, progress) => progress == null ? child : _emoji(),
-          );
-        },
+        errorBuilder: (context, error, stack) => _emoji(),
       ),
     );
   }

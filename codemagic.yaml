@@ -1,0 +1,23 @@
+workflows:
+  android-apk:
+    name: Guia do Vale - APK
+    instance_type: linux_x2
+    max_build_duration: 60
+    environment:
+      flutter: stable
+      java: 17
+    scripts:
+      - name: Preparar android/
+        script: bash tools/setup_android.sh
+      - name: Dependências
+        script: flutter pub get
+      - name: Análise (não bloqueia)
+        script: flutter analyze || true
+      - name: Testes (não bloqueia)
+        script: flutter test || true
+      - name: Build APK
+        script: |
+          flutter build apk --release --target-platform android-arm64 \
+            --build-name 1.0.${PROJECT_BUILD_NUMBER:-1} --build-number ${PROJECT_BUILD_NUMBER:-1}
+    artifacts:
+      - build/**/outputs/**/*.apk

@@ -137,3 +137,9 @@ assets/data/*.json           v1 gerado (funciona, mas sem imagens reais)
 - Commits pequenos e frequentes; mensagem em PT-BR; push em `main`. Terminar mensagens de commit feitas pelo Claude com os trailers pedidos pela plataforma.
 - Nunca commitar `tools/seed/.cache/`, chaves, tokens.
 - IDs de entrada estáveis (`crop_parsnip`, `fish_pufferfish`…) porque favoritos/progresso são guardados por ID.
+
+
+## ATUALIZAÇÃO (passo 2)
+Feito: search/favorites/about/assistant/shell/main.dart; rede removida de EntryImage/Store/detalhe;
+`tools/setup_android.sh` e `codemagic.yaml`. Código AINDA não compilado: rodar `flutter pub get && flutter analyze` e corrigir.
+Falta: gerador v2 com imagens reais (A), galeria `gallery` em Entry/detalhe, scraper wiki (D), testes/README (E), revisão (F).

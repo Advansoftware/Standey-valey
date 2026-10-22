@@ -10,7 +10,6 @@ class Store extends ChangeNotifier {
   int season;
   int day;
   ThemeMode themeMode;
-  bool networkImages;
   bool aiModelInstalled;
   String aiModelUrl;
 
@@ -21,7 +20,6 @@ class Store extends ChangeNotifier {
         season = _p.getInt('season') ?? 0,
         day = _p.getInt('day') ?? 1,
         themeMode = ThemeMode.values[(_p.getInt('theme') ?? 0).clamp(0, 2)],
-        networkImages = _p.getBool('netimg') ?? true,
         aiModelInstalled = _p.getBool('aiok') ?? false,
         aiModelUrl = _p.getString('aiurl') ?? '';
 
@@ -84,12 +82,6 @@ class Store extends ChangeNotifier {
   void setThemeMode(ThemeMode m) {
     themeMode = m;
     _p.setInt('theme', m.index);
-    notifyListeners();
-  }
-
-  void setNetworkImages(bool v) {
-    networkImages = v;
-    _p.setBool('netimg', v);
     notifyListeners();
   }
 
