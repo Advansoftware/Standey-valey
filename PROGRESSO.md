@@ -57,3 +57,11 @@ Atualizado a cada etapa concluída — serve de rede de segurança se algo falha
 - O APK foi baixado de volta do GitHub e conferido (mesmo md5, pacote válido).
 - Para publicar uma versão nova: subir a tag e o arquivo com
   `gh release create vX.Y.Z app-release.apk --notes-file notas.md`.
+
+## Revisão de textos (feita no fim da sessão)
+
+As frases de "onde achar" do dataset vinham em inglês misturado com português
+("Arando in Mines", "Ghost, Frost Bat… drop"). Foi criado um tradutor de frases
+(`LOC_PHRASES` em `tools/seed/enrich.py`) e a lista de nomes em PT-BR foi ampliada
+(mudas, gosmas, sementes, baús, presentes). Resultado: **nenhum campo das 563
+entradas fica com texto em inglês**.
