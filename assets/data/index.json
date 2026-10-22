@@ -1,0 +1,85 @@
+{
+ "categories": [
+  {
+   "id": "guia",
+   "title": "Comece aqui",
+   "emoji": "📖",
+   "color": "#2E7D32",
+   "desc": "Guia do iniciante: o que fazer, em que ordem e como progredir.",
+   "collect": "",
+   "count": 15
+  },
+  {
+   "id": "culturas",
+   "title": "Culturas",
+   "emoji": "🌱",
+   "color": "#5B8C3A",
+   "desc": "Tudo sobre plantio: tempo de crescimento, lucro e estações.",
+   "collect": "Já plantei",
+   "count": 40
+  },
+  {
+   "id": "peixes",
+   "title": "Peixes",
+   "emoji": "🐟",
+   "color": "#3F7FBF",
+   "desc": "Onde, quando e como pescar cada peixe.",
+   "collect": "Já pesquei",
+   "count": 66
+  },
+  {
+   "id": "aldeoes",
+   "title": "Moradores",
+   "emoji": "🧑‍🌾",
+   "color": "#C2185B",
+   "desc": "Aniversários, presentes amados e casamento.",
+   "collect": "Amizade máxima",
+   "count": 34
+  },
+  {
+   "id": "festivais",
+   "title": "Calendário e festivais",
+   "emoji": "🎉",
+   "color": "#F57C00",
+   "desc": "Eventos de cada estação.",
+   "collect": "Já fui",
+   "count": 12
+  },
+  {
+   "id": "pacotes",
+   "title": "Centro Comunitário",
+   "emoji": "🏛️",
+   "color": "#8E24AA",
+   "desc": "Todos os pacotes, com checklist de itens.",
+   "collect": "Concluído",
+   "count": 30
+  },
+  {
+   "id": "coletaveis",
+   "title": "Coletáveis",
+   "emoji": "🍄",
+   "color": "#7B5E2A",
+   "desc": "Itens da natureza por estação.",
+   "collect": "Já coletei",
+   "count": 23
+  },
+  {
+   "id": "habilidades",
+   "title": "Habilidades",
+   "emoji": "⭐",
+   "color": "#FBC02D",
+   "desc": "Habilidades e profissões.",
+   "collect": "",
+   "count": 5
+  },
+  {
+   "id": "animais",
+   "title": "Animais",
+   "emoji": "🐄",
+   "color": "#A1887F",
+   "desc": "Animais da fazenda e seus produtos.",
+   "collect": "Tenho",
+   "count": 10
+  }
+ ]
+}

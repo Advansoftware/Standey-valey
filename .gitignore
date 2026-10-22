@@ -1,0 +1,24 @@
+# Flutter / Dart
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+pubspec.lock
+*.iml
+.idea/
+.vscode/
+# Android gerado pelo CI (tools/setup_android.sh) — remova estas linhas se preferir versionar a pasta
+/android/.gradle/
+/android/local.properties
+/android/key.properties
+*.jks
+*.keystore
+# Python
+__pycache__/
+*.pyc
+# Cache do scraper
+tools/.cache/
+tools/seed/.cache/
