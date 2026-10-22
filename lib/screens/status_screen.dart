@@ -1,0 +1,467 @@
+import 'dart:async';
+import 'dart:math' as math;
+
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+import '../ai_service.dart';
+import '../app_scope.dart';
+import '../game_api.dart';
+import '../game_status.dart';
+import '../map_data.dart';
+import '../models.dart';
+import '../search.dart';
+import '../widgets/common.dart';
+
+part 'status_panels.dart';
+part 'status_widgets.dart';
+part 'status_tiles.dart';
+
+const _ink = Color(0xFF3A2414);
+const _paper = Color(0xFFF8EBCB);
+const _paper2 = Color(0xFFF0DDAF);
+const _wood = Color(0xFF4A2B16);
+const _woodDark = Color(0xFF1D120B);
+const _gold = Color(0xFFE6B34A);
+const _goldSoft = Color(0xFFF3D58B);
+const _green = Color(0xFF3F7A2A);
+const _blue = Color(0xFF3F7FBF);
+const _red = Color(0xFFB5483D);
+
+/// Abre a tela master em modo imersivo, cobrindo o app e as barras do sistema.
+Future<void> openStatusScreen(BuildContext context) {
+  return Navigator.of(context).push(
+    PageRouteBuilder<void>(
+      fullscreenDialog: true,
+      opaque: true,
+      transitionDuration: const Duration(milliseconds: 320),
+      reverseTransitionDuration: const Duration(milliseconds: 220),
+      pageBuilder: (_, _, _) => const StatusScreen(),
+      transitionsBuilder: (_, animation, _, child) {
+        final curved = CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOutCubic,
+        );
+        return FadeTransition(
+          opacity: curved,
+          child: ScaleTransition(
+            scale: Tween(begin: 0.97, end: 1.0).animate(curved),
+            child: child,
+          ),
+        );
+      },
+    ),
+  );
+}
+
+class StatusScreen extends StatefulWidget {
+  const StatusScreen({super.key});
+
+  @override
+  State<StatusScreen> createState() => _StatusScreenState();
+}
+
+class _StatusScreenState extends State<StatusScreen>
+    with WidgetsBindingObserver {
+  static const _display = MethodChannel('guia_do_vale/display');
+
+  final _entryCache = <String, Entry>{};
+  String _aiText = '';
+  String? _aiError;
+  bool _aiBusy = false;
+  bool _askedSync = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _immersive(true);
+    _keepScreenOn(true);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final scope = AppScope.of(context);
+    if (_entryCache.isEmpty) {
+      for (final e in scope.repo.all) {
+        for (final raw in [e.en, e.name]) {
+          final k = normalize(raw.trim());
+          if (k.isNotEmpty) _entryCache.putIfAbsent(k, () => e);
+        }
+      }
+    }
+    if (scope.api.connected && scope.api.snapshot == null && !_askedSync) {
+      _askedSync = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) scope.api.sync(silent: true);
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _immersive(false);
+    _keepScreenOn(false);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _immersive(true);
+      _keepScreenOn(true);
+    }
+  }
+
+  /// Só é chamada pelo botão AJUDA. Nada de IA automática nesta tela.
+  Future<void> _askAi() async {
+    if (_aiBusy) return;
+    final scope = AppScope.of(context);
+    final snap = scope.api.snapshot;
+    if (snap == null) return;
+    if (!scope.store.aiModelInstalled || !scope.ai.engineReady) {
+      _showAiUnavailable();
+      return;
+    }
+
+    final loc = locationInfo(snap.player.location);
+    final next = recommendedNextStep(snap, scope.repo);
+    final tips = buildStatusTips(snap, scope.repo);
+    final prompt = buildStatusPrompt(
+      snap: snap,
+      location: loc,
+      next: next,
+      tips: tips,
+      repo: scope.repo,
+    );
+
+    setState(() {
+      _aiBusy = true;
+      _aiError = null;
+      _aiText = '';
+    });
+
+    try {
+      final buf = StringBuffer();
+      await for (final token in scope.ai.ask(prompt)) {
+        buf.write(token);
+      }
+      if (!mounted) return;
+      final answer = cleanAnswer(buf.toString()).trim();
+      setState(() {
+        _aiText = answer;
+        if (parseAiObjectives(answer).isEmpty) {
+          _aiError =
+              'O conselheiro não devolveu um plano desta vez. Tente de novo.';
+        }
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(
+        () => _aiError =
+            'O conselheiro não respondeu. Tente de novo em instantes.',
+      );
+    } finally {
+      if (mounted) setState(() => _aiBusy = false);
+    }
+  }
+
+  void _showAiUnavailable() {
+    showGeneralDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: 'Fechar',
+      barrierColor: Colors.black.withValues(alpha: 0.72),
+      transitionDuration: const Duration(milliseconds: 180),
+      pageBuilder: (dialogContext, _, _) {
+        return Center(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 430),
+              child: Material(
+                color: Colors.transparent,
+                child: DefaultTextStyle(
+                  style: const TextStyle(
+                    color: _ink,
+                    decoration: TextDecoration.none,
+                  ),
+                  child: _GamePanel(
+                    accent: _gold,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const _PanelLabel(
+                          'CONSELHEIRO DO VALE',
+                          icon: Icons.auto_awesome_rounded,
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'A IA local ainda não está pronta neste aparelho.',
+                          style: TextStyle(
+                            fontFamily: 'PixelifySans',
+                            fontSize: 18,
+                            height: 1.1,
+                            color: _ink,
+                            decoration: TextDecoration.none,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        const Text(
+                          'Abra o Assistente, instale um modelo e volte para pedir um plano feito para o seu save. '
+                          'Sem IA, o plano do guia acima continua valendo.',
+                          style: TextStyle(
+                            fontSize: 13,
+                            height: 1.3,
+                            color: Color(0xFF4E3926),
+                            decoration: TextDecoration.none,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: FilledButton(
+                            style: FilledButton.styleFrom(
+                              backgroundColor: _gold,
+                              foregroundColor: _ink,
+                            ),
+                            onPressed: () => Navigator.of(dialogContext).pop(),
+                            child: const Text('ENTENDI'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _immersive(bool on) {
+    if (on) {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+      SystemChrome.setSystemUIOverlayStyle(
+        const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          systemNavigationBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+          systemNavigationBarIconBrightness: Brightness.light,
+        ),
+      );
+    } else {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+      SystemChrome.setSystemUIOverlayStyle(
+        const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          systemNavigationBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.dark,
+          systemNavigationBarIconBrightness: Brightness.dark,
+        ),
+      );
+    }
+  }
+
+  Future<void> _keepScreenOn(bool on) async {
+    try {
+      await _display.invokeMethod<void>('keepScreenOn', {'on': on});
+    } catch (_) {
+      // Em testes e em plataformas sem o canal nativo, só ignora.
+    }
+  }
+
+  void _close() => Navigator.of(context).maybePop();
+
+  Entry? _entryFor(ApiItem item) {
+    final key = normalize(
+      (item.displayName.isNotEmpty ? item.displayName : item.name).trim(),
+    );
+    return _entryCache[key];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final scope = AppScope.of(context);
+    return PopScope(
+      canPop: true,
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        body: ListenableBuilder(
+          listenable: scope.api,
+          builder: (context, _) {
+            final snap = scope.api.snapshot;
+            final live = scope.api.connected && snap != null;
+            return Stack(
+              fit: StackFit.expand,
+              children: [
+                _Backdrop(snap: snap),
+                SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(10, 6, 10, 6),
+                    child: live
+                        ? _buildDashboard(scope, snap, scope.api)
+                        : _NoSnapshot(api: scope.api, onClose: _close),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDashboard(AppScope scope, ApiSnapshot snap, GameApi api) {
+    final loc = locationInfo(snap.player.location);
+    final next = recommendedNextStep(snap, scope.repo);
+    final tips = buildStatusTips(snap, scope.repo);
+    final canAi = scope.store.aiModelInstalled && scope.ai.engineReady;
+
+    return LayoutBuilder(
+      builder: (context, c) {
+        final landscape = c.maxWidth > c.maxHeight * 1.12;
+        final left = <Widget>[
+          _vitalsPanel(snap),
+          const SizedBox(height: 7),
+          _mapPanel(context, snap, loc),
+          const SizedBox(height: 7),
+          _locationPanel(loc),
+          const SizedBox(height: 7),
+          _farmPanel(snap),
+        ];
+        final right = <Widget>[
+          _nextStepPanel(context, snap, loc, next, tips, canAi),
+          const SizedBox(height: 7),
+          _questsPanel(snap),
+          const SizedBox(height: 7),
+          _todayPanel(scope, snap),
+          const SizedBox(height: 7),
+          _inventoryPanel(snap),
+          const SizedBox(height: 7),
+          _skillsPanel(snap),
+          const SizedBox(height: 7),
+          _relationshipsPanel(snap),
+          const SizedBox(height: 7),
+          _equipmentPanel(snap),
+          const SizedBox(height: 7),
+          _achievementsPanel(snap),
+          const SizedBox(height: 7),
+          _footer(api),
+        ];
+
+        return Column(
+          children: [
+            _topBar(context, snap, api),
+            const SizedBox(height: 6),
+            Expanded(
+              child: landscape
+                  ? Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          width: math.min(340, c.maxWidth * 0.37),
+                          child: SingleChildScrollView(
+                            padding: const EdgeInsets.only(bottom: 10),
+                            child: Column(children: left),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: SingleChildScrollView(
+                            padding: const EdgeInsets.only(bottom: 10),
+                            child: Column(children: right),
+                          ),
+                        ),
+                      ],
+                    )
+                  : SingleChildScrollView(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Column(
+                        children: [
+                          ...left.take(1),
+                          const SizedBox(height: 7),
+                          _nextStepPanel(context, snap, loc, next, tips, canAi),
+                          ...left.skip(1),
+                          const SizedBox(height: 7),
+                          ...right.skip(1),
+                        ],
+                      ),
+                    ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _topBar(BuildContext context, ApiSnapshot snap, GameApi api) {
+    final p = snap.player;
+    final w = snap.world;
+    final weather = weatherInfo(w.weather);
+    final name = p.displayName.trim().isEmpty ? p.name : p.displayName;
+    return LayoutBuilder(
+      builder: (context, c) {
+        final compact = c.maxWidth < 540;
+        return Row(
+          children: [
+            Container(
+              width: 3,
+              height: 34,
+              decoration: BoxDecoration(
+                color: _gold,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'MEU STATUS',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontFamily: 'PixelifySans',
+                      color: _goldSoft,
+                      fontSize: 10,
+                      letterSpacing: 2.2,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  Text(
+                    compact ? name : '$name · ${w.farmName}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontFamily: 'PixelifySans',
+                      color: Colors.white,
+                      fontSize: compact ? 17 : 19,
+                      fontWeight: FontWeight.w700,
+                      shadows: const [
+                        Shadow(color: Colors.black54, blurRadius: 4),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (api.connected && !compact) ...[
+              const _LivePill(),
+              const SizedBox(width: 6),
+            ],
+            _DatePill(world: w, weather: weather),
+            const SizedBox(width: 6),
+            _CloseButton(onTap: _close),
+          ],
+        );
+      },
+    );
+  }
+}

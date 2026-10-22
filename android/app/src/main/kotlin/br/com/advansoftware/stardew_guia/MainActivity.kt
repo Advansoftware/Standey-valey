@@ -5,6 +5,7 @@ import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
 import android.os.Handler
 import android.os.Looper
+import android.view.WindowManager
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -13,6 +14,7 @@ import java.util.ArrayDeque
 class MainActivity : FlutterActivity() {
     private companion object {
         const val CHANNEL = "guia_do_vale/nsd"
+        const val DISPLAY_CHANNEL = "guia_do_vale/display"
         const val SERVICE_TYPE = "_stardewapi._tcp."
         const val SCAN_MS = 5000L
     }
@@ -40,6 +42,28 @@ class MainActivity : FlutterActivity() {
                     result.success(null)
                 }
                 else -> result.notImplemented()
+            }
+        }
+
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, DISPLAY_CHANNEL)
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "keepScreenOn" -> {
+                        val on = call.argument<Boolean>("on") ?: false
+                        setKeepScreenOn(on)
+                        result.success(null)
+                    }
+                    else -> result.notImplemented()
+                }
+            }
+    }
+
+    private fun setKeepScreenOn(on: Boolean) {
+        runOnUiThread {
+            if (on) {
+                window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            } else {
+                window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             }
         }
     }
@@ -145,6 +169,7 @@ class MainActivity : FlutterActivity() {
 
     override fun onDestroy() {
         finishScan()
+        setKeepScreenOn(false)
         channel?.setMethodCallHandler(null)
         super.onDestroy()
     }

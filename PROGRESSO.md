@@ -3,6 +3,63 @@
 Registro de progresso da sessão (continuação do HANDOFF.md).
 Atualizado a cada etapa concluída — serve de rede de segurança se algo falhar.
 
+## Sessão 6 — Meu Status imersivo (v1.3.0)
+
+| Etapa | Situação |
+|---|---|
+| Novo item central “Meu Status” na navegação inferior | ✅ substitui o Calendário; só libera com a API conectada |
+| Bloqueio sem conexão | ✅ cadeado + aviso com atalho para conectar |
+| Calendário como atalho no cabeçalho da Home | ✅ removido da barra inferior |
+| Tela imersiva em tela cheia, com fechar e tela ligada | ✅ `immersiveSticky` + canal nativo `guia_do_vale/display` |
+| Layout de uma tela só, duas colunas no landscape e uma no portrait | ✅ rolagem por coluna, sem abas |
+| Mapa com pin “VOCÊ”, vitais, local, fazenda, missões, agenda, mochila | ✅ dados de `/world`, `/players/main` e inventário |
+| Habilidades, amizades, equipamento e conquistas | ✅ painéis próprios com dados da API |
+| Próximo passo determinístico | ✅ regras de missão, aniversário, festival, energia/vida, estação, clima e amizades |
+| IA local só no botão **AJUDA** | ✅ nunca automática, sem timer/polling |
+| Resposta da IA como cartões de objetivo | ✅ até 3 cartões com ação, lugar e motivo |
+| Prompt e parser da IA | ✅ formato `AÇÃO | LUGAR | MOTIVO`, tolerante a markdown |
+| Correção de `npc.type` texto/número | ✅ sincronização com o mock `"Villager"` funcionando |
+| Limite de 1000 linhas por arquivo Dart | ✅ tela dividida em `status_screen`, `status_panels`, `status_widgets` e `status_tiles` |
+| `flutter analyze` / `flutter test` | ✅ limpo; 45 testes passando (8 novos) |
+| Teste físico no SM-G781B | ✅ portrait e landscape, cadeado/liberação, fechar, diálogo AJUDA e top bar |
+| Release do app 1.3.0+4 | ✅ publicada com APK arm64 |
+
+### O que entrou nesta etapa
+
+- **Meu Status**: dashboard imersivo com visual de madeira/pergaminho, fundo do jogo e fonte
+  `PixelifySans`. Reúne topo com jogador/fazenda/data, mapa com pin, vitais, localização, fazenda,
+  missões, agenda, mochila, habilidades, amizades, equipamento e conquistas.
+- **Acesso condicionado**: o item central mostra cadeado e explica que é preciso conectar. Com a
+  API conectada, abre em rota fullscreen e mantém a aba anterior ao fechar.
+- **Próximo passo primeiro**: o painel principal recomenda o que fazer e para onde ir. A regra é
+  local e funciona sem modelo de IA.
+- **Conselheiro sob demanda**: o botão AJUDA envia um snapshot curto para a IA local e transforma
+  a resposta em até 3 cartões de objetivo. Sem modelo instalado, mostra um diálogo explicativo e
+  o plano do guia continua valendo.
+- **Tela deitada**: o layout em landscape usa duas colunas independentes; em portrait vira uma
+  coluna. A tela permanece ligada enquanto a rota está aberta.
+- **Robustez da API**: `npc.type` agora aceita texto (`Villager`), número ou ausência, sem quebrar
+  a sincronização de amizades.
+
+### O que falta
+
+1. Repetir o teste da tela com um **save real** do Stardew Valley.
+2. Instalar um modelo de IA no aparelho e validar a resposta real do conselheiro (o fluxo com
+   resposta simulada já está coberto por teste).
+
+### Arquivos desta etapa
+
+- `lib/screens/status_screen.dart` — rota, estado, IA, topo e dashboard.
+- `lib/screens/status_panels.dart` — painéis da tela (vitais, mapa, local, missões, agenda etc.).
+- `lib/screens/status_widgets.dart` — peças visuais (fundo, painéis, pills, mapa, pin).
+- `lib/screens/status_tiles.dart` — cartões de objetivo, missão, item, habilidade, amizade e conquista.
+- `lib/game_status.dart` — regras do próximo passo, clima, localização, prompt e parser da IA.
+- `lib/screens/shell.dart` — item central, bloqueio e navegação.
+- `lib/screens/home_screen.dart` — atalho do calendário no cabeçalho.
+- `android/.../MainActivity.kt` — canal `guia_do_vale/display` (`keepScreenOn`).
+- `assets/fonts/PixelifySans.ttf` + licença OFL.
+- `test/app_test.dart`, `test/game_status_test.dart` e `test/game_api_test.dart` — novos testes.
+
 ## Sessão 5 — Stardew Web API (v1.2.0 concluída)
 
 | Etapa | Situação |

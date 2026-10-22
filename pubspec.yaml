@@ -1,7 +1,7 @@
 name: stardew_guia
 description: Enciclopédia offline de Stardew Valley em português do Brasil, com guia do iniciante, progresso e assistente de IA local.
 publish_to: 'none'
-version: 1.2.0+3
+version: 1.3.0+4
 
 environment:
   sdk: '>=3.12.0 <4.0.0'
@@ -23,6 +23,10 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  fonts:
+    - family: PixelifySans
+      fonts:
+        - asset: assets/fonts/PixelifySans.ttf
   assets:
     - assets/data/
     - assets/wiki/

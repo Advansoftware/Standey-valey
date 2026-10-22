@@ -25,18 +25,70 @@ class DiscoveredServer {
   final String host;
   final int port;
 
-  const DiscoveredServer({required this.name, required this.host, required this.port});
+  const DiscoveredServer({
+    required this.name,
+    required this.host,
+    required this.port,
+  });
 
-  String get url => host.contains(':') ? 'http://[$host]:$port' : 'http://$host:$port';
+  String get url =>
+      host.contains(':') ? 'http://[$host]:$port' : 'http://$host:$port';
+}
+
+/// Data do jogo como a API devolve (a estação e o dia da semana vêm como texto).
+class ApiDate {
+  final int season;
+  final int day;
+  final int year;
+  final String dayOfWeek;
+  final String shortDayOfWeek;
+
+  const ApiDate({
+    required this.season,
+    required this.day,
+    required this.year,
+    this.dayOfWeek = '',
+    this.shortDayOfWeek = '',
+  });
+
+  factory ApiDate.fromJson(Map<String, dynamic> j) {
+    final seasonName = (j['season'] as String?) ?? 'Spring';
+    return ApiDate(
+      season: seasonFromApi(seasonName),
+      day: (j['day'] as num?)?.toInt() ?? 1,
+      year: (j['year'] as num?)?.toInt() ?? 1,
+      dayOfWeek: (j['dayOfWeek'] as String?) ?? '',
+      shortDayOfWeek: (j['shortDayOfWeek'] as String?) ?? '',
+    );
+  }
+}
+
+class ApiNpc {
+  final String name;
+  final String type;
+
+  const ApiNpc({required this.name, this.type = ''});
+
+  factory ApiNpc.fromJson(Map<String, dynamic> j) {
+    return ApiNpc(
+      name: (j['name'] as String?) ?? '',
+      // A API pode mandar "Villager" (texto) ou um número em versões antigas.
+      type: '${j['type'] ?? ''}',
+    );
+  }
 }
 
 class ApiWorld {
   final int season;
   final int day;
   final int year;
+  final String dayOfWeek;
+  final String shortDayOfWeek;
   final String weather;
   final String farmName;
+  final String currentMusicTrack;
   final String? festival;
+  final List<ApiNpc> birthdays;
 
   const ApiWorld({
     required this.season,
@@ -44,20 +96,32 @@ class ApiWorld {
     required this.year,
     required this.weather,
     required this.farmName,
+    this.dayOfWeek = '',
+    this.shortDayOfWeek = '',
+    this.currentMusicTrack = '',
     this.festival,
+    this.birthdays = const [],
   });
 
   factory ApiWorld.fromJson(Map<String, dynamic> j) {
-    final today = (j['today'] as Map?)?.cast<String, dynamic>() ?? const <String, dynamic>{};
-    final date = (today['date'] as Map?)?.cast<String, dynamic>() ?? const <String, dynamic>{};
-    final seasonName = (date['season'] as String?) ?? 'Spring';
+    final today =
+        (j['today'] as Map?)?.cast<String, dynamic>() ??
+        const <String, dynamic>{};
+    final date =
+        (today['date'] as Map?)?.cast<String, dynamic>() ??
+        const <String, dynamic>{};
+    final parsed = ApiDate.fromJson(date);
     return ApiWorld(
-      season: seasonFromApi(seasonName),
-      day: (date['day'] as num?)?.toInt() ?? 1,
-      year: (date['year'] as num?)?.toInt() ?? 1,
+      season: parsed.season,
+      day: parsed.day,
+      year: parsed.year,
+      dayOfWeek: parsed.dayOfWeek,
+      shortDayOfWeek: parsed.shortDayOfWeek,
       weather: (today['weather'] as String?) ?? '',
       farmName: (j['farmName'] as String?) ?? '',
+      currentMusicTrack: (j['currentMusicTrack'] as String?) ?? '',
       festival: today['festival'] as String?,
+      birthdays: _objectList(today['birthdays'], ApiNpc.fromJson),
     );
   }
 }
@@ -76,32 +140,278 @@ int seasonFromApi(String value) {
   }
 }
 
+List<T> _objectList<T>(dynamic raw, T Function(Map<String, dynamic>) parse) {
+  if (raw is! List) return const [];
+  return raw
+      .whereType<Map>()
+      .map((e) => parse(e.cast<String, dynamic>()))
+      .toList();
+}
+
+class ApiProfession {
+  final int id;
+  final String name;
+  final String description;
+
+  const ApiProfession({
+    required this.id,
+    required this.name,
+    required this.description,
+  });
+
+  factory ApiProfession.fromJson(Map<String, dynamic> j) {
+    return ApiProfession(
+      id: (j['id'] as num?)?.toInt() ?? 0,
+      name: (j['name'] as String?) ?? '',
+      description: (j['description'] as String?) ?? '',
+    );
+  }
+}
+
+class ApiSkill {
+  final int id;
+  final String name;
+  final int level;
+  final List<ApiProfession> professions;
+
+  const ApiSkill({
+    required this.id,
+    required this.name,
+    required this.level,
+    this.professions = const [],
+  });
+
+  factory ApiSkill.fromJson(Map<String, dynamic> j) {
+    return ApiSkill(
+      id: (j['id'] as num?)?.toInt() ?? 0,
+      name: (j['name'] as String?) ?? '',
+      level: (j['level'] as num?)?.toInt() ?? 0,
+      professions: _objectList(j['professions'], ApiProfession.fromJson),
+    );
+  }
+}
+
+class ApiQuest {
+  final String title;
+  final String description;
+  final bool hasReward;
+  final String? rewardDescription;
+  final bool hasMoneyReward;
+  final int? moneyReward;
+  final String currentObjective;
+  final bool isTimedQuest;
+  final int? daysLeft;
+
+  const ApiQuest({
+    required this.title,
+    required this.description,
+    required this.hasReward,
+    this.rewardDescription,
+    required this.hasMoneyReward,
+    this.moneyReward,
+    required this.currentObjective,
+    required this.isTimedQuest,
+    this.daysLeft,
+  });
+
+  factory ApiQuest.fromJson(Map<String, dynamic> j) {
+    return ApiQuest(
+      title: (j['title'] as String?) ?? '',
+      description: (j['description'] as String?) ?? '',
+      hasReward: (j['hasReward'] as bool?) ?? false,
+      rewardDescription: j['rewardDescription'] as String?,
+      hasMoneyReward: (j['hasMoneyReward'] as bool?) ?? false,
+      moneyReward: (j['moneyReward'] as num?)?.toInt(),
+      currentObjective: (j['currentObjective'] as String?) ?? '',
+      isTimedQuest: (j['isTimedQuest'] as bool?) ?? false,
+      daysLeft: (j['daysLeft'] as num?)?.toInt(),
+    );
+  }
+}
+
+class ApiAchievement {
+  final int id;
+  final String name;
+  final String description;
+  final bool hasPlayerUnlocked;
+  final bool canPlayerSeeDetails;
+  final bool showIfPrerequisiteMet;
+  final bool hasPrerequisiteAchievement;
+  final int? prerequisiteAchievement;
+  final ApiItem? reward;
+
+  const ApiAchievement({
+    required this.id,
+    required this.name,
+    required this.description,
+    required this.hasPlayerUnlocked,
+    required this.canPlayerSeeDetails,
+    required this.showIfPrerequisiteMet,
+    required this.hasPrerequisiteAchievement,
+    this.prerequisiteAchievement,
+    this.reward,
+  });
+
+  factory ApiAchievement.fromJson(Map<String, dynamic> j) {
+    return ApiAchievement(
+      id: (j['id'] as num?)?.toInt() ?? 0,
+      name: (j['name'] as String?) ?? '',
+      description: (j['description'] as String?) ?? '',
+      hasPlayerUnlocked: (j['hasPlayerUnlocked'] as bool?) ?? false,
+      canPlayerSeeDetails: (j['canPlayerSeeDetails'] as bool?) ?? false,
+      showIfPrerequisiteMet: (j['showIfPrerequisiteMet'] as bool?) ?? false,
+      hasPrerequisiteAchievement:
+          (j['hasPrerequisiteAchievement'] as bool?) ?? false,
+      prerequisiteAchievement: (j['prerequisiteAchievement'] as num?)?.toInt(),
+      reward: _itemOrNull(j['reward']),
+    );
+  }
+}
+
+class ApiItem {
+  final String itemId;
+  final String typeDefinitionId;
+  final String name;
+  final String displayName;
+  final String qualifiedItemId;
+  final int quality;
+  final int category;
+  final int stackSize;
+  final String url;
+
+  const ApiItem({
+    required this.name,
+    required this.displayName,
+    required this.qualifiedItemId,
+    required this.stackSize,
+    this.itemId = '',
+    this.typeDefinitionId = '',
+    this.quality = 0,
+    this.category = 0,
+    this.url = '',
+  });
+
+  factory ApiItem.fromJson(Map<String, dynamic> j) {
+    return ApiItem(
+      itemId: (j['itemId'] as String?) ?? '',
+      typeDefinitionId: (j['typeDefinitionId'] as String?) ?? '',
+      name: (j['name'] as String?) ?? '',
+      displayName: (j['displayName'] as String?) ?? '',
+      qualifiedItemId: (j['qualifiedItemId'] as String?) ?? '',
+      quality: (j['quality'] as num?)?.toInt() ?? 0,
+      category: (j['category'] as num?)?.toInt() ?? 0,
+      stackSize: (j['stackSize'] as num?)?.toInt() ?? 0,
+      url: (j['url'] as String?) ?? '',
+    );
+  }
+}
+
+ApiItem? _itemOrNull(dynamic raw) {
+  if (raw is! Map) return null;
+  return ApiItem.fromJson(raw.cast<String, dynamic>());
+}
+
+class ApiClothing {
+  final ApiItem? hat;
+  final ApiItem? shirt;
+  final ApiItem? pants;
+  final ApiItem? boots;
+  final ApiItem? rightRing;
+  final ApiItem? leftRing;
+
+  const ApiClothing({
+    this.hat,
+    this.shirt,
+    this.pants,
+    this.boots,
+    this.rightRing,
+    this.leftRing,
+  });
+
+  factory ApiClothing.fromJson(Map<String, dynamic>? j) {
+    if (j == null) return const ApiClothing();
+    return ApiClothing(
+      hat: _itemOrNull(j['hat']),
+      shirt: _itemOrNull(j['shirt']),
+      pants: _itemOrNull(j['pants']),
+      boots: _itemOrNull(j['boots']),
+      rightRing: _itemOrNull(j['rightRing']),
+      leftRing: _itemOrNull(j['leftRing']),
+    );
+  }
+}
+
 class ApiRelationship {
   final String npcName;
+  final String npcType;
+  final int points;
   final int hearts;
+  final bool hasBeenGivenGiftToday;
+  final int giftsGivenToday;
+  final int giftsGivenThisWeek;
+  final ApiDate? lastGiftDate;
+  final bool isDating;
+  final bool isEngaged;
   final bool isMarried;
+  final bool isRoommate;
+  final bool isDivorced;
 
   const ApiRelationship({
     required this.npcName,
     required this.hearts,
     required this.isMarried,
+    this.npcType = '',
+    this.points = 0,
+    this.hasBeenGivenGiftToday = false,
+    this.giftsGivenToday = 0,
+    this.giftsGivenThisWeek = 0,
+    this.lastGiftDate,
+    this.isDating = false,
+    this.isEngaged = false,
+    this.isRoommate = false,
+    this.isDivorced = false,
   });
 
   factory ApiRelationship.fromJson(Map<String, dynamic> j) {
-    final npc = (j['npc'] as Map?)?.cast<String, dynamic>() ?? const <String, dynamic>{};
+    final npc =
+        (j['npc'] as Map?)?.cast<String, dynamic>() ??
+        const <String, dynamic>{};
+    final lastGift = (j['lastGiftDate'] as Map?)?.cast<String, dynamic>();
     return ApiRelationship(
       npcName: (npc['name'] as String?) ?? '',
+      npcType: '${npc['type'] ?? ''}',
+      points: (j['points'] as num?)?.toInt() ?? 0,
       hearts: (j['hearts'] as num?)?.toInt() ?? 0,
+      hasBeenGivenGiftToday: (j['hasBeenGivenGiftToday'] as bool?) ?? false,
+      giftsGivenToday: (j['giftsGivenToday'] as num?)?.toInt() ?? 0,
+      giftsGivenThisWeek: (j['giftsGivenThisWeek'] as num?)?.toInt() ?? 0,
+      lastGiftDate: lastGift == null ? null : ApiDate.fromJson(lastGift),
+      isDating: (j['isDating'] as bool?) ?? false,
+      isEngaged: (j['isEngaged'] as bool?) ?? false,
       isMarried: (j['isMarried'] as bool?) ?? false,
+      isRoommate: (j['isRoommate'] as bool?) ?? false,
+      isDivorced: (j['isDivorced'] as bool?) ?? false,
     );
   }
 }
 
 class ApiPlayer {
   final String name;
+  final String displayName;
   final String farmName;
   final int money;
+  final double stamina;
+  final int maxStamina;
+  final int health;
+  final int maxHealth;
   final String location;
+  final double dailyLuck;
+  final String dailyLuckFriendlyValue;
+  final String dailyLuckDescription;
+  final ApiClothing clothing;
+  final List<ApiSkill> skills;
+  final List<ApiQuest> quests;
+  final List<ApiAchievement> achievements;
   final List<ApiRelationship> relationships;
 
   const ApiPlayer({
@@ -110,41 +420,41 @@ class ApiPlayer {
     required this.money,
     required this.location,
     required this.relationships,
+    this.displayName = '',
+    this.stamina = 0,
+    this.maxStamina = 0,
+    this.health = 0,
+    this.maxHealth = 0,
+    this.dailyLuck = 0,
+    this.dailyLuckFriendlyValue = '',
+    this.dailyLuckDescription = '',
+    this.clothing = const ApiClothing(),
+    this.skills = const [],
+    this.quests = const [],
+    this.achievements = const [],
   });
 
   factory ApiPlayer.fromJson(Map<String, dynamic> j) {
     return ApiPlayer(
       name: (j['name'] as String?) ?? '',
+      displayName: (j['displayName'] as String?) ?? '',
       farmName: (j['farmName'] as String?) ?? '',
       money: (j['money'] as num?)?.toInt() ?? 0,
+      stamina: (j['stamina'] as num?)?.toDouble() ?? 0,
+      maxStamina: (j['maxStamina'] as num?)?.toInt() ?? 0,
+      health: (j['health'] as num?)?.toInt() ?? 0,
+      maxHealth: (j['maxHealth'] as num?)?.toInt() ?? 0,
       location: (j['location'] as String?) ?? '',
-      relationships: ((j['relationships'] as List?) ?? const [])
-          .whereType<Map>()
-          .map((e) => ApiRelationship.fromJson(e.cast<String, dynamic>()))
-          .toList(),
-    );
-  }
-}
-
-class ApiItem {
-  final String name;
-  final String displayName;
-  final String qualifiedItemId;
-  final int stackSize;
-
-  const ApiItem({
-    required this.name,
-    required this.displayName,
-    required this.qualifiedItemId,
-    required this.stackSize,
-  });
-
-  factory ApiItem.fromJson(Map<String, dynamic> j) {
-    return ApiItem(
-      name: (j['name'] as String?) ?? '',
-      displayName: (j['displayName'] as String?) ?? '',
-      qualifiedItemId: (j['qualifiedItemId'] as String?) ?? '',
-      stackSize: (j['stackSize'] as num?)?.toInt() ?? 0,
+      dailyLuck: (j['dailyLuck'] as num?)?.toDouble() ?? 0,
+      dailyLuckFriendlyValue: (j['dailyLuckFriendlyValue'] as String?) ?? '',
+      dailyLuckDescription: (j['dailyLuckDescription'] as String?) ?? '',
+      clothing: ApiClothing.fromJson(
+        (j['clothing'] as Map?)?.cast<String, dynamic>(),
+      ),
+      skills: _objectList(j['skills'], ApiSkill.fromJson),
+      quests: _objectList(j['quests'], ApiQuest.fromJson),
+      achievements: _objectList(j['achievements'], ApiAchievement.fromJson),
+      relationships: _objectList(j['relationships'], ApiRelationship.fromJson),
     );
   }
 }
@@ -245,15 +555,18 @@ class GameApi extends ChangeNotifier with WidgetsBindingObserver {
         final host = (item['host'] as String?)?.trim() ?? '';
         final port = (item['port'] as num?)?.toInt() ?? 0;
         if (host.isEmpty || port <= 0) continue;
-        out.add(DiscoveredServer(
-          name: (item['name'] as String?) ?? 'Stardew Web API',
-          host: host,
-          port: port,
-        ));
+        out.add(
+          DiscoveredServer(
+            name: (item['name'] as String?) ?? 'Stardew Web API',
+            host: host,
+            port: port,
+          ),
+        );
       }
       return out;
     } on MissingPluginException {
-      error = 'Busca automática indisponível neste aparelho. Informe o endereço.';
+      error =
+          'Busca automática indisponível neste aparelho. Informe o endereço.';
       return const [];
     } on PlatformException catch (e) {
       error = e.message?.trim().isNotEmpty == true
@@ -290,7 +603,10 @@ class GameApi extends ChangeNotifier with WidgetsBindingObserver {
     try {
       final health = await _getJson(url, '/api/v1/mods');
       if (health is! List) {
-        throw const ApiException(0, 'O endereço respondeu, mas não parece ser a Stardew Web API.');
+        throw const ApiException(
+          0,
+          'O endereço respondeu, mas não parece ser a Stardew Web API.',
+        );
       }
 
       _session++;
@@ -337,14 +653,22 @@ class GameApi extends ChangeNotifier with WidgetsBindingObserver {
 
       if (session != _session || !connected) return false;
 
-      final world = ApiWorld.fromJson((results[0] as Map).cast<String, dynamic>());
-      final player = ApiPlayer.fromJson((results[1] as Map).cast<String, dynamic>());
+      final world = ApiWorld.fromJson(
+        (results[0] as Map).cast<String, dynamic>(),
+      );
+      final player = ApiPlayer.fromJson(
+        (results[1] as Map).cast<String, dynamic>(),
+      );
       final inventory = ((results[2] as List?) ?? const [])
           .whereType<Map>()
           .map((e) => ApiItem.fromJson(e.cast<String, dynamic>()))
           .toList();
 
-      snapshot = ApiSnapshot(world: world, player: player, inventory: inventory);
+      snapshot = ApiSnapshot(
+        world: world,
+        player: player,
+        inventory: inventory,
+      );
       store.setDate(world.season, world.day);
 
       final ids = _autoCollectedIds(player, inventory);
@@ -354,8 +678,10 @@ class GameApi extends ChangeNotifier with WidgetsBindingObserver {
       error = null;
       return true;
     } on ApiException catch (e) {
-      if (e.statusCode == 400 && e.message.toLowerCase().contains('no save loaded')) {
-        error = 'API conectada. Carregue um save no jogo para sincronizar o progresso.';
+      if (e.statusCode == 400 &&
+          e.message.toLowerCase().contains('no save loaded')) {
+        error =
+            'API conectada. Carregue um save no jogo para sincronizar o progresso.';
       } else {
         error = _friendlyError(e);
       }
@@ -419,7 +745,8 @@ class GameApi extends ChangeNotifier with WidgetsBindingObserver {
     }
 
     final villagers = {
-      for (final e in repo.byCat['aldeoes'] ?? const <Entry>[]) normalize(e.en): e,
+      for (final e in repo.byCat['aldeoes'] ?? const <Entry>[])
+        normalize(e.en): e,
     };
     for (final rel in player.relationships) {
       final target = rel.isMarried ? 14 : 10;
@@ -476,7 +803,9 @@ class GameApi extends ChangeNotifier with WidgetsBindingObserver {
           .getUrl(Uri.parse('$base$path'))
           .timeout(const Duration(seconds: 5));
       request.headers.set(HttpHeaders.acceptHeader, 'application/json');
-      final response = await request.close().timeout(const Duration(seconds: 5));
+      final response = await request.close().timeout(
+        const Duration(seconds: 5),
+      );
       final body = await response
           .transform(utf8.decoder)
           .join()
@@ -490,12 +819,18 @@ class GameApi extends ChangeNotifier with WidgetsBindingObserver {
             message = decoded['error'] as String;
           }
         } catch (_) {}
-        throw ApiException(response.statusCode, message.isEmpty ? 'sem detalhes' : message);
+        throw ApiException(
+          response.statusCode,
+          message.isEmpty ? 'sem detalhes' : message,
+        );
       }
 
       return jsonDecode(body);
     } on TimeoutException {
-      throw const ApiException(0, 'A API não respondeu a tempo. Confira se o jogo está aberto.');
+      throw const ApiException(
+        0,
+        'A API não respondeu a tempo. Confira se o jogo está aberto.',
+      );
     } on SocketException {
       throw const ApiException(
         0,

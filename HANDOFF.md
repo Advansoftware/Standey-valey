@@ -2,7 +2,7 @@
 
 > Arquivo de continuação para qualquer IA/pessoa que pegar o projeto. **Atualize este arquivo
 > a cada etapa concluída** (marque `[x]`, ajuste "Próximos passos") e faça commit + push.
-> Última atualização: 2026-10-22 (sessão 5 — Stardew Web API integrada; app 1.2.0 e API 0.7.0 publicados).
+> Última atualização: 2026-10-22 (sessão 6 — tela Meu Status imersiva; app 1.3.0+4 em preparação para release).
 
 ## 1. Objetivo (pedido do dono, Bruno)
 
@@ -21,29 +21,32 @@ Requisitos explícitos do dono:
   arquivos); **não perguntar nada**, decidir e seguir; **deixar o app pronto e testado**; **publicar a
   release v1.0.0 no GitHub** com a descrição do que tem na primeira versão.
 
-## 2. Estado atual (sessão 5)
+## 2. Estado atual (sessão 6)
 
-O que existia até a sessão 4 está **funcionando e testado**. A sessão 5 entregou a integração
-opcional com a Stardew Web API, a release **0.7.0** do fork e o app **1.2.0+3**. A descoberta
-mDNS, a conexão, a sincronização, o timer de 60 s e o modo offline foram validados em um celular
-físico **SM-G781B (Android 13)** com uma API mock no PC; falta apenas repetir com um save real do
-Stardew Valley.
+O que existia até a sessão 5 está **funcionando e testado**. A sessão 6 entregou a tela
+**Meu Status**, um dashboard imersivo para usar com o celular deitado ao lado do PC. O item central
+da barra inferior só abre quando a API está conectada; sem conexão, mostra cadeado e um aviso com
+atalho para conectar. O Calendário saiu da barra e virou atalho no cabeçalho da Home.
+
+A tela usa dados de `/world`, `/players/main` e `/players/main/inventory`, tem duas colunas no
+landscape, uma no portrait, mantém a tela ligada e restaura as barras do sistema ao fechar. O
+próximo passo é calculado localmente; a IA local só roda no botão **AJUDA** e devolve até 3 cartões
+de objetivo.
 
 | Item | Situação |
 |---|---|
-| `flutter analyze` | ✅ sem avisos (sessão 5) |
-| `flutter test` | ✅ 37 testes passando (30 anteriores + 7 da API) |
-| `flutter build apk --release --target-platform android-arm64` | ✅ APK 1.2.0+3 (70 MB) |
-| Celular físico Samsung SM-G781B (Android 13) | ✅ app instalado e testado via ADB sem fio |
-| Emulador Android (Pixel 7 API 35) | ✅ app instalado e testado a mão (sessão 4) |
-| Pasta `android/` | ✅ versionada (minSdk 30, permissão INTERNET, ícone próprio, splash) |
+| `flutter analyze` | ✅ sem avisos (sessão 6) |
+| `flutter test` | ✅ 45 testes passando (37 anteriores + 8 novos) |
+| `flutter build apk --release --target-platform android-arm64` | ✅ APK 1.3.0+4 (70 MB) |
+| Celular físico Samsung SM-G781B (Android 13) | ✅ Meu Status testado em portrait e landscape |
+| Limite de 1000 linhas por arquivo Dart | ✅ tela dividida em 4 arquivos, todos abaixo do limite |
 | Conteúdo | ✅ 565 entradas, 16 categorias, **todas com imagem do jogo** |
 | Wiki offline | ✅ ~1.300 páginas da wiki PT dentro do app (`assets/wiki/pages.json.gz`) |
 | Mapa do Vale | ✅ 16 lugares, norte/sul, zoom, filtros e ficha por lugar |
 | IA local | ✅ 6 modelos na tela do Assistente; **Gemma 4 E4B** como padrão (RAM 8 GB+) |
 | Stardew Web API (fork 0.7.0) | ✅ release publicada com mDNS `_stardewapi._tcp` e encaminhador TCP na 7882 |
 | App: card "Servidor do jogo (API)" | ✅ descoberta, URL manual, sincronização e offline validados no celular |
-| GitHub | ✅ `main` com as releases `v1.1.0`, `v1.2.0` e a API `0.7.0` |
+| GitHub | ✅ `main` com as releases `v1.1.0`, `v1.2.0` e a API `0.7.0`; `v1.3.0` nesta sessão |
 
 Detalhe do ambiente: o sandbox **tem** Flutter 3.47.6 (snap), Dart 3.13.5, Android SDK 36,
 emulador com KVM, Python 3, node/npm, PIL e ImageMagick. A **API da wiki** (`api.php`) é bloqueada pelo
@@ -97,6 +100,7 @@ lib/search.dart                 BM25 local (acentos, stopwords, prefixo) + índi
 lib/ai_service.dart             wrapper flutter_edge_ai (install/ask) + prompt RAG + cleanAnswer
 lib/ai_models.dart              catálogo dos 6 modelos de IA (nome, tamanho, RAM, URL)
 lib/game_api.dart               cliente da API local, descoberta NSD e sincronização
+lib/game_status.dart            regras do próximo passo, clima, localização, prompt e parser da IA
 lib/app_theme.dart              tema "pergaminho" claro/escuro + parchment() + widget Parchment
 lib/app_scope.dart              InheritedWidget com store/repo/search/ai/api
 lib/widgets/common.dart         EntryImage, DexCard, EntryTile, TagPill, SectionTitle
@@ -105,15 +109,20 @@ lib/widgets/assistant_*.dart    cartão de download do modelo e balões do chat
 lib/map_data.dart               16 lugares do mapa, regiões, coordenadas e textos curtos
 lib/screens/                    home, encyclopedia/category, detail, calendar, search,
                                 map, assistant, favorites, about, shell (NavigationBar)
+lib/screens/status_screen.dart  rota/estado da tela Meu Status
+lib/screens/status_panels.dart  painéis do dashboard (vitais, mapa, local, missões, agenda…)
+lib/screens/status_widgets.dart peças visuais (fundo, painéis, pills, mapa, pin)
+lib/screens/status_tiles.dart   cartões de objetivo, missão, item, habilidade, amizade e conquista
 assets/data/*.json              16 categorias + index.json + names_pt.json
 assets/img/                     920+ sprites do jogo (nome achatado) + map_valley.png
 assets/wiki/pages.json.gz       corpus da wiki PT para o RAG
+assets/fonts/PixelifySans.ttf   fonte pixel da tela Meu Status (+ licença OFL)
 tools/seed/                     geradores de conteúdo (data_core, data_guia, enrich, utility…)
 tools/seed/utility.py           gera "Utilidade" e preços nas fichas
 tools/scrape_wiki.py            baixa a wiki PT
 tools/make_icon.py              gera o ícone do app
 tools/setup_android*.sh         preparação do projeto Android
-android/.../MainActivity.kt     canal guia_do_vale/nsd (NsdManager, _stardewapi._tcp)
+android/.../MainActivity.kt     canais guia_do_vale/nsd (NsdManager) e guia_do_vale/display (tela ligada)
 android/.../AndroidManifest.xml INTERNET + usesCleartextTraffic (HTTP na rede local)
 StardewWebApi/                  submódulo do fork da API 0.7.0 (mDNS + TCP 7882)
 .opencode/skills/android-phone-test/
@@ -121,6 +130,7 @@ StardewWebApi/                  submódulo do fork da API 0.7.0 (mDNS + TCP 7882
 test/app_test.dart              testes de interface (todas as telas)
 test/search_test.dart           testes da busca
 test/game_api_test.dart         testes do cliente/sincronização da API
+test/game_status_test.dart      testes do próximo passo, parser e prompt do conselheiro
 codemagic.yaml                  build do APK no CI (não usado no fork)
 ```
 
@@ -153,6 +163,10 @@ codemagic.yaml                  build do APK no CI (não usado no fork)
       timer e offline validados no celular físico com API mock. Falta repetir com save real.
 - [x] **O. Skill do celular de testes** — `.opencode/skills/android-phone-test` com passos de pareamento,
       conexão, instalação, screenshots e solução de problemas via ADB sem fio.
+- [x] **P. Meu Status imersivo** — item central na barra (só com API conectada), tela cheia em
+      landscape/portrait, mapa com pin, vitais, missões, mochila, habilidades, amizades e conquistas;
+      próximo passo local e IA somente no botão AJUDA, com resposta em cartões.
+- [ ] **Q. Release v1.3.0** — publicar o APK arm64 com a tela Meu Status.
 
 ## 7. Integração com a Stardew Web API (sessão 5)
 

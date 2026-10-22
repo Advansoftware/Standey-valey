@@ -24,6 +24,10 @@ Também tem:
 - **Favoritos** e **progresso**: marque o que já pescou, plantou ou entregou.
 - **Integração opcional com o jogo no PC**: conecte o app à Stardew Web API na mesma rede e ele
   traz a data, a mochila e as amizades do save aberto. Sem a API, tudo continua funcionando offline.
+- **Meu Status**: quando a API está conectada, o item central do menu abre um painel imersivo
+  (tela cheia, deitada, com a tela ligada) que reúne localização, vitais, mochila, missões,
+  amizades, habilidades, conquistas e o próximo passo do dia. O plano do guia funciona sem IA;
+  o botão **AJUDA** pede até 3 objetivos ao conselheiro local, com lugar e motivo.
 - **Mapa do Vale** com orientação norte/sul, pinos por região, zoom e uma ficha curta de cada lugar
   (fazenda, vila, montanha, minas, praia, floresta, deserto e Ilha Gengibre), com atalho para a wiki offline.
 - **Checklist** dos pacotes do Centro Comunitário, com barra de progresso.
@@ -73,8 +77,8 @@ do mod original não mudaram.
 A busca automática usa o `NsdManager` do Android; a URL manual funciona em qualquer Android.
 A API 0.7.0 está publicada em
 https://github.com/Advansoftware/StardewWebApi/releases/tag/0.7.0 — o zip inclui um `INSTALL.md`
-com os links e os caminhos de instalação. O app 1.2.0 está em
-https://github.com/Advansoftware/Standey-valey/releases/tag/v1.2.0.
+com os links e os caminhos de instalação. O app 1.3.0 está em
+https://github.com/Advansoftware/Standey-valey/releases/tag/v1.3.0.
 
 ### O que sincroniza
 

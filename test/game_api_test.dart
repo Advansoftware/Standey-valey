@@ -201,6 +201,31 @@ void main() {
     },
   );
 
+  test('ApiPlayer aceita o tipo do NPC como texto, número ou ausente', () {
+    final player = ApiPlayer.fromJson({
+      'name': 'Bruno',
+      'relationships': [
+        {
+          'npc': {'name': 'Abigail', 'type': 'Villager'},
+          'hearts': 10,
+        },
+        {
+          'npc': {'name': 'Penny', 'type': 1},
+          'hearts': 8,
+        },
+        {
+          'npc': {'name': 'Sam'},
+          'hearts': 4,
+        },
+      ],
+    });
+
+    expect(player.relationships, hasLength(3));
+    expect(player.relationships[0].npcType, 'Villager');
+    expect(player.relationships[1].npcType, '1');
+    expect(player.relationships[2].npcType, isEmpty);
+  });
+
   test('ApiWorld converte a estação da API para o índice do app', () {
     final world = ApiWorld.fromJson({
       'today': {
