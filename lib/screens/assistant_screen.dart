@@ -95,7 +95,7 @@ class _AssistantScreenState extends State<AssistantScreen> {
         }
         if (answer.text.isEmpty) answer.text = _fallback(hits);
       } catch (e) {
-        answer.text = '${_fallback(hits)}\n\n(A IA local falhou: $e)';
+        answer.text = '${_fallback(hits)}\n\n${_friendlyError(e)}';
       }
     } else {
       answer.text = _fallback(hits);
@@ -106,6 +106,21 @@ class _AssistantScreenState extends State<AssistantScreen> {
       _asking = false;
     });
     _toEnd();
+  }
+
+  /// Traduz erros técnicos do motor de IA para uma mensagem que faz sentido.
+  String _friendlyError(Object e) {
+    final msg = '$e';
+    if (msg.contains('arm64') || msg.contains('aarch64')) {
+      return 'Este aparelho não consegue rodar o modelo de IA (o motor precisa de '
+          'um celular arm64, como os de hoje). Os trechos acima são a resposta '
+          'da busca inteligente do guia.';
+    }
+    if (msg.contains('Failed to load model') || msg.contains('load')) {
+      return 'Não consegui abrir o modelo baixado. Tente baixá-lo de novo ou use '
+          'outro modelo menor.';
+    }
+    return 'A IA local falhou: $msg';
   }
 
   Future<void> _install(String urlOverride) async {
