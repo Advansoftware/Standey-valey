@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stardew_guia/ai_service.dart';
 import 'package:stardew_guia/app_scope.dart';
 import 'package:stardew_guia/app_theme.dart';
+import 'package:stardew_guia/game_api.dart';
 import 'package:stardew_guia/repository.dart';
 import 'package:stardew_guia/screens/about_screen.dart';
 import 'package:stardew_guia/screens/assistant_screen.dart';
@@ -44,6 +45,7 @@ Future<Store> pumpFullApp(WidgetTester tester) async {
       repo: repo,
       search: SearchService(repo),
       ai: AiService(),
+      api: GameApi(s, repo),
       child: Builder(
         builder: (context) => MaterialApp(
           theme: buildTheme(Brightness.light),
@@ -68,6 +70,7 @@ Future<Store> pumpScreen(WidgetTester tester, Widget screen, {SearchService? sea
       repo: repo,
       search: svc,
       ai: AiService(),
+      api: GameApi(s, repo),
       child: MaterialApp(theme: buildTheme(Brightness.light), home: screen),
     ),
   );

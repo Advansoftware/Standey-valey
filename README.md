@@ -22,6 +22,8 @@ Também tem:
 - **Wiki offline**: 1.300 páginas da wiki em português, dentro do app, para ler sem internet.
 - **Calendário** com aniversários e festivais, e a data do jogo que você está acompanhando.
 - **Favoritos** e **progresso**: marque o que já pescou, plantou ou entregou.
+- **Integração opcional com o jogo no PC**: conecte o app à Stardew Web API na mesma rede e ele
+  traz a data, a mochila e as amizades do save aberto. Sem a API, tudo continua funcionando offline.
 - **Mapa do Vale** com orientação norte/sul, pinos por região, zoom e uma ficha curta de cada lugar
   (fazenda, vila, montanha, minas, praia, floresta, deserto e Ilha Gengibre), com atalho para a wiki offline.
 - **Checklist** dos pacotes do Centro Comunitário, com barra de progresso.
@@ -44,6 +46,77 @@ O assistente deixa você escolher o modelo (o botão fica na aba Assistente):
 | Gemma 4 12B | 6,9 GB | 16 GB+ | Só para celulares muito fortes |
 
 Também dá para colar o endereço de qualquer outro arquivo `.litertlm`.
+
+## Integração com o jogo (opcional)
+
+Se você joga no PC, dá para ligar o app ao save aberto pela
+[Stardew Web API](https://github.com/Advansoftware/StardewWebApi) — um fork do
+[projeto original do zunderscore](https://github.com/zunderscore/StardewWebApi), com licença MIT.
+A integração é opcional: ela só acrescenta dados e o app continua funcionando sem ela.
+
+Na versão 0.7.0 do fork, a API anuncia o serviço `_stardewapi._tcp` na rede local e aceita conexões
+na porta 7882 sem precisar de URLACL nem rodar o jogo como administrador. Os endpoints e os dados
+do mod original não mudaram.
+
+### Como ativar
+
+1. Instale a API no PC (Stardew Valley 1.6 e a [última versão do SMAPI](https://github.com/Pathoschild/SMAPI/releases/latest); testado com a 4.5.2), em `Mods/StardewWebApi/`.
+2. Abra o jogo e **carregue um save**. A API só responde os dados do mundo com um save aberto.
+3. No celular, na mesma rede Wi-Fi: toque na engrenagem → **Sobre e ajustes** →
+   **Servidor do jogo (API)**.
+4. Toque em **Procurar na rede**. O app procura o anúncio `_stardewapi._tcp` por alguns segundos.
+5. Se não encontrar, digite o endereço do PC (por exemplo, `http://192.168.0.10:7882`) e toque em
+   **Conectar**.
+6. Deixe o **Modo automático** ligado. Ele atualiza a data e o progresso a cada minuto e quando você
+   volta para o app. A tela mostra o status e a hora da última sincronização.
+
+A busca automática usa o `NsdManager` do Android; a URL manual funciona em qualquer Android.
+A API 0.7.0 está publicada em
+https://github.com/Advansoftware/StardewWebApi/releases/tag/0.7.0 — o zip inclui um `INSTALL.md`
+com os links e os caminhos de instalação. O app 1.2.0 está em
+https://github.com/Advansoftware/Standey-valey/releases/tag/v1.2.0.
+
+### O que sincroniza
+
+- **Data do jogo**: estação, dia, clima e nome da fazenda vêm de `/api/v1/world` e atualizam
+  a data que o app acompanha.
+- **Mochila**: os itens de `/api/v1/players/main/inventory` marcam automaticamente fichas de
+  **peixes, coletáveis, minerais, culinária e ferramentas** que estão com você.
+- **Amizades**: quem está em `/api/v1/players/main` com o coração máximo (10, ou 14 para cônjuge)
+  tem a ficha de aldeão marcada.
+
+A sincronização **nunca desmarca** o que você marcou à mão. Ela só acrescenta progresso. Se a API
+ficar indisponível, o app segue com os dados offline e as marcações manuais intactas.
+
+### O que continua manual
+
+A API não expõe histórico nem eventos do save, então estas coisas continuam sendo marcadas por você:
+
+- peixes que você já pescou e não estão mais na mochila (não há histórico de pesca);
+- "já plantei" e histórico de colheitas;
+- museu e doações ("já doei");
+- monstros derrotados ("já derrotei");
+- pacotes do Centro Comunitário concluídos;
+- qualquer ficha que você queira marcar sem ter o item na mochila.
+
+### Requisitos e rede
+
+- Jogo aberto com um save carregado.
+- Stardew Web API 0.7.0 instalada no PC.
+- Celular e PC na mesma rede local. Redes de convidados com isolamento de clientes e VPNs podem
+  impedir a descoberta e a conexão.
+- Porta **7882** liberada no firewall do PC. No Windows, permita o acesso em redes privadas quando o
+  sistema perguntar.
+- Não precisa de administrador nem de URLACL: o fork encaminha a porta 7882 da rede local para o
+  servidor que escuta em `localhost`.
+- No Android, o app usa HTTP local (`usesCleartextTraffic`) para falar com a API.
+
+### Privacidade e offline
+
+A conexão é direta entre o celular e o seu PC, dentro da sua rede. Não há conta, nuvem nem envio de
+dados de jogo para a internet. O tráfego é HTTP simples, sem TLS, e a API fica acessível a quem
+estiver na mesma rede: use em rede confiável e não exponha a porta 7882 na internet. Sem a API, ou
+com o jogo fechado, o app abre e funciona normalmente com o conteúdo embutido.
 
 ## IA local: como funciona
 
@@ -77,13 +150,15 @@ com verificação automática e manual em cada uma.
   perguntas naturais ("me explique sobre pinheiro", "vantagens de plantar um pinheiro").
 - **Prompt e chat testados**: testes garantem que o prompt pede utilidade, preço e prós/contras, e que o chat
   não mostra asteriscos literais.
-- **QA no emulador**: cada tela foi aberta no Pixel 7 API 35, com capturas e correções de layout e reatividade.
+- **QA no emulador e no celular**: cada tela foi aberta no Pixel 7 API 35 e o fluxo da API foi testado
+  em um Samsung SM-G781B físico, na mesma rede do PC, com capturas e correções de layout e reatividade.
+  A skill `.opencode/skills/android-phone-test` guarda o passo a passo do ADB sem fio.
 - **Registro de decisões**: `PROGRESSO.md` e `HANDOFF.md` guardam o estado, os comandos e as armadilhas
   (por exemplo: `.litertlm` não roda no emulador x86_64; é preciso testar a busca nele).
 - **Builds otimizados**: Gradle com 10 GB de heap, cache, configuração sob demanda e 16 workers, para usar
   a máquina de 16 núcleos.
 
-Todo o desenvolvimento contou com esse modelo gratuito; o app em si não usa API paga nem manda dados para fora.
+Todo o desenvolvimento contou com esse modelo gratuito; o app em si não usa API paga nem manda dados para a internet.
 
 ## Rodando
 
@@ -96,10 +171,16 @@ flutter pub get
 flutter run
 ```
 
-Pra gerar o APK: `flutter build apk --release --target-platform android-arm64`.
-O `codemagic.yaml` faz isso no Codemagic.
+A API não é necessária para rodar o app. Se for mexer nela, o submódulo vem junto com
+`git submodule update --init --recursive`; os comandos de build estão no `HANDOFF.md`.
 
-Testes: `flutter test` (30 testes que percorrem todas as telas, o mapa, a busca e os guias) e `flutter analyze`.
+Pra gerar o APK: `flutter build apk --release --target-platform android-arm64`.
+O build é local; o GitHub Actions do fork não é usado.
+
+Testes: `flutter test` (37 testes que percorrem as telas, o mapa, a busca, os guias e a API) e `flutter analyze`.
+
+Para testar no celular físico via ADB sem fio, use a skill
+`.opencode/skills/android-phone-test` (passo a passo e helper `phone.sh`).
 
 ## De onde vêm os dados
 
@@ -124,6 +205,8 @@ python3 tools/scrape_wiki.py       # gera assets/wiki/pages.json.gz e assets/dat
 ## Pastas
 
 - `lib/`: o app (telas, busca, IA, tema)
+- `lib/game_api.dart`: cliente e sincronização com a Stardew Web API (opcional)
+- `StardewWebApi/`: submódulo com o fork da API do jogo (mDNS + porta 7882)
 - `assets/`: JSON, sprites do jogo e a wiki offline
 - `tools/seed/`: scripts que geram o conteúdo
 - `tools/scrape_wiki.py`: baixa a wiki em português
@@ -134,4 +217,7 @@ python3 tools/scrape_wiki.py       # gera assets/wiki/pages.json.gz e assets/dat
 
 Stardew Valley e a arte do jogo são de ConcernedApe; os sprites estão aqui só como guia de fã.
 O texto de referência vem da [wiki](https://pt.stardewvalleywiki.com) (CC BY-NC-SA 3.0).
+A [Stardew Web API](https://github.com/zunderscore/StardewWebApi) é de zunderscore e contribuidores
+(licença MIT); o fork com descoberta local é o
+[Advansoftware/StardewWebApi](https://github.com/Advansoftware/StardewWebApi).
 App por Bruno Antunes, Advansoftware.

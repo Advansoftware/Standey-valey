@@ -16,6 +16,10 @@ class Store extends ChangeNotifier {
   bool aiDownloading;
   String aiModelUrl;
   String aiModelId;
+  String apiUrl;
+  String apiName;
+  bool apiAuto;
+  int apiLastSyncMs;
 
   Store._(this._p)
       : favorites = (_p.getStringList('fav') ?? const <String>[]).toSet(),
@@ -27,7 +31,11 @@ class Store extends ChangeNotifier {
         aiModelInstalled = _p.getBool('aiok') ?? false,
         aiDownloading = _p.getBool('aidl') ?? false,
         aiModelUrl = _p.getString('aiurl') ?? '',
-        aiModelId = _p.getString('aimodel') ?? defaultAiModel.id;
+        aiModelId = _p.getString('aimodel') ?? defaultAiModel.id,
+        apiUrl = _p.getString('apiurl') ?? '',
+        apiName = _p.getString('apiname') ?? '',
+        apiAuto = _p.getBool('apiauto') ?? true,
+        apiLastSyncMs = _p.getInt('apilast') ?? 0;
 
   /// Cria o estado a partir de preferências já carregadas (usado nos testes).
   factory Store.withPrefs(SharedPreferences p) => Store._(p);
@@ -119,6 +127,44 @@ class Store extends ChangeNotifier {
     aiModelId = v;
     _p.setString('aimodel', v);
     notifyListeners();
+  }
+
+  void setApiUrl(String v) {
+    apiUrl = v;
+    _p.setString('apiurl', v);
+    notifyListeners();
+  }
+
+  void setApiName(String v) {
+    apiName = v;
+    _p.setString('apiname', v);
+    notifyListeners();
+  }
+
+  void setApiAuto(bool v) {
+    apiAuto = v;
+    _p.setBool('apiauto', v);
+    notifyListeners();
+  }
+
+  void setApiLastSync(DateTime? when) {
+    apiLastSyncMs = when?.millisecondsSinceEpoch ?? 0;
+    _p.setInt('apilast', apiLastSyncMs);
+    notifyListeners();
+  }
+
+  /// Marca várias fichas de uma vez (sincronização com a API). Nunca desmarca
+  /// nada: o progresso manual do jogador é preservado.
+  int addCollected(Iterable<String> ids) {
+    var added = 0;
+    for (final id in ids) {
+      if (collected.add(id)) added++;
+    }
+    if (added > 0) {
+      _p.setStringList('col', collected.toList());
+      notifyListeners();
+    }
+    return added;
   }
 
   void resetProgress() {

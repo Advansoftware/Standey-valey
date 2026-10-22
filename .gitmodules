@@ -1,0 +1,3 @@
+[submodule "StardewWebApi"]
+	path = StardewWebApi
+	url = https://github.com/Advansoftware/StardewWebApi.git

@@ -3,6 +3,71 @@
 Registro de progresso da sessão (continuação do HANDOFF.md).
 Atualizado a cada etapa concluída — serve de rede de segurança se algo falhar.
 
+## Sessão 5 — Stardew Web API (v1.2.0 concluída)
+
+| Etapa | Situação |
+|---|---|
+| Submódulo `StardewWebApi/` no fork `Advansoftware/StardewWebApi` | ✅ |
+| API 0.7.0: anúncio mDNS/DNS-SD do serviço `_stardewapi._tcp` | ✅ código e release |
+| API 0.7.0: encaminhador TCP para a porta 7882 sem URLACL/admin | ✅ código e release |
+| Endpoints e dados existentes da API | ✅ sem mudanças |
+| App: card "Servidor do jogo (API)" em Sobre e ajustes | ✅ |
+| Descoberta automática na rede (`NsdManager` nativo no Android) | ✅ testada no SM-G781B via mDNS |
+| URL manual, conectar/desconectar, modo automático e último sync | ✅ |
+| Sincronização de data, inventário e amizades | ✅ testada em aparelho com API mock; save real ainda recomendado |
+| `flutter analyze` / `flutter test` | ✅ limpo; 37 testes passando (7 novos da API) |
+| Commit e release 0.7.0 do fork da API | ✅ release publicada com zip e `INSTALL.md` |
+| Teste em aparelho físico na mesma rede | ✅ descoberta, conexão, sync, timer de 60 s e offline |
+| Release do app 1.2.0+3 | ✅ publicada com APK arm64 |
+
+### O que entrou nesta etapa
+
+- **API como submódulo**: `StardewWebApi/` aponta para o fork
+  https://github.com/Advansoftware/StardewWebApi (original de zunderscore, MIT). A versão do
+  manifesto é **0.7.0**; os endpoints e os dados existentes não mudaram.
+- **Descoberta local**: a API anuncia `_stardewapi._tcp` via mDNS/DNS-SD e um encaminhador TCP expõe
+  o servidor de `localhost:7882` para a rede local, sem URLACL e sem rodar o jogo como administrador.
+- **Card no app**: "Servidor do jogo (API)" em Sobre e ajustes, com busca automática na rede, campo de
+  URL manual, conectar/desconectar, modo automático e status da última sincronização.
+- **Sincronização só com o que a API expõe**: `/api/v1/world` (data), `/api/v1/players/main/inventory`
+  (mochila) e `/api/v1/players/main` (amizades). Marca fichas de peixes, coletáveis, minerais,
+  culinária e ferramentas que estão na mochila, e aldeões com amizade máxima.
+- **Nunca desmarca**: a sincronização só acrescenta progresso; marcações manuais continuam.
+- **Offline preservado**: o app abre e funciona normalmente sem a API ou com o jogo fechado.
+- **Créditos**: Stardew Web API (zunderscore e contribuidores, MIT) e o fork do Guia do Vale no
+  README e na tela Sobre.
+
+### O que falta
+
+1. Validar a sincronização com um **save real** do Stardew Valley no PC (o teste em aparelho usou uma
+   API mock com o mesmo formato; os endpoints reais e o firewall do PC ainda devem ser conferidos).
+2. Opcional: repetir o teste em uma rede com isolamento de clientes para documentar o fallback manual.
+
+### Releases publicadas
+
+- **API 0.7.0** — https://github.com/Advansoftware/StardewWebApi/releases/tag/0.7.0
+  - Asset: `StardewWebApi-0.7.0.zip`
+  - SHA-256: `fb535d823751e17320164f63d13b67ad3bf276a62920d008b503a47ccd25839b`
+  - O zip inclui `INSTALL.md` com requisitos, caminhos e link da última versão do SMAPI.
+- **App 1.2.0+3** — https://github.com/Advansoftware/Standey-valey/releases/tag/v1.2.0
+  - Asset: `guia-do-vale-1.2.0.apk` (arm64)
+  - SHA-256: `a3973894a3d14ee5b749d7e5f0091603072fa99449b159c48d1e8a747da8c57b`
+
+### Arquivos desta etapa
+
+- `lib/game_api.dart` — cliente HTTP, descoberta, sincronização e regras de marcação automática.
+- `lib/screens/about_screen.dart` — card "Servidor do jogo (API)" e créditos.
+- `lib/store.dart` — URL, nome, modo automático e data da última sincronização.
+- `lib/main.dart` e `lib/app_scope.dart` — injeção do `GameApi` no app.
+- `android/app/src/main/kotlin/br/com/advansoftware/stardew_guia/MainActivity.kt` — canal
+  `guia_do_vale/nsd` com `NsdManager` (serviço `_stardewapi._tcp`).
+- `android/app/src/main/AndroidManifest.xml` — `usesCleartextTraffic` para HTTP na rede local.
+- `test/app_test.dart` — ajuste do teste da tela Sobre.
+- `test/game_api_test.dart` — 7 testes do cliente, descoberta e regras de marcação.
+- `.opencode/skills/android-phone-test/` — skill e helper para conectar, instalar e testar no celular
+  físico via ADB/depuração sem fio.
+- `StardewWebApi/` — submódulo do fork (mDNS, encaminhador TCP e manifest 0.7.0).
+
 ## Sessão 4 — mapa, lavoura e v1.1.0
 
 | Etapa | Situação |

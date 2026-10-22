@@ -5,6 +5,7 @@ import 'ai_models.dart';
 import 'ai_service.dart';
 import 'app_scope.dart';
 import 'app_theme.dart';
+import 'game_api.dart';
 import 'repository.dart';
 import 'screens/shell.dart';
 import 'search.dart';
@@ -16,8 +17,9 @@ Future<void> main() async {
   final repo = await Repository.load();
   final search = SearchService(repo);
   final ai = AiService();
+  final api = GameApi(store, repo);
 
-  runApp(StardewGuiaApp(store: store, repo: repo, search: search, ai: ai));
+  runApp(StardewGuiaApp(store: store, repo: repo, search: search, ai: ai, api: api));
 
   // Em segundo plano: motor de IA local e wiki offline (se existir).
   ai.init().then((_) async {
@@ -31,6 +33,7 @@ Future<void> main() async {
     store.setAiDownloading(false);
     if (ok) store.setAiInstalled(true);
   });
+  api.init();
   WidgetsBinding.instance.addPostFrameCallback((_) => search.loadWiki());
 }
 
@@ -39,6 +42,7 @@ class StardewGuiaApp extends StatelessWidget {
   final Repository repo;
   final SearchService search;
   final AiService ai;
+  final GameApi api;
 
   const StardewGuiaApp({
     super.key,
@@ -46,6 +50,7 @@ class StardewGuiaApp extends StatelessWidget {
     required this.repo,
     required this.search,
     required this.ai,
+    required this.api,
   });
 
   @override
@@ -55,6 +60,7 @@ class StardewGuiaApp extends StatelessWidget {
       repo: repo,
       search: search,
       ai: ai,
+      api: api,
       child: ListenableBuilder(
         listenable: store,
         builder: (context, _) => MaterialApp(

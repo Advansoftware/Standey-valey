@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import 'ai_service.dart';
+import 'game_api.dart';
 import 'repository.dart';
 import 'search.dart';
 import 'store.dart';
@@ -10,6 +11,7 @@ class AppScope extends InheritedWidget {
   final Repository repo;
   final SearchService search;
   final AiService ai;
+  final GameApi api;
 
   const AppScope({
     super.key,
@@ -17,6 +19,7 @@ class AppScope extends InheritedWidget {
     required this.repo,
     required this.search,
     required this.ai,
+    required this.api,
     required super.child,
   });
 
