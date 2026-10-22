@@ -2,7 +2,7 @@
 
 > Arquivo de continuação para qualquer IA/pessoa que pegar o projeto. **Atualize este arquivo
 > a cada etapa concluída** (marque `[x]`, ajuste "Próximos passos") e faça commit + push.
-> Última atualização: 2026-10-22 (sessão 6 — tela Meu Status imersiva; app 1.3.0+4 em preparação para release).
+> Última atualização: 2026-10-22 (sessão 6 — tela Meu Status imersiva; app 1.3.0+4 publicado).
 
 ## 1. Objetivo (pedido do dono, Bruno)
 
@@ -166,7 +166,7 @@ codemagic.yaml                  build do APK no CI (não usado no fork)
 - [x] **P. Meu Status imersivo** — item central na barra (só com API conectada), tela cheia em
       landscape/portrait, mapa com pin, vitais, missões, mochila, habilidades, amizades e conquistas;
       próximo passo local e IA somente no botão AJUDA, com resposta em cartões.
-- [ ] **Q. Release v1.3.0** — publicar o APK arm64 com a tela Meu Status.
+- [x] **Q. Release v1.3.0** — APK arm64 publicado com a tela Meu Status.
 
 ## 7. Integração com a Stardew Web API (sessão 5)
 
@@ -296,6 +296,7 @@ pareamento; a de conexão é a mostrada na tela principal de depuração sem fio
 
 | Versão | Link | Asset | SHA-256 |
 |---|---|---|---|
+| App 1.3.0+4 | https://github.com/Advansoftware/Standey-valey/releases/tag/v1.3.0 | `guia-do-vale-1.3.0.apk` (arm64) | `df81e2cc9c88308b47bf7083b4fa0bd3d42d1c3d3136806f290fbca5accd7bbf` |
 | App 1.2.0+3 | https://github.com/Advansoftware/Standey-valey/releases/tag/v1.2.0 | `guia-do-vale-1.2.0.apk` (arm64) | `a3973894a3d14ee5b749d7e5f0091603072fa99449b159c48d1e8a747da8c57b` |
 | API 0.7.0 | https://github.com/Advansoftware/StardewWebApi/releases/tag/0.7.0 | `StardewWebApi-0.7.0.zip` | `fb535d823751e17320164f63d13b67ad3bf276a62920d008b503a47ccd25839b` |
 

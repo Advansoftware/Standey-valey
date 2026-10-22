@@ -102,6 +102,9 @@ Atualizado a cada etapa concluída — serve de rede de segurança se algo falha
 
 ### Releases publicadas
 
+- **App 1.3.0+4** — https://github.com/Advansoftware/Standey-valey/releases/tag/v1.3.0
+  - Asset: `guia-do-vale-1.3.0.apk` (arm64)
+  - SHA-256: `df81e2cc9c88308b47bf7083b4fa0bd3d42d1c3d3136806f290fbca5accd7bbf`
 - **API 0.7.0** — https://github.com/Advansoftware/StardewWebApi/releases/tag/0.7.0
   - Asset: `StardewWebApi-0.7.0.zip`
   - SHA-256: `fb535d823751e17320164f63d13b67ad3bf276a62920d008b503a47ccd25839b`
