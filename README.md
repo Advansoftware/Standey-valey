@@ -1,61 +1,64 @@
-# 🌾 Guia do Vale
+# Guia do Vale
 
-Enciclopédia de **Stardew Valley** em **português do Brasil**, no estilo Pokédex, para Android.
-Pensada para quem começou a jogar hoje e quer saber *o que é o quê* e *como progredir*.
+Um app de Android com tudo sobre Stardew Valley, em português. Comecei a jogar e vivia abrindo a wiki
+no navegador pra descobrir qual árvore era qual, o que plantar na primavera ou o que a Abigail gosta de ganhar.
+Resolvi juntar isso num app só, que funciona sem internet.
 
-> Projeto de fã, sem fins comerciais. Não é afiliado à ConcernedApe.
+Projeto de fã, sem fins comerciais, sem ligação com a ConcernedApe.
 
-## ✨ Recursos
+## O que tem
 
-- **563 entradas em 16 categorias:** guia do iniciante, culturas, peixes, moradores, festivais, Centro Comunitário, coletáveis, habilidades, animais, árvores, minerais, monstros, culinária, artefatos, construções e ferramentas.
-- **Sprites reais do jogo** em todas as entradas, com galeria de fases (sementes e estágios de crescimento das culturas e árvores). Dá para distinguir carvalho, bordo e pinheiro pela semente e pelo desenho.
-- **100% offline:** dados e imagens ficam dentro do app.
-- **Assistente com IA local (RAG):** busca no conteúdo do app (BM25 no próprio aparelho) e, se você baixar o modelo uma vez, gera as respostas com um LLM que roda no celular. Sem o modelo, mostra os trechos mais parecidos com a pergunta.
-- Calendário com aniversários e festivais, favoritos, checklists (pacotes do Centro Comunitário), progresso por categoria e tema claro/escuro.
+São 563 entradas em 16 categorias: guia do iniciante, culturas, peixes, moradores, festivais, Centro Comunitário,
+coletáveis, habilidades, animais, árvores, minerais, monstros, culinária, artefatos, construções e ferramentas.
 
-## 🧱 Tecnologia
+Todas têm o desenho do jogo. Nas árvores e culturas dá pra ver a semente e cada fase de crescimento, então
+carvalho, bordo e pinheiro deixam de ser um mistério (bolota, semente de bordo e pinha, respectivamente).
 
-Flutter (Material 3), `shared_preferences`, `flutter_edge_ai` + LiteRT-LM (modelo Qwen3 0.6B). Android arm64, minSdk 30.
+Também tem calendário com aniversários e festivais, favoritos, checklist dos pacotes do Centro Comunitário
+e tema claro e escuro.
 
-## 🛠️ Como rodar
+Existe ainda um assistente: você pergunta algo ("o que faço no primeiro dia?") e ele procura no conteúdo do app.
+Se você baixar um modelo de IA uma única vez (uns 350 MB), ele passa a escrever a resposta no próprio celular.
+Sem o modelo, mostra os trechos mais parecidos com a pergunta.
 
-Pré-requisito: [Flutter](https://docs.flutter.dev/get-started/install) estável.
+## Rodando
+
+Precisa do Flutter instalado.
 
 ```bash
-bash tools/setup_android.sh      # gera a pasta android/ (minSdk 30, permissão de internet)
+bash tools/setup_android.sh   # cria a pasta android/ (minSdk 30, permissão de internet)
 flutter pub get
-flutter run                      # ou:
-flutter build apk --release --target-platform android-arm64
+flutter run
 ```
 
-O repositório também traz `codemagic.yaml` para gerar o APK no [Codemagic](https://codemagic.io).
+Pra gerar o APK: `flutter build apk --release --target-platform android-arm64`.
+O `codemagic.yaml` faz isso no Codemagic.
 
-## 🗂️ Regenerar os dados
+## De onde vêm os dados
 
-Os dados e os sprites vêm do pacote npm [`stardew-valley-data`](https://www.npmjs.com/package/stardew-valley-data) (MIT).
+Os dados e os sprites vêm do pacote npm [stardew-valley-data](https://www.npmjs.com/package/stardew-valley-data) (MIT).
+Os scripts em `tools/seed` traduzem os nomes e geram os JSON que o app lê:
 
 ```bash
-bash tools/seed/fetch_dataset.sh   # baixa o pacote para tools/seed/.cache
-python3 tools/seed/build_seed.py   # gera assets/data/*.json e copia os sprites para assets/img/
-python3 tools/seed/verify.py       # confere imagens ausentes e ids duplicados
+bash tools/seed/fetch_dataset.sh
+python3 tools/seed/build_seed.py
+python3 tools/seed/verify.py
 ```
 
-## 📁 Estrutura
+## Pastas
 
-```
-lib/         app Flutter (telas, busca BM25, serviço de IA, tema)
-assets/      data/ (JSON), img/ (sprites)
-tools/seed/  geradores de conteúdo e tradução de nomes
-HANDOFF.md   estado atual e pendências do projeto
-```
+- `lib/`: o app (telas, busca, IA, tema)
+- `assets/`: JSON e imagens
+- `tools/seed/`: scripts que geram o conteúdo
+- `HANDOFF.md`: notas sobre o que falta fazer
 
-## ⚠️ Status
+## Estado atual
 
-Em desenvolvimento. O código ainda precisa passar por `flutter analyze` e testes em aparelho. Veja as pendências no [HANDOFF.md](HANDOFF.md).
+Ainda em construção. O código não passou por `flutter analyze` nem foi testado num aparelho, então pode ter erro.
+O que falta está no `HANDOFF.md`.
 
-## 📜 Créditos e licenças
+## Créditos
 
-- Stardew Valley e toda a arte do jogo © ConcernedApe. Os sprites são usados aqui apenas em um guia de fã, sem fins comerciais.
-- Dados e imagens extraídos do pacote `stardew-valley-data` (MIT).
-- Referência de conteúdo: [Stardew Valley Wiki](https://pt.stardewvalleywiki.com) (CC BY-NC-SA 3.0).
-- O código do app é de Bruno Antunes (Advansoftware).
+Stardew Valley e a arte do jogo são de ConcernedApe; os sprites estão aqui só como guia de fã.
+O texto de referência vem da [wiki](https://pt.stardewvalleywiki.com) (CC BY-NC-SA 3.0).
+App por Bruno Antunes, Advansoftware.
