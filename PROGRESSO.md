@@ -3,6 +3,35 @@
 Registro de progresso da sessão (continuação do HANDOFF.md).
 Atualizado a cada etapa concluída — serve de rede de segurança se algo falhar.
 
+## Sessão 4 — mapa, lavoura e v1.1.0
+
+| Etapa | Situação |
+|---|---|
+| Conteúdo: 565 entradas, 16 categorias, todas com imagem | ✅ |
+| Guia `Lavouras sem mistério` (rega, espantalho, treliça, fim de estação) | ✅ |
+| Mapa do Vale com imagem real, 16 lugares, pinos por região e zoom | ✅ |
+| Ficha do lugar com o que tem, como chegar, dica e atalhos | ✅ |
+| Categorias abrem em lista por padrão; botão de grade continua | ✅ |
+| Chat da IA renderiza Markdown sem asteriscos literais | ✅ |
+| Download da IA em segundo plano, com retomada ao abrir | ✅ |
+| Builds com 10 GB de heap, cache e 16 workers | ✅ |
+| README com a seção de IA local e de como o projeto foi feito | ✅ |
+| `flutter analyze` / `flutter test` | ✅ 30 testes passando |
+| Release `v1.1.0` no GitHub com APK arm64 | ⏳ |
+
+### O que entrou nesta versão
+
+- **Mapa do Vale**: norte/sul, rosa dos ventos, filtros por região/iniciante, zoom e uma ficha curta
+  para cada lugar. O mapa usa a imagem da wiki e aponta para as páginas já embutidas no app.
+- **Guia de lavoura**: extraído das dúvidas da página "A Fazenda" sem repetir as fichas de culturas;
+  explica o que gasta energia, quando a planta morre, corvos, espantalho, treliça, árvores frutíferas,
+  aspersores e fertilizante.
+- **Lista por padrão**: ao abrir Moradores, Culturas etc., a lista vem primeiro; o botão de grade
+  continua no topo.
+- **Chat formatado**: `MarkdownLite` próprio para negrito, itálico, código e listas.
+- **README transparente**: documenta as técnicas de IA (RAG local, BM25, prompt, fallback e Markdown),
+  o modelo gratuito usado no desenvolvimento e o processo de dados/testes/QA.
+
 ## Sessão 3 — do zero ao app publicado
 
 | Etapa | Situação |

@@ -8,8 +8,10 @@ Projeto de fã, sem fins comerciais, sem ligação com a ConcernedApe.
 
 ## O que tem
 
-São 563 entradas em 16 categorias: guia do iniciante, culturas, peixes, moradores, festivais, Centro Comunitário,
+São 565 entradas em 16 categorias: guia do iniciante, culturas, peixes, moradores, festivais, Centro Comunitário,
 coletáveis, habilidades, animais, árvores, minerais, monstros, culinária, artefatos, construções e ferramentas.
+As entradas de guia incluem um roteiro por estação, um guia de árvores e um guia de lavoura que explica rega,
+espantalho, treliça e o fim da estação sem repetir as fichas de culturas.
 
 Todas têm o desenho do jogo. Nas árvores e culturas dá pra ver a semente e cada fase de crescimento, então
 carvalho, bordo e pinheiro deixam de ser um mistério (bolota, semente de bordo e pinha, respectivamente).
@@ -20,6 +22,8 @@ Também tem:
 - **Wiki offline**: 1.300 páginas da wiki em português, dentro do app, para ler sem internet.
 - **Calendário** com aniversários e festivais, e a data do jogo que você está acompanhando.
 - **Favoritos** e **progresso**: marque o que já pescou, plantou ou entregou.
+- **Mapa do Vale** com orientação norte/sul, pinos por região, zoom e uma ficha curta de cada lugar
+  (fazenda, vila, montanha, minas, praia, floresta, deserto e Ilha Gengibre), com atalho para a wiki offline.
 - **Checklist** dos pacotes do Centro Comunitário, com barra de progresso.
 - **Tema claro e escuro**, seguindo o sistema.
 - **Assistente com IA local**: você pergunta ("o que faço no primeiro dia?") e ele procura no conteúdo do app.
@@ -41,6 +45,46 @@ O assistente deixa você escolher o modelo (o botão fica na aba Assistente):
 
 Também dá para colar o endereço de qualquer outro arquivo `.litertlm`.
 
+## IA local: como funciona
+
+O assistente não manda a pergunta para nenhum servidor. Ele combina técnicas simples e verificáveis:
+
+- **RAG local**: a pergunta vira uma busca BM25 no conteúdo do app (fichas + cerca de 9.900 trechos da wiki).
+  Os melhores trechos entram no prompt como contexto, com o título e a categoria de cada ficha.
+- **Prompt com papel e formato**: o modelo recebe instruções para responder em português, dizer para que serve,
+  quanto rende e prós/contras quando esses dados existirem, usar listas com hífen e **negrito**, e não inventar
+  o que não está no contexto.
+- **Inferência no aparelho**: o arquivo `.litertlm` roda via `flutter_edge_ai`; o download é único e pode
+  continuar em segundo plano com notificação. Sem modelo instalado, o app não trava: mostra os trechos mais
+  parecidos com a pergunta (fallback extrativo).
+- **Pós-processamento**: a resposta é limpa de tokens especiais e renderizada por um Markdown leve feito no
+  projeto (negrito, itálico, código e listas), sem pacote externo e sem mostrar `*asteriscos*` literais.
+
+O modelo padrão é o **Gemma 4 E4B**. A aba Assistente permite trocar por modelos menores ou colar outra URL.
+
+## Como o projeto foi construído (com IA)
+
+O app, os scripts de dados e os testes foram desenvolvidos em pair programming com um modelo **gratuito** do
+OpenCode — **DeepSeek V4.1 Flash Free** —, com o autor definindo os requisitos, revisando cada mudança e
+validando o resultado no emulador. Não foi "pedir um app pronto": o trabalho foi dividido em etapas pequenas,
+com verificação automática e manual em cada uma.
+
+- **Pipeline de dados reproduzível**: `fetch_dataset.sh` → `build_seed.py` → `verify.py`, com checagem de IDs,
+  imagens e campos obrigatórios. O mesmo script gera as 16 categorias e as fichas de guia.
+- **Wiki offline própria**: scraper em Python com `curl` e User-Agent de navegador, corpus dividido em trechos
+  para a busca. O app não depende da wiki estar no ar.
+- **Busca testável**: BM25 com stop words em português, boost de título e expansão por prefixo. Os testes cobrem
+  perguntas naturais ("me explique sobre pinheiro", "vantagens de plantar um pinheiro").
+- **Prompt e chat testados**: testes garantem que o prompt pede utilidade, preço e prós/contras, e que o chat
+  não mostra asteriscos literais.
+- **QA no emulador**: cada tela foi aberta no Pixel 7 API 35, com capturas e correções de layout e reatividade.
+- **Registro de decisões**: `PROGRESSO.md` e `HANDOFF.md` guardam o estado, os comandos e as armadilhas
+  (por exemplo: `.litertlm` não roda no emulador x86_64; é preciso testar a busca nele).
+- **Builds otimizados**: Gradle com 10 GB de heap, cache, configuração sob demanda e 16 workers, para usar
+  a máquina de 16 núcleos.
+
+Todo o desenvolvimento contou com esse modelo gratuito; o app em si não usa API paga nem manda dados para fora.
+
 ## Rodando
 
 Precisa do Flutter 3.44+ (Dart 3.12+) instalado.
@@ -55,7 +99,7 @@ flutter run
 Pra gerar o APK: `flutter build apk --release --target-platform android-arm64`.
 O `codemagic.yaml` faz isso no Codemagic.
 
-Testes: `flutter test` (20 testes que percorrem todas as telas) e `flutter analyze`.
+Testes: `flutter test` (30 testes que percorrem todas as telas, o mapa, a busca e os guias) e `flutter analyze`.
 
 ## De onde vêm os dados
 
@@ -69,6 +113,8 @@ python3 tools/seed/verify.py
 ```
 
 O texto de referência vem da [wiki em português](https://pt.stardewvalleywiki.com) (CC BY-NC-SA 3.0).
+O mapa do vale em `assets/img/map_valley.png` veio da wiki em inglês (mesma licença) e é usado só para
+orientação; os pinos e os textos curtos de cada lugar são do app.
 O `tools/scrape_wiki.py` baixa as páginas e monta o corpus offline que o app lê:
 
 ```bash

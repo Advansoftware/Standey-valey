@@ -2,7 +2,7 @@
 
 > Arquivo de continuação para qualquer IA/pessoa que pegar o projeto. **Atualize este arquivo
 > a cada etapa concluída** (marque `[x]`, ajuste "Próximos passos") e faça commit + push.
-> Última atualização: 2026-10-22 (sessão 3 — app completo, testado e publicado na v1.0.0).
+> Última atualização: 2026-10-22 (sessão 4 — mapa do vale, guia de lavoura e release v1.1.0).
 
 ## 1. Objetivo (pedido do dono, Bruno)
 
@@ -21,21 +21,22 @@ Requisitos explícitos do dono:
   arquivos); **não perguntar nada**, decidir e seguir; **deixar o app pronto e testado**; **publicar a
   release v1.0.0 no GitHub** com a descrição do que tem na primeira versão.
 
-## 2. Estado atual (sessão 3)
+## 2. Estado atual (sessão 4)
 
 Tudo abaixo já está **funcionando e testado**:
 
 | Item | Situação |
 |---|---|
 | `flutter analyze` | ✅ sem avisos |
-| `flutter test` | ✅ 20 testes (todas as telas) + 2 da busca |
+| `flutter test` | ✅ 30 testes (telas, mapa, busca e guias) |
 | `flutter build apk --release --target-platform android-arm64` | ✅ gera APK instalável |
 | Emulador Android (Pixel 7 API 35) | ✅ app instalado e testado a mão |
 | Pasta `android/` | ✅ versionada (minSdk 30, permissão INTERNET, ícone próprio, splash) |
-| Conteúdo | ✅ 563 entradas, 16 categorias, **todas com imagem do jogo** |
+| Conteúdo | ✅ 565 entradas, 16 categorias, **todas com imagem do jogo** |
 | Wiki offline | ✅ ~1.300 páginas da wiki PT dentro do app (`assets/wiki/pages.json.gz`) |
+| Mapa do Vale | ✅ 16 lugares, norte/sul, zoom, filtros e ficha por lugar |
 | IA local | ✅ 6 modelos na tela do Assistente; **Gemma 4 E4B** como padrão (RAM 8 GB+) |
-| GitHub | ✅ `main` atualizado + release `v1.0.0` com o APK |
+| GitHub | ✅ `main` atualizado + release `v1.1.0` com o APK |
 
 Detalhe do ambiente: o sandbox **tem** Flutter 3.47.6 (snap), Dart 3.13.5, Android SDK 36,
 emulador com KVM, Python 3, node/npm, PIL e ImageMagick. A **API da wiki** (`api.php`) é bloqueada pelo
@@ -83,13 +84,16 @@ lib/ai_models.dart              catálogo dos 6 modelos de IA (nome, tamanho, RA
 lib/app_theme.dart              tema "pergaminho" claro/escuro + parchment() + widget Parchment
 lib/app_scope.dart              InheritedWidget com store/repo/search/ai
 lib/widgets/common.dart         EntryImage, DexCard, EntryTile, TagPill, SectionTitle
+lib/widgets/markdown_lite.dart  Markdown leve para o chat (negrito, itálico, listas, código)
 lib/widgets/assistant_*.dart    cartão de download do modelo e balões do chat
+lib/map_data.dart               16 lugares do mapa, regiões, coordenadas e textos curtos
 lib/screens/                    home, encyclopedia/category, detail, calendar, search,
-                                assistant, favorites, about, shell (NavigationBar)
+                                map, assistant, favorites, about, shell (NavigationBar)
 assets/data/*.json              16 categorias + index.json + names_pt.json
-assets/img/                     920+ sprites do jogo (nome achatado)
+assets/img/                     920+ sprites do jogo (nome achatado) + map_valley.png
 assets/wiki/pages.json.gz       corpus da wiki PT para o RAG
-tools/seed/                     geradores de conteúdo (data_core, data_guia, enrich, pt_names…)
+tools/seed/                     geradores de conteúdo (data_core, data_guia, enrich, utility…)
+tools/seed/utility.py           gera "Utilidade" e preços nas fichas
 tools/scrape_wiki.py            baixa a wiki PT
 tools/make_icon.py              gera o ícone do app
 tools/setup_android*.sh         preparação do projeto Android
@@ -108,14 +112,18 @@ codemagic.yaml                  build do APK no CI
 
 ## 6. O que já está feito (marcar conforme for avançando)
 
-- [x] **A. Gerador v2 com imagens reais** — 16 categorias, 563 entradas, sprites do jogo, galeria de estágios.
+- [x] **A. Gerador v2 com imagens reais** — 16 categorias, 565 entradas, sprites do jogo, galeria de estágios.
 - [x] **B. Telas** — todas as telas existem, testadas e sem erros de layout.
 - [x] **C. Android + Codemagic** — `android/` versionada, `codemagic.yaml` pronto, ícone e splash próprios.
 - [x] **D. Wiki offline** — `tools/scrape_wiki.py` baixa ~1.300 páginas; o app lê e busca nelas.
-- [x] **E. Testes e README** — 20 testes de interface + 2 da busca; README reescrito.
+- [x] **E. Testes e README** — 30 testes (telas, mapa, busca e guias); README reescrito.
 - [x] **F. Revisão de conteúdo** — nomes sem tradução agora vêm da wiki; todas as entradas com imagem.
 - [x] **G. IA local com escolha de modelo** — 6 modelos, Gemma 4 E4B como padrão.
 - [x] **H. Release v1.0.0 no GitHub** — com o APK anexado e a descrição do que tem na primeira versão.
+- [x] **I. Mapa do Vale** — imagem real, 16 lugares, norte/sul, zoom, filtros e ficha com atalhos.
+- [x] **J. Guia de lavoura** — rega, espantalho, treliça, árvores frutíferas, aspersores e fim de estação.
+- [x] **K. Lista padrão e chat formatado** — categorias em lista; Markdown no chat; README com a seção de IA.
+- [x] **L. Release v1.1.0 no GitHub** — APK arm64 com mapa, guia de lavoura e correções.
 
 ## 7. Ideias para as próximas versões (opcional)
 
