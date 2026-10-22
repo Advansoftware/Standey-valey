@@ -17,7 +17,7 @@ Atualizado a cada etapa concluída — serve de rede de segurança se algo falha
 | Builds com 10 GB de heap, cache e 16 workers | ✅ |
 | README com a seção de IA local e de como o projeto foi feito | ✅ |
 | `flutter analyze` / `flutter test` | ✅ 30 testes passando |
-| Release `v1.1.0` no GitHub com APK arm64 | ⏳ |
+| Release `v1.1.0` no GitHub com APK arm64 | ✅ |
 
 ### O que entrou nesta versão
 
@@ -86,6 +86,14 @@ Atualizado a cada etapa concluída — serve de rede de segurança se algo falha
 - O APK foi baixado de volta do GitHub e conferido (mesmo md5, pacote válido).
 - Para publicar uma versão nova: subir a tag e o arquivo com
   `gh release create vX.Y.Z app-release.apk --notes-file notas.md`.
+
+## Release v1.1.0
+
+- Tag: `v1.1.0` — https://github.com/Advansoftware/Standey-valey/releases/tag/v1.1.0
+- Arquivo: `guia-do-vale-1.1.0.apk` (arm64, 69,9 MB, minSdk 30, versionCode 2).
+- SHA-256: `202fa5941e3e57ac8be146d216389ec78fec2307ce7d4c41a6d45ea5f5d4ac88`.
+- O APK foi gerado de `main` limpo, com `flutter analyze` sem avisos e 30 testes passando.
+- Notas da release: mapa do vale, guia de lavouras, lista padrão, chat formatado, IA em segundo plano.
 
 ## Revisão de textos (feita no fim da sessão)
 
