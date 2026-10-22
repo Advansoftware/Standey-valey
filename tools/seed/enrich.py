@@ -8,6 +8,7 @@ import shutil
 import unicodedata
 
 from pt_names import pt as _pt
+from pt_names import NAMES
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PKG = os.path.join(HERE, ".cache", "package")
@@ -22,7 +23,7 @@ EXTRA = {
     "Walleye": "Walleye", "Woodskip": "Woodskip", "Coral": "Coral", "Jade": "Jade", "Duggy": "Duggy",
     "Pepper Rex": "Pepper Rex", "Any Egg": "Qualquer ovo", "Any Milk": "Qualquer leite", "Any Fish": "Qualquer peixe",
     "Any Fruit": "Qualquer fruta", "Any Vegetable": "Qualquer vegetal", "Any Flower": "Qualquer flor",
-    "Oak Tree": "Carvalho", "Maple Tree": "Bordo", "Pine Tree": "Pinheiro", "Mahogany Tree": "Mogno",
+    "Oak Tree": "Carvalho", "Summer Spangle": "Flor-Miçanga", "Maple Tree": "Bordo", "Pine Tree": "Pinheiro", "Mahogany Tree": "Mogno",
     "Mushroom Tree": "Árvore de cogumelo", "Mystic Tree": "Árvore mística", "Fiddlehead Stalk": "Samambaia-gigante",
     "Palm Tree": "Palmeira", "Acorn": "Bolota", "Maple Seed": "Semente de bordo", "Pine Cone": "Pinha",
 }
@@ -30,6 +31,119 @@ STATS = {"Farming": "Agricultura", "Fishing": "Pesca", "Foraging": "Coleta", "Mi
          "Combat": "Combate", "Luck": "Sorte", "Max Energy": "Energia máx.", "Magnetism": "Magnetismo",
          "Speed": "Velocidade", "Defense": "Defesa", "Attack": "Ataque"}
 SEASON = {"spring": "Primavera", "summer": "Verão", "fall": "Outono", "winter": "Inverno"}
+
+# Frases de "onde achar" do dataset (inglês) traduzidas para PT-BR.
+# As mais longas primeiro, para as substituições não se atropelarem.
+LOC_PHRASES = [
+    ("Crates and barrels in Mines/Skull Cavern/Volcano Dungeon",
+     "caixas e barris nas Minas, Caverna da Caveira e Masmorra do Vulcão"),
+    ("Hill-top / Four Corners farm", "fazenda na Colina ou em Quatro Cantos"),
+    ("Breaking rocks in The Mines", "quebrando pedras nas Minas"),
+    ("Tilling in Mines/Skull Cavern (any floor)", "arando em qualquer andar das Minas ou da Caverna da Caveira"),
+    ("Tilling in Mines/Skull Cavern", "arando nas Minas ou na Caverna da Caveira"),
+    ("Tilling in Mines (floor 40-79)", "arando nas Minas (andares 40-79)"),
+    ("Tilling in Mines (floor 80+)", "arando nas Minas (andares 80+)"),
+    ("Tilling in Mines (floor 1-39)", "arando nas Minas (andares 1-39)"),
+    ("Prehistoric floors in Skull Cavern", "andares pré-históricos na Caverna da Caveira"),
+    ("Skull Cavern treasure rooms", "salas de tesouro da Caverna da Caveira"),
+    ("Skull Cavern (crates and barrels)", "Caverna da Caveira (caixas e barris)"),
+    ("Skull Cavern (Desert Festival only)", "Caverna da Caveira (só no Festival do Deserto)"),
+    ("Ginger Island West (beach)", "praia do oeste da Ilha Gengibre"),
+    ("Ginger Island Dig Site", "sítios de escavação da Ilha Gengibre"),
+    ("Ginger Island (dropped by enemies)", "Ilha Gengibre (soltado pelos inimigos)"),
+    ("Ginger Island (foraged)", "Ilha Gengibre (coletável)"),
+    ("Volcano Dungeon (Cinder Shard Nodes)", "Masmorra do Vulcão (veios de fragmento de brasa)"),
+    ("Coal Nodes (Quarry, Quarry Mine, Volcano Dungeon)",
+     "veios de carvão (Pedreira, Mina da Pedreira, Masmorra do Vulcão)"),
+    ("Charcoal Kiln (10 Wood → 1 Coal)", "Fornalha de Carvão (10 de Madeira → 1 de Carvão)"),
+    ("Recycling Machine (Trash or Driftwood)", "Máquina de Reciclagem (Lixo ou Madeira à Deriva)"),
+    ("Dust Sprites (50% drop, Floors 41-79)", "Fadas-de-poeira (50% de chance, andares 41-79)"),
+    ("Ghost, Frost Bat, Dust Sprite, Blue Slime drop (0.5%)",
+     "Fantasma, Morcego de gelo, Fada-de-poeira ou Gosma azul (0,5%)"),
+    ("Shadow Brute, Shadow Shaman, Spider drop (0.3%)",
+     "Bruto das sombras, Xamã das sombras ou Aranha (0,3%)"),
+    ("Magma Sprite, Magma Sparker, Magma Duggy, False Magma Cap drops",
+     "Duende de magma, Fagulha de magma, Escavador de magma ou Capa de magma falso"),
+    ("Bug, Cave Fly, Grub drop (0.5%)", "Bicho, Mosca da caverna ou Lagarta (0,5%)"),
+    ("Skeleton and Lava Lurk drops", "Esqueletos e Espreitadores de Lava"),
+    ("Most monsters (0.1%)", "a maioria dos monstros (0,1%)"),
+    ("Most Bats (0.1%)", "a maioria dos morcegos (0,1%)"),
+    ("Several monsters (0.5% each)", "vários monstros (0,5% cada)"),
+    ("Several monsters (0.5-1.5%)", "vários monstros (0,5% a 1,5%)"),
+    ("Monster drops (0.05%)", "monstros (0,05%)"),
+    ("Monster Drops", "monstros"),
+    ("Skeleton Drops", "esqueletos"),
+    ("Various dig spots (very rare)", "vários pontos de escavação (muito raro)"),
+    ("Various outdoor areas", "várias áreas externas"),
+    ("Various Events", "eventos variados"),
+    ("Special Rewards", "recompensas especiais"),
+    ("Winter Tilling", "arando no inverno"),
+    ("Stingray Fish Pond (population 7+)", "Lago de arraias (com 7 ou mais arraias)"),
+    ("Mystic Stone (Mines Floor 100+)", "Pedra mística (Minas, andar 100+)"),
+    ("Duggy drop (2%)", "Escavador de magma (2%)"),
+    ("Duggy (10%)", "Escavador de magma (10%)"),
+    ("Duggy (25%)", "Escavador de magma (25%)"),
+    ("Desert Trader (3 Omni Geodes)", "Comerciante do Deserto (3 Ômnigeodos)"),
+    ("Fishing Treasure Chests", "baús do tesouro (pescando)"),
+    ("Fishing Treasure Chest (3.1-3.4%)", "baú do tesouro (pescando, 3,1% a 3,4%)"),
+    ("Fishing Treasure Chest", "baú do tesouro (pescando)"),
+    ("Artifact Trove (3.6%)", "baú de artefatos (3,6%)"),
+    ("Artifact Spots", "pontos de artefato"),
+    ("Bones on Ginger Island", "ossos na Ilha Gengibre"),
+    ("Bone Nodes on Ginger Island", "veios de ossos na Ilha Gengibre"),
+    ("Bone Nodes (0.8%)", "veios de ossos (0,8%)"),
+    ("Amethyst Node", "veio de ametista"), ("Emerald Node", "veio de esmeralda"),
+    ("Ruby Node", "veio de rubi"), ("Topaz Node", "veio de topázio"),
+    ("Jade Node", "veio de jade"), ("Diamond Node", "veio de diamante"),
+    ("Iridium Node (4%)", "veio de irídio (4%)"),
+    ("Geodes (all types)", "geodos (todos os tipos)"),
+    ("The Mines (Floors 80-120)", "as Minas (andares 80-120)"),
+    ("The Mines (Floors 81-120)", "as Minas (andares 81-120)"),
+    ("The Mines (Floors 81-119)", "as Minas (andares 81-119)"),
+    ("The Mines (Floors 80+)", "as Minas (andares 80+)"),
+    ("The Mines (Floors 1-120)", "as Minas (andares 1-120)"),
+    ("The Mines (Floors 1-39)", "as Minas (andares 1-39)"),
+    ("The Mines (Floors 1-29)", "as Minas (andares 1-29)"),
+    ("The Mines (Floors 2-39)", "as Minas (andares 2-39)"),
+    ("The Mines (Floors 31-39)", "as Minas (andares 31-39)"),
+    ("The Mines (Floors 40-79)", "as Minas (andares 40-79)"),
+    ("The Mines (Floors 41-79)", "as Minas (andares 41-79)"),
+    ("The Mines (Floor 100+)", "as Minas (andar 100+)"),
+    ("The Mines (Floor 80+)", "as Minas (andar 80+)"),
+    ("The Mines (Floor 50+)", "as Minas (andar 50+)"),
+    ("The Mines (Floor 40+)", "as Minas (andar 40+)"),
+    ("The Mines (any floor)", "as Minas (qualquer andar)"),
+    ("The Mines", "as Minas"),
+    ("Mines", "Minas"),
+    ("Skull Cavern", "Caverna da Caveira"),
+    ("Volcano Dungeon", "Masmorra do Vulcão"),
+    ("Quarry Mine", "Mina da Pedreira"),
+    ("Quarry", "Pedreira"),
+    ("Ginger Island", "Ilha Gengibre"),
+    ("Bus Stop", "ponto de ônibus"),
+    ("Backwoods", "mata"),
+    ("Beach", "praia"),
+    ("Forest", "floresta"),
+    ("Mountain", "montanha"),
+    ("Town", "cidade"),
+    ("Desert", "deserto"),
+    ("Farm", "fazenda"), ("Oasis", "oásis"),
+    ("Garbage Can", "lixeira"),
+    ("Haunted Skull", "crânio assombrado"),
+    ("Dwarvish Sentry", "guarda anã"),
+    ("Slime Ball", "bola de gosma"),
+    ("Secret Note", "bilhete secreto"),
+    ("Mining Level", "Nível de Mineração"),
+    ("Fishing", "pescando"),
+    ("Panning", "peneirando"),
+    ("Tilling", "arando"),
+    ("drop", "solta"),
+    ("drops", "soltam"),
+    ("Floors", "andares"),
+    ("floor", "andar"),
+    ("in ", "em "),
+]
+
 LOC = [("The Mines", "Minas"), ("Skull Cavern", "Caverna da Caveira"), ("Garbage Can", "Lixeira"),
        ("Floors", "andares"), ("Floor", "andar"), ("Any floor", "qualquer andar"), ("any floor", "qualquer andar"),
        ("The Farm", "Fazenda"), ("Ginger Island", "Ilha Gengibre"), ("Volcano Dungeon", "Masmorra do Vulcão"),
@@ -42,7 +156,7 @@ LOC = [("The Mines", "Minas"), ("Skull Cavern", "Caverna da Caveira"), ("Garbage
        ("Stone Golem", "Golem de pedra"), ("Wilderness Golem", "Golem selvagem"), ("Bats", "Morcegos"),
        ("Bat", "Morcego"), ("Dust Sprite", "Duende de poeira"), ("Geode", "Geodo"), ("Omni", "Omni"),
        ("Frozen", "Congelado"), ("Magma", "Magma"), ("Artifact Trove", "Baú de artefatos"),
-       ("Tree", "Árvore"), ("Dwarf", "Anão"), ("Slimes", "Slimes"), ("Slime", "Slime"), ("or", "ou"), ("and", "e"),
+       ("Tree", "Árvore"), ("Dwarf", "Anão"), ("Slimes", "Slimes"), ("Slime", "Slime"),
        ("Island", "Ilha"), ("Field Office", "Escritório de campo"), ("Night Market", "Mercado Noturno"),
        ("Witch's Swamp", "Pântano da Bruxa"), ("Swamp", "Pântano"), ("Forest", "Floresta"), ("Lake", "Lago"),
        ("Pond", "Lagoa"), ("Cave", "Caverna"), ("Sewers", "Esgoto"), ("Mutant Bug Lair", "Covil dos insetos mutantes")]
@@ -53,10 +167,20 @@ def pt(n):
 
 
 def loc_pt(s):
+    """Traduz a frase de local do dataset (inglês) para português."""
+    if not s:
+        return s
     out = s
+    for en, p in sorted(LOC_PHRASES, key=lambda x: -len(x[0])):
+        out = re.sub(re.escape(en), p, out, flags=re.IGNORECASE)
     for en, p in sorted(LOC, key=lambda x: -len(x[0])):
         out = re.sub(r"\b" + re.escape(en) + r"\b", p, out)
+    # nomes de itens e monstros que ficaram em inglês
+    for en, p in sorted(NAMES.items(), key=lambda x: -len(x[0])):
+        if len(en) > 3 and re.search(r"\b" + re.escape(en) + r"\b", out):
+            out = re.sub(r"\b" + re.escape(en) + r"\b", p, out)
     return out
+
 
 
 def load(name):

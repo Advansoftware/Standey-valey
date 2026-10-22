@@ -148,7 +148,7 @@ VILL = [
     ("Sam", "Sam", 1, 17, True, "1 Willow Lane, na cidade", ["Fruta de cacto", "Barra de bordo", "Pizza", "Olho-de-tigre"], "Músico que toca em uma banda.", "🧑‍🎸"),
     ("Sebastian", "Sebastian", 3, 10, True, "Oficina da Robin, nas montanhas", ["Lágrima congelada", "Obsidiana", "Sopa de abóbora", "Sashimi", "Ovo do vazio"], "Programador que vive no porão.", "🧑‍💻"),
     ("Shane", "Shane", 0, 20, True, "Rancho da Marnie", ["Cerveja", "Pimenta", "Pimentas recheadas", "Pizza"], "Trabalha no rancho e cuida das galinhas.", "🧑‍🌾"),
-    ("Caroline", "Caroline", 3, 7, False, "Loja do Pierre", ["Taco de peixe", "Chá verde", "Summer Spangle", "Curry tropical"], "Esposa do Pierre.", "👩"),
+    ("Caroline", "Caroline", 3, 7, False, "Loja do Pierre", ["Taco de peixe", "Chá verde", "Flor-Miçanga", "Curry tropical"], "Esposa do Pierre.", "👩"),
     ("Clint", "Clint", 3, 26, False, "Ferraria", ["Ametista", "Água-marinha", "Pasta de alcachofra", "Esmeralda", "Risoto de samambaia", "Barra de ouro", "Barra de irídio", "Jade", "Ômnigeodo", "Rubi", "Topázio"], "Ferreiro: melhora suas ferramentas e quebra geodos.", "🔨"),
     ("Demetrius", "Demetrius", 1, 19, False, "Oficina da Robin", ["Cozido de feijão", "Sorvete", "Pudim de arroz", "Morango"], "Cientista, marido da Robin.", "👨‍🔬"),
     ("Dwarf", "Anão", 1, 22, False, "Minas (precisa do Idioma Anão)", ["Ametista", "Água-marinha", "Esmeralda", "Jade", "Pedra-limão", "Ômnigeodo", "Rubi", "Topázio"], "Vende itens úteis para quem aprende o idioma anão.", "🧙"),
