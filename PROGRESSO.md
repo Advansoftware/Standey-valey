@@ -17,7 +17,8 @@ Atualizado a cada etapa concluída — serve de rede de segurança se algo falha
 | IA local: catálogo de 6 modelos, Gemma 4 E4B como padrão | ✅ |
 | Teste manual no emulador (todas as telas) | ✅ |
 | Download e instalação de modelo de IA no emulador | ✅ (Qwen3 0.6B) |
-| APK de release + release `v1.0.0` no GitHub | ✅ |
+| APK de release (arm64) assinado e testado | ✅ 69,8 MB |
+| Release `v1.0.0` no GitHub com o APK anexado | ✅ |
 
 ## Bugs reais encontrados pelos testes (e corrigidos)
 
@@ -48,3 +49,11 @@ Atualizado a cada etapa concluída — serve de rede de segurança se algo falha
 - Wiki: `tools/scrape_wiki.py` → `assets/wiki/pages.json.gz` + `assets/data/names_pt.json`.
 - Ícone: `tools/make_icon.py` → `android/app/src/main/res/mipmap-*/`.
 - Build: `flutter build apk --release --target-platform android-arm64` (ou o `codemagic.yaml`).
+
+## Release publicada
+
+- Tag: `v1.0.0` — https://github.com/Advansoftware/Standey-valey/releases/tag/v1.0.0
+- Arquivo: `guia-do-vale-1.0.0.apk` (arm64, minSdk 30, assinado com a chave de debug).
+- O APK foi baixado de volta do GitHub e conferido (mesmo md5, pacote válido).
+- Para publicar uma versão nova: subir a tag e o arquivo com
+  `gh release create vX.Y.Z app-release.apk --notes-file notas.md`.
