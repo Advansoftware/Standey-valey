@@ -37,8 +37,8 @@ class DetailScreen extends StatelessWidget {
               if (cat.collect.isNotEmpty && entry.checklist.isEmpty)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                  child: Container(
-                    decoration: parchment(context, accent: cat.color),
+                  child: Parchment(
+                    accent: cat.color,
                     child: SwitchListTile(
                       value: store.isCollected(entry.id),
                       onChanged: (_) => store.toggleCollected(entry.id),
@@ -194,36 +194,43 @@ class _Checklist extends StatelessWidget {
     final store = AppScope.of(context).store;
     final need = (entry.meta['need'] as num?)?.toInt() ?? entry.checklist.length;
     final done = store.checkedCount(entry.id, entry.checklist);
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      decoration: parchment(context, accent: color),
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-            child: Row(
-              children: [
-                Text('Checklist', style: TextStyle(fontWeight: FontWeight.w800, color: color)),
-                const Spacer(),
-                Text('$done de $need', style: const TextStyle(fontWeight: FontWeight.w700)),
-              ],
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      child: Parchment(
+        accent: color,
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+              child: Row(
+                children: [
+                  Text('Checklist', style: TextStyle(fontWeight: FontWeight.w800, color: color)),
+                  const Spacer(),
+                  Text('$done de $need', style: const TextStyle(fontWeight: FontWeight.w700)),
+                ],
+              ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: LinearProgressIndicator(value: need == 0 ? 0 : (done / need).clamp(0.0, 1.0), color: color, minHeight: 6, borderRadius: BorderRadius.circular(6)),
-          ),
-          for (final item in entry.checklist)
-            CheckboxListTile(
-              dense: true,
-              value: store.isChecked(entry.id, item),
-              onChanged: (_) => store.toggleCheck(entry.id, item),
-              title: Text(item),
-              controlAffinity: ListTileControlAffinity.leading,
-              activeColor: color,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: LinearProgressIndicator(
+                value: need == 0 ? 0 : (done / need).clamp(0.0, 1.0),
+                color: color,
+                minHeight: 6,
+                borderRadius: BorderRadius.circular(6),
+              ),
             ),
-        ],
+            for (final item in entry.checklist)
+              CheckboxListTile(
+                dense: true,
+                value: store.isChecked(entry.id, item),
+                onChanged: (_) => store.toggleCheck(entry.id, item),
+                title: Text(item),
+                controlAffinity: ListTileControlAffinity.leading,
+                activeColor: color,
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -288,7 +295,7 @@ class _Gallery extends StatelessWidget {
           scrollDirection: Axis.horizontal,
           padding: const EdgeInsets.symmetric(horizontal: 16),
           itemCount: entry.gallery.length,
-          separatorBuilder: (_, __) => const SizedBox(width: 10),
+          separatorBuilder: (_, _) => const SizedBox(width: 10),
           itemBuilder: (context, i) {
             final g = entry.gallery[i];
             return Container(
@@ -299,7 +306,7 @@ class _Gallery extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Image.asset('assets/img/${g[0]}', fit: BoxFit.contain, filterQuality: FilterQuality.none,
-                        errorBuilder: (_, __, ___) => const SizedBox()),
+                        errorBuilder: (_, _, _) => const SizedBox()),
                   ),
                   const SizedBox(height: 4),
                   Text(g.length > 1 ? g[1] : '', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),

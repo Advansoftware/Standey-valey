@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'ai_models.dart';
+
 /// Estado do usuário: favoritos, progresso, data do jogo e preferências.
 class Store extends ChangeNotifier {
   final SharedPreferences _p;
@@ -12,6 +14,7 @@ class Store extends ChangeNotifier {
   ThemeMode themeMode;
   bool aiModelInstalled;
   String aiModelUrl;
+  String aiModelId;
 
   Store._(this._p)
       : favorites = (_p.getStringList('fav') ?? const <String>[]).toSet(),
@@ -21,7 +24,11 @@ class Store extends ChangeNotifier {
         day = _p.getInt('day') ?? 1,
         themeMode = ThemeMode.values[(_p.getInt('theme') ?? 0).clamp(0, 2)],
         aiModelInstalled = _p.getBool('aiok') ?? false,
-        aiModelUrl = _p.getString('aiurl') ?? '';
+        aiModelUrl = _p.getString('aiurl') ?? '',
+        aiModelId = _p.getString('aimodel') ?? defaultAiModel.id;
+
+  /// Cria o estado a partir de preferências já carregadas (usado nos testes).
+  factory Store.withPrefs(SharedPreferences p) => Store._(p);
 
   static Future<Store> load() async => Store._(await SharedPreferences.getInstance());
 
@@ -94,6 +101,12 @@ class Store extends ChangeNotifier {
   void setAiUrl(String v) {
     aiModelUrl = v;
     _p.setString('aiurl', v);
+    notifyListeners();
+  }
+
+  void setAiModelId(String v) {
+    aiModelId = v;
+    _p.setString('aimodel', v);
     notifyListeners();
   }
 

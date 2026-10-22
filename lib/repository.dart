@@ -23,6 +23,8 @@ class Repository {
     final byId = <String, Entry>{};
 
     // Nomes em PT-BR vindos da wiki (gerado por tools/scrape_wiki.py), opcional.
+    // Só entram onde ainda não há tradução (nome vazio ou igual ao inglês):
+    // assim a wiki completa o que falta sem sobrescrever traduções curadas.
     Map<String, dynamic> namesPt = const {};
     try {
       namesPt = jsonDecode(await rootBundle.loadString('assets/data/names_pt.json'))
@@ -37,8 +39,9 @@ class Repository {
       final list = <Entry>[];
       for (final e in (data['entries'] as List)) {
         final entry = Entry.fromJson(e as Map<String, dynamic>);
+        final needsTranslation = entry.pt.isEmpty || entry.pt == entry.en;
         final override = namesPt[entry.en];
-        if (override is String && override.isNotEmpty && cat.id != 'guia' && cat.id != 'pacotes') {
+        if (needsTranslation && override is String && override.isNotEmpty && override != entry.en) {
           entry.pt = override;
         }
         list.add(entry);

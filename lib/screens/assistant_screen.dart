@@ -1,18 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../ai_models.dart';
 import '../ai_service.dart';
 import '../app_scope.dart';
-import '../app_theme.dart';
 import '../search.dart';
-import '../widgets/common.dart';
-
-class _Msg {
-  final bool user;
-  String text;
-  List<Hit> sources;
-  bool busy;
-  _Msg({required this.user, this.text = '', this.sources = const [], this.busy = false});
-}
+import '../widgets/assistant_bubble.dart';
+import '../widgets/assistant_install_card.dart';
 
 /// Assistente: busca (RAG) no conteúdo do app e, se o modelo estiver instalado,
 /// gera a resposta com a IA local. Sem modelo, mostra os trechos encontrados.
@@ -25,12 +18,12 @@ class AssistantScreen extends StatefulWidget {
 }
 
 class _AssistantScreenState extends State<AssistantScreen> {
-  final _msgs = <_Msg>[];
+  final _msgs = <ChatMessage>[];
   final _input = TextEditingController();
   final _scroll = ScrollController();
-  final _url = TextEditingController();
   bool _started = false;
   bool _asking = false;
+  String _modelId = defaultAiModel.id;
 
   @override
   void didChangeDependencies() {
@@ -39,7 +32,7 @@ class _AssistantScreenState extends State<AssistantScreen> {
     _started = true;
     final scope = AppScope.of(context);
     scope.search.loadWiki();
-    _url.text = scope.store.aiModelUrl.isNotEmpty ? scope.store.aiModelUrl : defaultModelUrl;
+    _modelId = scope.store.aiModelId.isEmpty ? defaultAiModel.id : scope.store.aiModelId;
     final q = widget.initialQuestion;
     if (q != null && q.trim().isNotEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _ask(q));
@@ -50,7 +43,6 @@ class _AssistantScreenState extends State<AssistantScreen> {
   void dispose() {
     _input.dispose();
     _scroll.dispose();
-    _url.dispose();
     super.dispose();
   }
 
@@ -62,6 +54,7 @@ class _AssistantScreenState extends State<AssistantScreen> {
     });
   }
 
+  /// Resposta sem modelo de linguagem: mostra os trechos encontrados.
   String _fallback(List<Hit> hits) {
     final search = AppScope.of(context).search;
     if (hits.isEmpty) return 'Não encontrei isso no guia. Tente outras palavras.';
@@ -80,11 +73,11 @@ class _AssistantScreenState extends State<AssistantScreen> {
     if (q.isEmpty || _asking) return;
     final scope = AppScope.of(context);
     final hits = scope.search.search(q, limit: 6);
-    final answer = _Msg(user: false, sources: hits, busy: true);
+    final answer = ChatMessage(user: false, sources: hits, busy: true);
     setState(() {
       _asking = true;
       _msgs
-        ..add(_Msg(user: true, text: q))
+        ..add(ChatMessage(user: true, text: q))
         ..add(answer);
       _input.clear();
     });
@@ -115,11 +108,13 @@ class _AssistantScreenState extends State<AssistantScreen> {
     _toEnd();
   }
 
-  Future<void> _install() async {
+  Future<void> _install(String urlOverride) async {
     final scope = AppScope.of(context);
-    final url = _url.text.trim().isEmpty ? defaultModelUrl : _url.text.trim();
-    scope.store.setAiUrl(url);
-    final ok = await scope.ai.install(url);
+    final model = aiModelById(_modelId) ?? defaultAiModel;
+    scope.store.setAiModelId(model.id);
+    final custom = urlOverride.trim();
+    if (custom.isNotEmpty) scope.store.setAiUrl(custom);
+    final ok = await scope.ai.install(model, urlOverride: custom);
     if (ok) scope.store.setAiInstalled(true);
   }
 
@@ -139,9 +134,17 @@ class _AssistantScreenState extends State<AssistantScreen> {
                   controller: _scroll,
                   padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
                   children: [
-                    if (!installed) _InstallCard(url: _url, onInstall: _install),
-                    if (_msgs.isEmpty) _Suggestions(onTap: _ask),
-                    for (final m in _msgs) _Bubble(msg: m),
+                    if (!installed)
+                      AssistantInstallCard(
+                        modelId: _modelId,
+                        onModelChanged: (id) {
+                          setState(() => _modelId = id);
+                          scope.store.setAiModelId(id);
+                        },
+                        onInstall: _install,
+                      ),
+                    if (_msgs.isEmpty) AssistantSuggestions(onTap: _ask),
+                    for (final m in _msgs) AssistantBubble(msg: m),
                   ],
                 ),
               ),
@@ -173,126 +176,6 @@ class _AssistantScreenState extends State<AssistantScreen> {
             ],
           );
         },
-      ),
-    );
-  }
-}
-
-class _InstallCard extends StatelessWidget {
-  final TextEditingController url;
-  final VoidCallback onInstall;
-  const _InstallCard({required this.url, required this.onInstall});
-
-  @override
-  Widget build(BuildContext context) {
-    final ai = AppScope.of(context).ai;
-    return Container(
-      margin: const EdgeInsets.only(top: 8, bottom: 12),
-      padding: const EdgeInsets.all(14),
-      decoration: parchment(context, accent: const Color(0xFF8E24AA)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('🧠 IA no seu celular', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
-          const SizedBox(height: 6),
-          const Text(
-            'Sem o modelo, o assistente mostra os trechos mais parecidos com a sua pergunta. '
-            'Para respostas escritas pela IA, baixe o modelo uma vez (cerca de 350 MB, use Wi-Fi). '
-            'Depois disso tudo roda offline.',
-          ),
-          if (!ai.engineReady && ai.engineError != null) ...[
-            const SizedBox(height: 6),
-            Text('Este aparelho não suporta o motor de IA: ${ai.engineError}', style: TextStyle(color: Theme.of(context).colorScheme.error)),
-          ],
-          const SizedBox(height: 10),
-          TextField(controller: url, maxLines: 2, style: const TextStyle(fontSize: 12), decoration: const InputDecoration(labelText: 'Endereço do modelo (.litertlm)')),
-          const SizedBox(height: 10),
-          if (ai.downloading) ...[
-            LinearProgressIndicator(value: ai.progress > 0 ? ai.progress.clamp(0.0, 1.0) : null),
-            const SizedBox(height: 4),
-            Text('Baixando… ${(ai.progress * 100).toStringAsFixed(0)}%'),
-          ] else
-            FilledButton.icon(
-              icon: const Icon(Icons.download_rounded),
-              label: const Text('Baixar modelo'),
-              onPressed: ai.engineReady ? onInstall : null,
-            ),
-          if (ai.installError != null) ...[
-            const SizedBox(height: 6),
-            Text('Erro: ${ai.installError}', style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 12)),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _Suggestions extends StatelessWidget {
-  final void Function(String) onTap;
-  const _Suggestions({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    const qs = [
-      'O que devo fazer no primeiro dia?',
-      'Como ganhar dinheiro no começo?',
-      'Qual árvore é o carvalho?',
-      'O que a Abigail ama?',
-      'Onde pescar o baiacu?',
-      'O que plantar na primavera?',
-    ];
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: [for (final q in qs) ActionChip(label: Text(q), onPressed: () => onTap(q))],
-    );
-  }
-}
-
-class _Bubble extends StatelessWidget {
-  final _Msg msg;
-  const _Bubble({required this.msg});
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final search = AppScope.of(context).search;
-    final entries = <dynamic>[];
-    final seen = <String>{};
-    for (final h in msg.sources) {
-      final e = search.entryOf(h.doc);
-      if (e != null && seen.add(e.id)) entries.add(e);
-    }
-    return Align(
-      alignment: msg.user ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.only(top: 10),
-        padding: const EdgeInsets.all(12),
-        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.88),
-        decoration: msg.user
-            ? BoxDecoration(color: scheme.primary.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(18))
-            : parchment(context, radius: 18),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (msg.text.isEmpty && msg.busy) const Text('pensando…') else SelectableText(msg.text),
-            if (!msg.user && !msg.busy && entries.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 6,
-                runSpacing: 6,
-                children: [
-                  for (final e in entries.take(4))
-                    ActionChip(
-                      avatar: Text(e.emoji as String),
-                      label: Text(e.name as String),
-                      onPressed: () => openEntry(context, e),
-                    ),
-                ],
-              ),
-            ],
-          ],
-        ),
       ),
     );
   }

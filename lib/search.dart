@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 import 'dart:math' as math;
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -155,31 +155,35 @@ class WikiPage {
 List<dynamic> _decodeWiki(Uint8List bytes) =>
     jsonDecode(utf8.decode(gzip.decode(bytes))) as List<dynamic>;
 
+/// Constrói o índice com os documentos da enciclopédia e (opcionalmente) os
+/// trechos da wiki. Pode rodar em outro isolate (ver [Isolate.run]).
+Bm25Index buildIndex(List<Doc> entryDocs, List<Doc> wikiDocs) {
+  final idx = Bm25Index();
+  for (final d in entryDocs) {
+    idx.add(d);
+  }
+  for (final d in wikiDocs) {
+    idx.add(d, titleBoost: 2);
+  }
+  idx.finish();
+  return idx;
+}
+
 /// Busca sobre a enciclopédia embutida e, se existir, sobre a wiki baixada.
 class SearchService extends ChangeNotifier {
   final Repository repo;
   Bm25Index _index = Bm25Index();
+  final List<Doc> _entryDocs = [];
   final Map<String, WikiPage> pages = {};
   bool wikiLoading = false;
   bool wikiLoaded = false;
   bool wikiAvailable = false;
 
   SearchService(this.repo) {
-    _index = _buildIndex(const []);
-  }
-
-  Bm25Index _buildIndex(List<WikiPage> wiki) {
-    final idx = Bm25Index();
     for (final e in repo.all) {
-      idx.add(Doc(title: '${e.name} ${e.en}', text: e.fullText, entryId: e.id));
+      _entryDocs.add(Doc(title: '${e.name} ${e.en}', text: e.fullText, entryId: e.id));
     }
-    for (final p in wiki) {
-      for (final c in p.chunks) {
-        idx.add(Doc(title: p.title, text: c, pageTitle: p.title, pageUrl: p.url), titleBoost: 2);
-      }
-    }
-    idx.finish();
-    return idx;
+    _index = buildIndex(_entryDocs, const []);
   }
 
   /// Carrega a wiki offline (assets/wiki/pages.json.gz) se ela existir.
@@ -191,6 +195,7 @@ class SearchService extends ChangeNotifier {
       final data = await rootBundle.load('assets/wiki/pages.json.gz');
       final raw = await compute(_decodeWiki, data.buffer.asUint8List());
       final list = <WikiPage>[];
+      final wikiDocs = <Doc>[];
       for (final p in raw) {
         final m = p as Map<String, dynamic>;
         final page = WikiPage(
@@ -200,11 +205,19 @@ class SearchService extends ChangeNotifier {
         );
         list.add(page);
         pages[page.title] = page;
+        for (final c in page.chunks) {
+          wikiDocs.add(Doc(title: page.title, text: c, pageTitle: page.title, pageUrl: page.url));
+        }
       }
-      _index = _buildIndex(list);
+      // o índice é grande: monta em outro isolate para não travar a interface
+      // (use variáveis locais: senão o isolate captura o SearchService inteiro)
+      final entryDocs = _entryDocs;
+      final docs = wikiDocs;
+      _index = await Isolate.run(() => buildIndex(entryDocs, docs));
       wikiAvailable = list.isNotEmpty;
-    } catch (_) {
+    } catch (e, st) {
       wikiAvailable = false;
+      debugPrint('Falha ao carregar a wiki offline: $e\n$st');
     }
     wikiLoaded = true;
     wikiLoading = false;

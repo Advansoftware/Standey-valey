@@ -2,11 +2,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_edge_ai/flutter_edge_ai.dart';
 import 'package:flutter_edge_ai_litertlm/flutter_edge_ai_litertlm.dart';
 
+import 'ai_models.dart';
 import 'search.dart';
 
-/// Modelo padrão: Qwen3 0.6B (~345 MB, sem login no Hugging Face).
-const defaultModelUrl =
-    'https://huggingface.co/litert-community/Qwen3-0.6B/resolve/main/Qwen3-0.6B_dynamic_wi4b32_afp32.litertlm';
+/// Modelo padrão: Gemma 4 E4B (boa qualidade, roda bem em celulares com 8 GB+).
+/// Os demais modelos ficam na lista de [aiModels] e podem ser escolhidos
+/// pelo usuário na tela do Assistente.
+String get defaultModelUrl => defaultAiModel.url;
 
 /// IA local (roda no aparelho). Se qualquer parte falhar, o app continua
 /// funcionando com a busca inteligente (RAG sem modelo de linguagem).
@@ -27,28 +29,53 @@ class AiService extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Baixa e instala o modelo. Retorna true se deu certo.
-  Future<bool> install(String url) async {
+  /// Baixa e instala o modelo escolhido. Retorna true se deu certo.
+  ///
+  /// Primeiro tenta a resolução automática do pacote no Hugging Face (o
+  /// plugin escolhe a melhor variante para o aparelho: GPU, NPU ou CPU). Se a
+  /// resolução falhar, cai para o download direto do arquivo.
+  ///
+  /// [urlOverride] permite usar um arquivo .litertlm escolhido pelo usuário.
+  Future<bool> install(AiModel model, {String? urlOverride}) async {
     if (!engineReady) {
       installError = 'O motor de IA não está disponível neste aparelho.';
       notifyListeners();
       return false;
     }
+    final custom = (urlOverride ?? '').trim();
+    final url = custom.isEmpty ? model.url : custom;
     downloading = true;
     progress = 0;
     installError = null;
     notifyListeners();
+
+    void onProgress(dynamic p) {
+      final v = double.tryParse('$p');
+      if (v != null) {
+        progress = v > 1 ? v / 100 : v;
+        notifyListeners();
+      }
+    }
+
     try {
-      await FlutterEdgeAi.installModel(
-        modelType: ModelType.qwen3,
-        fileType: ModelFileType.litertlm,
-      ).fromNetwork(url).withProgress((dynamic p) {
-        final v = double.tryParse('$p');
-        if (v != null) {
-          progress = v > 1 ? v / 100 : v;
-          notifyListeners();
+      if (custom.isEmpty) {
+        try {
+          await FlutterEdgeAi.installModel(
+            modelType: model.type,
+            fileType: ModelFileType.litertlm,
+          ).fromHuggingFace(model.repo).withProgress(onProgress).install();
+        } catch (_) {
+          await FlutterEdgeAi.installModel(
+            modelType: model.type,
+            fileType: ModelFileType.litertlm,
+          ).fromNetwork(url).withProgress(onProgress).install();
         }
-      }).install();
+      } else {
+        await FlutterEdgeAi.installModel(
+          modelType: model.type,
+          fileType: ModelFileType.litertlm,
+        ).fromNetwork(url).withProgress(onProgress).install();
+      }
       downloading = false;
       notifyListeners();
       return true;
@@ -56,6 +83,17 @@ class AiService extends ChangeNotifier {
       downloading = false;
       installError = '$e';
       notifyListeners();
+      return false;
+    }
+  }
+
+  /// Diz se já existe um modelo instalado no aparelho.
+  Future<bool> hasModel() async {
+    try {
+      final model = await FlutterEdgeAi.getActiveModel();
+      await model.close();
+      return true;
+    } catch (_) {
       return false;
     }
   }
@@ -99,7 +137,7 @@ String buildPrompt(String question, List<Hit> hits) {
   return b.toString();
 }
 
-/// Remove o raciocínio interno (<think>...</think>) que alguns modelos emitem.
+/// Remove o raciocínio interno (`<think>...</think>`) que alguns modelos emitem.
 String cleanAnswer(String s) {
   var t = s.replaceAll(RegExp(r'<think>.*?</think>', dotAll: true), '');
   final open = t.indexOf('<think>');

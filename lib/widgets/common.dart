@@ -49,7 +49,7 @@ class SectionTitle extends StatelessWidget {
           Expanded(
             child: Text(text, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
           ),
-          if (trailing != null) trailing!,
+          ?trailing,
         ],
       ),
     );

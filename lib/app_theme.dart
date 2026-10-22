@@ -66,3 +66,44 @@ BoxDecoration parchment(BuildContext context, {Color? accent, double radius = 20
     ],
   );
 }
+
+/// Versão em widget do cartão de pergaminho.
+///
+/// Usa [Material] + [Ink] para que as ondas de toque ("ink splash") apareçam
+/// sobre o papel e para que ListTiles dentro dele tenham o Material certo
+/// (o Flutter exige que um ListTile com fundo tenha um Material acima dele).
+class Parchment extends StatelessWidget {
+  final Widget child;
+  final Color? accent;
+  final double radius;
+  final EdgeInsetsGeometry? padding;
+  final VoidCallback? onTap;
+
+  const Parchment({
+    super.key,
+    required this.child,
+    this.accent,
+    this.radius = 20,
+    this.padding,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final content = Padding(padding: padding ?? EdgeInsets.zero, child: child);
+    return Material(
+      color: Colors.transparent,
+      child: Ink(
+        decoration: parchment(context, accent: accent, radius: radius),
+        child: onTap == null
+            ? content
+            : InkWell(
+                borderRadius: BorderRadius.circular(radius),
+                onTap: onTap,
+                child: content,
+              ),
+      ),
+    );
+  }
+}
+
