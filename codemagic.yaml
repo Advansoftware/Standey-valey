@@ -6,9 +6,13 @@ workflows:
     environment:
       flutter: stable
       java: 17
+      android:
+        min_sdk_version: 30
     scripts:
       - name: Preparar android/
-        script: bash tools/setup_android.sh
+        script: |
+          bash tools/setup_android.sh
+          bash tools/setup_android_visual.sh
       - name: Dependências
         script: flutter pub get
       - name: Análise (não bloqueia)
