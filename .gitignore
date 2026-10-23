@@ -15,6 +15,7 @@ pubspec.lock
 /android/local.properties
 /android/key.properties
 *.jks
+!android/app/release.jks
 *.keystore
 # Python
 __pycache__/

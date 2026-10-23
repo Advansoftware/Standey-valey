@@ -29,11 +29,26 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        create("appRelease") {
+            val keyFile = file("release.jks")
+            if (keyFile.exists()) {
+                storeFile = keyFile
+                storePassword = "stardew_guia"
+                keyAlias = "stardew_guia"
+                keyPassword = "stardew_guia"
+            }
+        }
+    }
+
     buildTypes {
+        debug {
+            val relConfig = signingConfigs.getByName("appRelease")
+            signingConfig = if (relConfig.storeFile?.exists() == true) relConfig else signingConfigs.getByName("debug")
+        }
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            val relConfig = signingConfigs.getByName("appRelease")
+            signingConfig = if (relConfig.storeFile?.exists() == true) relConfig else signingConfigs.getByName("debug")
         }
     }
 }

@@ -2,7 +2,7 @@
 
 > Arquivo de continuação para qualquer IA/pessoa que pegar o projeto. **Atualize este arquivo
 > a cada etapa concluída** (marque `[x]`, ajuste "Próximos passos") e faça commit + push.
-> Última atualização: 2026-10-23 (sessão 7 — Meu Status interativo com diálogos e suporte a tempo real; app 1.3.1+5 publicado).
+> Última atualização: 2026-10-23 (sessão 7 — correções de navegação, sincronização imediata, download de IA estável e release v1.3.2).
 
 ## 1. Objetivo (pedido do dono, Bruno)
 

@@ -688,8 +688,10 @@ class GameApi extends ChangeNotifier with WidgetsBindingObserver {
     } on ApiException catch (e) {
       if (e.statusCode == 400 &&
           e.message.toLowerCase().contains('no save loaded')) {
-        error =
-            'API conectada. Carregue um save no jogo para sincronizar o progresso.';
+        if (snapshot == null) {
+          error =
+              'API conectada. Carregue um save no jogo para sincronizar o progresso.';
+        }
       } else {
         error = _friendlyError(e);
       }
@@ -778,21 +780,36 @@ class GameApi extends ChangeNotifier with WidgetsBindingObserver {
         notifyListeners();
       }
       sync(silent: true);
-    } else if (eventName == 'PlayerInventoryChanged' ||
-        eventName == 'TimeChanged' ||
-        eventName == 'DayStarted' ||
-        eventName == 'DayEnding' ||
-        eventName == 'PlayerLevelChanged' ||
-        eventName == 'RelationshipChanged') {
-      sync(silent: true);
+    } else {
+      final normName = eventName.toLowerCase();
+      if (normName.contains('saveloaded') ||
+          normName.contains('savecreated') ||
+          normName.contains('daystarted') ||
+          normName.contains('dayending') ||
+          normName.contains('timechanged') ||
+          normName.contains('playerinventorychanged') ||
+          normName.contains('playerlevelchanged') ||
+          normName.contains('relationshipchanged')) {
+        sync(silent: true);
+      }
     }
   }
 
   void _startTimer() {
     _timer?.cancel();
     if (!connected || !store.apiAuto) return;
-    _timer = Timer.periodic(const Duration(seconds: 60), (_) {
-      if (connected && store.apiAuto) sync(silent: true);
+    final interval = snapshot == null
+        ? const Duration(seconds: 3)
+        : const Duration(seconds: 30);
+    _timer = Timer.periodic(interval, (_) {
+      if (connected && store.apiAuto) {
+        final hadSnapshot = snapshot != null;
+        sync(silent: true).then((ok) {
+          if (ok && !hadSnapshot && snapshot != null) {
+            _startTimer();
+          }
+        });
+      }
     });
   }
 

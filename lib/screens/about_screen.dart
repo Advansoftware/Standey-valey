@@ -165,7 +165,7 @@ class _ApiCardState extends State<_ApiCard> {
             ),
           ],
         ),
-        if (api.error != null) ...[
+        if (api.error != null && snap == null) ...[
           const SizedBox(height: 8),
           Text(api.error!, style: TextStyle(color: theme.colorScheme.error)),
         ],

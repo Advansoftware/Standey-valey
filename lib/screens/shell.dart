@@ -58,7 +58,7 @@ class _AppShellState extends State<AppShell> {
             ],
           ),
           bottomNavigationBar: NavigationBar(
-            selectedIndex: _index,
+            selectedIndex: _index >= 2 ? _index + 1 : _index,
             onDestinationSelected: (i) {
               // O item central abre o painel imersivo e não vira aba: ao
               // fechar, a pessoa continua exatamente onde estava.

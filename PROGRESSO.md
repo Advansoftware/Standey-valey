@@ -233,9 +233,15 @@ entradas fica com texto em inglês**.
 - Tag: `v1.3.1` — https://github.com/Advansoftware/Standey-valey/releases/tag/v1.3.1
 - Arquivo: `guia-do-vale-1.3.1.apk` (arm64, 70,3 MB, versionCode 5).
 - SHA-256: `2c547d4446f75e3e1f66c5c4df78bf7d113dc273e3d872d0fd937feabc549f07`.
-- **Novidades**:
-  - Diálogos de inspeção em Meu Status ao tocar em Dinheiro, Energia, Vida e Sorte.
-  - Diálogos detalhados de itens do inventário, conquistas e habilidades com profissões.
-  - Cliente WebSocket (`GameWebSocket`) para sincronização em tempo real de eventos da Stardew Web API (movimentação, inventário, relógio, etc.).
-  - Polling a cada 2s enquanto a tela de status estiver aberta.
+
+## Release v1.3.2 — Correções críticas de navegação, sincronização e IA
+
+- Tag: `v1.3.2` — https://github.com/Advansoftware/Standey-valey/releases/tag/v1.3.2
+- Arquivo: `guia-do-vale-1.3.2.apk` (arm64, 70,3 MB, versionCode 6).
+- SHA-256: `2345cd9eeabfea178e1fec46396df2d167bd64256df8403f8f745f9eb1726076`.
+- **Correções incluídas**:
+  - **Mapeamento da barra inferior (NavigationBar)**: corrigido offset `selectedIndex` quando o item Meu Status é o botão central, eliminando seleção incorreta ao tocar em Assistente ou Favoritos.
+  - **Sincronização imediata**: polling de 3s ao conectar até o primeiro save carregar, captura de evento `SaveLoaded` e limpeza imediata de mensagens de erro assim que o save é sincronizado.
+  - **Estabilidade do download de IA**: remoção de foreground service desnecessário que causava crashes no Android 13/14, throttling seguro nos callbacks de progresso da interface.
+  - **Chave de assinatura estável (Keystore)**: criação de `android/app/release.jks` versionado no projeto para que qualquer nova versão seja reconhecida pelo Android como atualização válida do mesmo aplicativo sem exigir desinstalação.
 

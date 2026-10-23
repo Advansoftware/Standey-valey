@@ -49,11 +49,16 @@ class AiService extends ChangeNotifier {
     installError = null;
     notifyListeners();
 
+    int lastTick = 0;
     void onProgress(dynamic p) {
       final v = double.tryParse('$p');
       if (v != null) {
         progress = v > 1 ? v / 100 : v;
-        notifyListeners();
+        final now = DateTime.now().millisecondsSinceEpoch;
+        if (now - lastTick > 250 || progress >= 1.0) {
+          lastTick = now;
+          notifyListeners();
+        }
       }
     }
 
@@ -63,18 +68,18 @@ class AiService extends ChangeNotifier {
           await FlutterEdgeAi.installModel(
             modelType: model.type,
             fileType: ModelFileType.litertlm,
-          ).fromHuggingFace(model.repo, foreground: true).withProgress(onProgress).install();
+          ).fromHuggingFace(model.repo).withProgress(onProgress).install();
         } catch (_) {
           await FlutterEdgeAi.installModel(
             modelType: model.type,
             fileType: ModelFileType.litertlm,
-          ).fromNetwork(url, foreground: true).withProgress(onProgress).install();
+          ).fromNetwork(url).withProgress(onProgress).install();
         }
       } else {
         await FlutterEdgeAi.installModel(
           modelType: model.type,
           fileType: ModelFileType.litertlm,
-        ).fromNetwork(url, foreground: true).withProgress(onProgress).install();
+        ).fromNetwork(url).withProgress(onProgress).install();
       }
       downloading = false;
       notifyListeners();

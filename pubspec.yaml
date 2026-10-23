@@ -1,7 +1,7 @@
 name: stardew_guia
 description: Enciclopédia offline de Stardew Valley em português do Brasil, com guia do iniciante, progresso e assistente de IA local.
 publish_to: 'none'
-version: 1.3.1+5
+version: 1.3.2+6
 
 environment:
   sdk: '>=3.12.0 <4.0.0'
