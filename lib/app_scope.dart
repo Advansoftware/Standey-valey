@@ -5,6 +5,7 @@ import 'game_api.dart';
 import 'repository.dart';
 import 'search.dart';
 import 'store.dart';
+import 'updater_service.dart';
 
 class AppScope extends InheritedWidget {
   final Store store;
@@ -12,6 +13,7 @@ class AppScope extends InheritedWidget {
   final SearchService search;
   final AiService ai;
   final GameApi api;
+  final UpdaterService updater;
 
   const AppScope({
     super.key,
@@ -20,6 +22,7 @@ class AppScope extends InheritedWidget {
     required this.search,
     required this.ai,
     required this.api,
+    required this.updater,
     required super.child,
   });
 

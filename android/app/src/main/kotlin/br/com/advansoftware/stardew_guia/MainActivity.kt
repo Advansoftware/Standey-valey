@@ -1,20 +1,25 @@
 package br.com.advansoftware.stardew_guia
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
 import android.os.Handler
 import android.os.Looper
 import android.view.WindowManager
+import androidx.core.content.FileProvider
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+import java.io.File
 import java.util.ArrayDeque
 
 class MainActivity : FlutterActivity() {
     private companion object {
         const val CHANNEL = "guia_do_vale/nsd"
         const val DISPLAY_CHANNEL = "guia_do_vale/display"
+        const val UPDATER_CHANNEL = "guia_do_vale/updater"
         const val SERVICE_TYPE = "_stardewapi._tcp."
         const val SCAN_MS = 5000L
     }
@@ -56,6 +61,45 @@ class MainActivity : FlutterActivity() {
                     else -> result.notImplemented()
                 }
             }
+
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, UPDATER_CHANNEL)
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "installApk" -> {
+                        val path = call.argument<String>("path")
+                        if (path != null) {
+                            installApk(path, result)
+                        } else {
+                            result.error("invalid_arg", "Caminho não fornecido.", null)
+                        }
+                    }
+                    else -> result.notImplemented()
+                }
+            }
+    }
+
+    private fun installApk(path: String, result: MethodChannel.Result) {
+        try {
+            val file = File(path)
+            if (!file.exists()) {
+                result.error("file_not_found", "Arquivo APK não existe em $path", null)
+                return
+            }
+            val uri = FileProvider.getUriForFile(
+                applicationContext,
+                "${applicationContext.packageName}.fileprovider",
+                file
+            )
+            val intent = Intent(Intent.ACTION_VIEW).apply {
+                setDataAndType(uri, "application/vnd.android.package-archive")
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            startActivity(intent)
+            result.success(true)
+        } catch (e: Exception) {
+            result.error("install_error", "Falha ao disparar instalação: ${e.message}", null)
+        }
     }
 
     private fun setKeepScreenOn(on: Boolean) {

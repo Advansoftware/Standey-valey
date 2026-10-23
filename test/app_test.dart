@@ -19,6 +19,7 @@ import 'package:stardew_guia/screens/shell.dart';
 import 'package:stardew_guia/screens/status_screen.dart';
 import 'package:stardew_guia/search.dart';
 import 'package:stardew_guia/store.dart';
+import 'package:stardew_guia/updater_service.dart';
 import 'package:stardew_guia/widgets/common.dart';
 import 'package:stardew_guia/widgets/markdown_lite.dart';
 
@@ -47,6 +48,7 @@ Future<Store> pumpFullApp(WidgetTester tester) async {
       search: SearchService(repo),
       ai: AiService(),
       api: GameApi(s, repo),
+      updater: UpdaterService(),
       child: Builder(
         builder: (context) => MaterialApp(
           theme: buildTheme(Brightness.light),
@@ -76,6 +78,7 @@ Future<Store> pumpScreen(
       search: svc,
       ai: AiService(),
       api: GameApi(s, repo),
+      updater: UpdaterService(),
       child: MaterialApp(theme: buildTheme(Brightness.light), home: screen),
     ),
   );
@@ -380,6 +383,7 @@ void main() {
         search: SearchService(repo),
         ai: AiService(),
         api: api,
+        updater: UpdaterService(),
         child: MaterialApp(
           theme: buildTheme(Brightness.light),
           home: const AppShell(),
@@ -434,6 +438,7 @@ void main() {
         search: SearchService(repo),
         ai: ai,
         api: api,
+        updater: UpdaterService(),
         child: MaterialApp(
           theme: buildTheme(Brightness.light),
           home: const StatusScreen(),

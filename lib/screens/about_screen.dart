@@ -4,6 +4,9 @@ import '../app_scope.dart';
 import '../app_theme.dart';
 import '../models.dart';
 
+import 'update_screen.dart';
+import '../updater_service.dart';
+
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
 
@@ -11,14 +14,56 @@ class AboutScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final scope = AppScope.of(context);
     final store = scope.store;
+    final updater = scope.updater;
     return Scaffold(
       appBar: AppBar(title: const Text('Sobre e ajustes')),
       body: ListenableBuilder(
-        listenable: Listenable.merge([store, scope.ai, scope.search, scope.api]),
+        listenable: Listenable.merge([store, scope.ai, scope.search, scope.api, updater]),
         builder: (context, _) {
           return ListView(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
             children: [
+              _Card(
+                title: 'Atualizações do aplicativo',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.system_update_rounded, color: Color(0xFFE6B34A)),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            updater.isNewVersionAvailable
+                                ? 'Nova versão ${updater.latestRelease?.tagName ?? ''} disponível!'
+                                : 'Versão atual: v$currentAppVersion',
+                            style: const TextStyle(fontWeight: FontWeight.w700),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    FilledButton.icon(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: const Color(0xFFE6B34A),
+                        foregroundColor: const Color(0xFF3A2414),
+                      ),
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const UpdateScreen(),
+                        ),
+                      ),
+                      icon: const Icon(Icons.cloud_download_rounded),
+                      label: Text(
+                        updater.isNewVersionAvailable
+                            ? 'Atualizar agora'
+                            : 'Buscar atualizações',
+                        style: const TextStyle(fontWeight: FontWeight.w800),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               _Card(
                 title: 'Aparência',
                 child: SegmentedButton<ThemeMode>(

@@ -10,6 +10,7 @@ import 'repository.dart';
 import 'screens/shell.dart';
 import 'search.dart';
 import 'store.dart';
+import 'updater_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,14 +19,13 @@ Future<void> main() async {
   final search = SearchService(repo);
   final ai = AiService();
   final api = GameApi(store, repo);
+  final updater = UpdaterService();
 
-  runApp(StardewGuiaApp(store: store, repo: repo, search: search, ai: ai, api: api));
+  runApp(StardewGuiaApp(store: store, repo: repo, search: search, ai: ai, api: api, updater: updater));
 
-  // Em segundo plano: motor de IA local e wiki offline (se existir).
+  // Em segundo plano: motor de IA local, API do jogo e verificação de atualizações.
+  updater.checkForUpdates(silent: true);
   ai.init().then((_) async {
-    // Se o app foi fechado no meio de um download, o Android continuou
-    // baixando em segundo plano (WorkManager). Ao abrir de novo, retomamos o
-    // acompanhamento para concluir a instalação do arquivo.
     if (!store.aiDownloading) return;
     final model = aiModelById(store.aiModelId) ?? defaultAiModel;
     final custom = store.aiModelUrl.trim();
@@ -43,6 +43,7 @@ class StardewGuiaApp extends StatelessWidget {
   final SearchService search;
   final AiService ai;
   final GameApi api;
+  final UpdaterService updater;
 
   const StardewGuiaApp({
     super.key,
@@ -51,6 +52,7 @@ class StardewGuiaApp extends StatelessWidget {
     required this.search,
     required this.ai,
     required this.api,
+    required this.updater,
   });
 
   @override
@@ -61,6 +63,7 @@ class StardewGuiaApp extends StatelessWidget {
       search: search,
       ai: ai,
       api: api,
+      updater: updater,
       child: ListenableBuilder(
         listenable: store,
         builder: (context, _) => MaterialApp(

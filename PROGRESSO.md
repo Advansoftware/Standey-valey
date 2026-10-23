@@ -3,6 +3,20 @@
 Registro de progresso da sessão (continuação do HANDOFF.md).
 Atualizado a cada etapa concluída — serve de rede de segurança se algo falhar.
 
+## Sessão 7 — Atualizador Próprio In-App e Correções de Estabilidade (v1.4.0)
+
+| Etapa | Situação |
+|---|---|
+| Auto-Atualizador In-App (`UpdateScreen`) | ✅ Consulta GitHub Releases, barra circular com ícone central, download e instalação |
+| Histórico da versão atual | ✅ Toque na versão atual abre diálogo detalhado de notas da versão |
+| FileProvider nativo e permissões Android | ✅ `REQUEST_INSTALL_PACKAGES`, canal `guia_do_vale/updater` e FileProvider configurados |
+| Keystore fixa (`release.jks`) | ✅ Gerada e configurada em `build.gradle.kts` para permitir atualização direta sobre versões antigas |
+| Correção da navegação inferior | ✅ Mapeamento de abas corrigido (índices 0, 1, 2, 3 com Meu Status central) |
+| Sincronização e erro persistente da API | ✅ Polling inicial mais rápido (3s) e limpeza de mensagens de erro após sincronizar |
+| Estabilidade no download de IA | ✅ Removido foreground service indevido em Android 13/14 |
+| `flutter analyze` & `flutter test` | ✅ 0 issues, 45 testes passando |
+| Release 1.4.0+7 no GitHub | ✅ Build arm64 compilado localmente |
+
 ## Sessão 6 — Meu Status imersivo (v1.3.0)
 
 | Etapa | Situação |
