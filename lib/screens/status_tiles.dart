@@ -8,15 +8,40 @@ class _AiObjectiveTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 5),
-      padding: const EdgeInsets.fromLTRB(6, 6, 7, 6),
-      decoration: BoxDecoration(
-        color: _paper2,
-        borderRadius: BorderRadius.circular(6),
-        border: const Border(left: BorderSide(color: _blue, width: 3)),
+    return InkWell(
+      onTap: () => showStatusDetailDialog(
+        context,
+        title: objective.action,
+        icon: Icons.explore_rounded,
+        tag: objective.place,
+        tagColor: _green,
+        content: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if ((objective.place ?? '').isNotEmpty) ...[
+              Text(
+                'Local sugerido: ${objective.place}',
+                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: _green),
+              ),
+              const SizedBox(height: 6),
+            ],
+            Text(
+              objective.detail ?? objective.action,
+              style: const TextStyle(fontSize: 13, height: 1.35, color: _ink),
+            ),
+          ],
+        ),
       ),
-      child: Row(
+      borderRadius: BorderRadius.circular(6),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 5),
+        padding: const EdgeInsets.fromLTRB(6, 6, 7, 6),
+        decoration: BoxDecoration(
+          color: _paper2,
+          borderRadius: BorderRadius.circular(6),
+          border: const Border(left: BorderSide(color: _blue, width: 3)),
+        ),
+        child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
@@ -115,6 +140,7 @@ class _AiObjectiveTile extends StatelessWidget {
           ),
         ],
       ),
+      ),
     );
   }
 }
@@ -127,15 +153,18 @@ class _QuestTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final objective = quest.currentObjective.trim();
     final desc = quest.description.trim();
-    return Container(
-      margin: const EdgeInsets.only(bottom: 5),
-      padding: const EdgeInsets.fromLTRB(7, 6, 7, 6),
-      decoration: BoxDecoration(
-        color: _paper2,
-        borderRadius: BorderRadius.circular(6),
-        border: Border(left: BorderSide(color: _blue, width: 3)),
-      ),
-      child: Column(
+    return InkWell(
+      onTap: () => showQuestDetailDialog(context, quest),
+      borderRadius: BorderRadius.circular(6),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 5),
+        padding: const EdgeInsets.fromLTRB(7, 6, 7, 6),
+        decoration: BoxDecoration(
+          color: _paper2,
+          borderRadius: BorderRadius.circular(6),
+          border: const Border(left: BorderSide(color: _blue, width: 3)),
+        ),
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
@@ -195,6 +224,7 @@ class _QuestTile extends StatelessWidget {
             ),
           ],
         ],
+      ),
       ),
     );
   }
@@ -266,13 +296,16 @@ class _ItemTile extends StatelessWidget {
             entry?.emoji ?? (item.typeDefinitionId == 'H' ? '🎩' : '📦'),
             style: const TextStyle(fontSize: 19),
           );
-    return Tooltip(
-      message:
-          '${item.displayName.isNotEmpty ? item.displayName : item.name}\n'
-          'Quantidade: ${item.stackSize}\nQualidade: ${item.quality}\nID: ${item.qualifiedItemId}\nCategoria: ${item.category}',
-      child: Container(
-        width: 59,
-        height: 72,
+    return InkWell(
+      onTap: () => showItemDetailDialog(context, item, entry),
+      borderRadius: BorderRadius.circular(6),
+      child: Tooltip(
+        message:
+            '${item.displayName.isNotEmpty ? item.displayName : item.name}\n'
+            'Quantidade: ${item.stackSize}\nQualidade: ${item.quality}\nToque para ver tudo',
+        child: Container(
+          width: 59,
+          height: 72,
         padding: const EdgeInsets.fromLTRB(3, 3, 3, 2),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.11),
@@ -323,6 +356,7 @@ class _ItemTile extends StatelessWidget {
           ],
         ),
       ),
+      ),
     );
   }
 }
@@ -338,13 +372,16 @@ class _SkillTile extends StatelessWidget {
         .map((p) => professionNamePt(p.name))
         .where((p) => p.trim().isNotEmpty)
         .toList();
-    return Container(
-      padding: const EdgeInsets.fromLTRB(6, 5, 6, 5),
-      decoration: BoxDecoration(
-        color: _paper2,
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: const Color(0xFFD2B77F)),
-      ),
+    return InkWell(
+      onTap: () => showSkillDetailDialog(context, skill),
+      borderRadius: BorderRadius.circular(6),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(6, 5, 6, 5),
+        decoration: BoxDecoration(
+          color: _paper2,
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: const Color(0xFFD2B77F)),
+        ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -414,6 +451,7 @@ class _SkillTile extends StatelessWidget {
           ],
         ],
       ),
+      ),
     );
   }
 }
@@ -437,15 +475,17 @@ class _RelationshipTile extends StatelessWidget {
     final target = rel.isMarried ? 14 : 10;
     final pct = clamp01(rel.hearts / target);
     final name = entry?.name ?? rel.npcName;
-    final status = _status;
-    return Container(
-      margin: const EdgeInsets.only(bottom: 4),
-      padding: const EdgeInsets.fromLTRB(5, 4, 6, 4),
-      decoration: BoxDecoration(
-        color: _paper2,
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: const Color(0xFFD2B77F)),
-      ),
+    return InkWell(
+      onTap: () => showVillagerDetailDialog(context, rel, entry),
+      borderRadius: BorderRadius.circular(6),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 4),
+        padding: const EdgeInsets.fromLTRB(5, 4, 6, 4),
+        decoration: BoxDecoration(
+          color: _paper2,
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: const Color(0xFFD2B77F)),
+        ),
       child: Row(
         children: [
           Container(
@@ -487,8 +527,8 @@ class _RelationshipTile extends StatelessWidget {
                         ),
                       ),
                     ),
-                    if (status.isNotEmpty)
-                      _TinyTag(status, const Color(0xFFC2185B)),
+                    if (_status.isNotEmpty)
+                      _TinyTag(_status, const Color(0xFFC2185B)),
                     const SizedBox(width: 3),
                     Text(
                       '${rel.hearts}♥',
@@ -537,6 +577,7 @@ class _RelationshipTile extends StatelessWidget {
           ),
         ],
       ),
+      ),
     );
   }
 }
@@ -556,42 +597,48 @@ class _EquipSlot extends StatelessWidget {
     final name = item == null
         ? '—'
         : (item!.displayName.isNotEmpty ? item!.displayName : item!.name);
-    return Tooltip(
-      message: item == null
-          ? '$label vazio'
-          : '$label: $name\nID: ${item!.qualifiedItemId}',
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(4, 4, 4, 5),
-        decoration: BoxDecoration(
-          color: _paper2,
-          borderRadius: BorderRadius.circular(6),
-          border: Border.all(color: const Color(0xFFD2B77F)),
-        ),
-        child: Column(
-          children: [
-            Icon(
-              item == null ? icon : Icons.checkroom_rounded,
-              size: 20,
-              color: item == null ? const Color(0xFF9E8A6A) : _green,
-            ),
-            const SizedBox(height: 2),
-            Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 7.5,
-                fontWeight: FontWeight.w900,
-                color: Color(0xFF6B5238),
+    return InkWell(
+      onTap: item == null
+          ? null
+          : () => showItemDetailDialog(context, item!, null),
+      borderRadius: BorderRadius.circular(6),
+      child: Tooltip(
+        message: item == null
+            ? '$label vazio'
+            : '$label: $name\nToque para ver detalhes',
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(4, 4, 4, 5),
+          decoration: BoxDecoration(
+            color: _paper2,
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(color: const Color(0xFFD2B77F)),
+          ),
+          child: Column(
+            children: [
+              Icon(
+                item == null ? icon : Icons.checkroom_rounded,
+                size: 20,
+                color: item == null ? const Color(0xFF9E8A6A) : _green,
               ),
-            ),
-            Text(
-              name,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 8.5, color: _ink),
-            ),
-          ],
+              const SizedBox(height: 2),
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 7.5,
+                  fontWeight: FontWeight.w900,
+                  color: Color(0xFF6B5238),
+                ),
+              ),
+              Text(
+                name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 8.5, color: _ink),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -606,56 +653,98 @@ class _AchievementTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final unlocked = a.hasPlayerUnlocked;
     final color = unlocked ? _green : const Color(0xFF9E8A6A);
-    return Container(
-      margin: const EdgeInsets.only(bottom: 4),
-      padding: const EdgeInsets.fromLTRB(5, 4, 6, 4),
-      decoration: BoxDecoration(
-        color: unlocked ? const Color(0xFFE7F0D3) : _paper2,
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: color.withValues(alpha: 0.4)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(
-            unlocked ? Icons.emoji_events_rounded : Icons.lock_outline_rounded,
-            size: 16,
-            color: color,
-          ),
-          const SizedBox(width: 5),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  a.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w900,
-                    color: unlocked ? _ink : const Color(0xFF7A6750),
-                  ),
+    return InkWell(
+      onTap: () => showStatusDetailDialog(
+        context,
+        title: a.name,
+        icon: unlocked ? Icons.emoji_events_rounded : Icons.lock_outline_rounded,
+        tag: unlocked ? 'DESBLOQUEADO' : 'BLOQUEADO',
+        tagColor: unlocked ? _green : Color(0xFF8D6E63),
+        content: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              a.description,
+              style: const TextStyle(fontSize: 13, height: 1.35, color: _ink),
+            ),
+            if (a.reward != null) ...[
+              const SizedBox(height: 10),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: _paper2,
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: _gold),
                 ),
-                if (a.canPlayerSeeDetails || unlocked)
+                child: Row(
+                  children: [
+                    const Icon(Icons.card_giftcard_rounded, color: _gold, size: 18),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        'Recompensa: ${a.reward!.displayName.isNotEmpty ? a.reward!.displayName : a.reward!.name}',
+                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: _ink),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+      borderRadius: BorderRadius.circular(6),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 4),
+        padding: const EdgeInsets.fromLTRB(5, 4, 6, 4),
+        decoration: BoxDecoration(
+          color: unlocked ? const Color(0xFFE7F0D3) : _paper2,
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: color.withValues(alpha: 0.4)),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              unlocked ? Icons.emoji_events_rounded : Icons.lock_outline_rounded,
+              size: 16,
+              color: color,
+            ),
+            const SizedBox(width: 5),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                    a.description,
-                    maxLines: 2,
+                    a.name,
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 9.5,
-                      height: 1.12,
-                      color: Color(0xFF6B5238),
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w900,
+                      color: unlocked ? _ink : const Color(0xFF7A6750),
                     ),
                   ),
-              ],
+                  if (a.canPlayerSeeDetails || unlocked)
+                    Text(
+                      a.description,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 9.5,
+                        height: 1.12,
+                        color: Color(0xFF6B5238),
+                      ),
+                    ),
+                ],
+              ),
             ),
-          ),
-          if (a.reward != null) ...[
-            const SizedBox(width: 3),
-            Icon(Icons.card_giftcard_rounded, size: 13, color: _gold),
+            if (a.reward != null) ...[
+              const SizedBox(width: 3),
+              Icon(Icons.card_giftcard_rounded, size: 13, color: _gold),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

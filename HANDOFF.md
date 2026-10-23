@@ -2,7 +2,7 @@
 
 > Arquivo de continuação para qualquer IA/pessoa que pegar o projeto. **Atualize este arquivo
 > a cada etapa concluída** (marque `[x]`, ajuste "Próximos passos") e faça commit + push.
-> Última atualização: 2026-10-22 (sessão 6 — tela Meu Status imersiva; app 1.3.0+4 publicado).
+> Última atualização: 2026-10-23 (sessão 7 — Meu Status interativo com diálogos e suporte a tempo real; app 1.3.1+5 publicado).
 
 ## 1. Objetivo (pedido do dono, Bruno)
 

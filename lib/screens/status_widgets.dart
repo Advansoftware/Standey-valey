@@ -360,6 +360,7 @@ class _StatTile extends StatelessWidget {
   final double? fraction;
   final String? sub;
   final String? tooltip;
+  final VoidCallback? onTap;
 
   const _StatTile({
     required this.icon,
@@ -369,88 +370,93 @@ class _StatTile extends StatelessWidget {
     this.fraction,
     this.sub,
     this.tooltip,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final content = Container(
-      padding: const EdgeInsets.fromLTRB(6, 5, 6, 5),
-      decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.18),
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: color.withValues(alpha: 0.35)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              SizedBox(
-                width: 15,
-                height: 15,
-                child: icon is String
-                    ? Image.asset(
-                        icon as String,
-                        filterQuality: FilterQuality.none,
-                        errorBuilder: (_, _, _) =>
-                            Icon(Icons.circle, size: 11, color: color),
-                      )
-                    : Icon(icon as IconData, size: 13, color: color),
-              ),
-              const SizedBox(width: 3),
-              Expanded(
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 8,
-                    letterSpacing: 0.7,
-                    fontWeight: FontWeight.w900,
-                    color: _goldSoft,
+    final content = InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(6),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(6, 5, 6, 5),
+        decoration: BoxDecoration(
+          color: Colors.black.withValues(alpha: 0.18),
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: color.withValues(alpha: 0.35)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                SizedBox(
+                  width: 15,
+                  height: 15,
+                  child: icon is String
+                      ? Image.asset(
+                          icon as String,
+                          filterQuality: FilterQuality.none,
+                          errorBuilder: (_, _, _) =>
+                              Icon(Icons.circle, size: 11, color: color),
+                        )
+                      : Icon(icon as IconData, size: 13, color: color),
+                ),
+                const SizedBox(width: 3),
+                Expanded(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 8,
+                      letterSpacing: 0.7,
+                      fontWeight: FontWeight.w900,
+                      color: _goldSoft,
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 1),
-          Text(
-            value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontFamily: 'PixelifySans',
-              fontSize: 15,
-              height: 1.05,
-              fontWeight: FontWeight.w700,
-              color: Colors.white,
+              ],
             ),
-          ),
-          if (fraction != null) ...[
-            const SizedBox(height: 3),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(3),
-              child: LinearProgressIndicator(
-                value: clamp01(fraction!),
-                minHeight: 4,
-                backgroundColor: Colors.white.withValues(alpha: 0.12),
-                valueColor: AlwaysStoppedAnimation(color),
-              ),
-            ),
-          ] else if (sub != null) ...[
             const SizedBox(height: 1),
             Text(
-              sub!,
+              value,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
-                fontSize: 8.5,
-                height: 1.1,
-                color: Color(0xFFD9C9A8),
+                fontFamily: 'PixelifySans',
+                fontSize: 15,
+                height: 1.05,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
               ),
             ),
+            if (fraction != null) ...[
+              const SizedBox(height: 3),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(3),
+                child: LinearProgressIndicator(
+                  value: clamp01(fraction!),
+                  minHeight: 4,
+                  backgroundColor: Colors.white.withValues(alpha: 0.12),
+                  valueColor: AlwaysStoppedAnimation(color),
+                ),
+              ),
+            ] else if (sub != null) ...[
+              const SizedBox(height: 1),
+              Text(
+                sub!,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 8.5,
+                  height: 1.1,
+                  color: Color(0xFFD9C9A8),
+                ),
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
     return tooltip == null || tooltip!.trim().isEmpty

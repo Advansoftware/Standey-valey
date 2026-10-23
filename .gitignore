@@ -22,3 +22,15 @@ __pycache__/
 # Cache do scraper
 tools/.cache/
 tools/seed/.cache/
+
+# .NET / Android build caches locais
+**/bin/
+**/obj/
+android/.kotlin/
+
+# Testes e logs temporários
+stardew_*.txt
+tela_*.png
+*.apk
+
+

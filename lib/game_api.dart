@@ -9,6 +9,7 @@ import 'models.dart';
 import 'repository.dart';
 import 'search.dart';
 import 'store.dart';
+import 'game_ws.dart';
 
 /// Erro de comunicação com a API local.
 class ApiException implements Exception {
@@ -502,9 +503,12 @@ class GameApi extends ChangeNotifier with WidgetsBindingObserver {
   DateTime? lastSync;
   Map<String, List<Entry>>? _nameIndex;
   Timer? _timer;
+  GameWebSocket? _ws;
   bool _syncing = false;
   bool _observing = false;
   int _session = 0;
+
+  bool get wsConnected => _ws?.isConnected ?? false;
 
   GameApi(this.store, this.repo) {
     final ms = store.apiLastSyncMs;
@@ -525,6 +529,7 @@ class GameApi extends ChangeNotifier with WidgetsBindingObserver {
   @override
   void dispose() {
     _timer?.cancel();
+    _ws?.disconnect();
     if (_observing) {
       WidgetsBinding.instance.removeObserver(this);
       _observing = false;
@@ -620,17 +625,20 @@ class GameApi extends ChangeNotifier with WidgetsBindingObserver {
       }
 
       _startTimer();
+      _connectWs(url);
       await sync(silent: silent);
       return true;
     } on ApiException catch (e) {
       connected = false;
       error = _friendlyError(e);
       _timer?.cancel();
+      _ws?.disconnect();
       return false;
     } catch (e) {
       connected = false;
       error = 'Não foi possível conectar à API: $e';
       _timer?.cancel();
+      _ws?.disconnect();
       return false;
     } finally {
       linking = false;
@@ -709,6 +717,8 @@ class GameApi extends ChangeNotifier with WidgetsBindingObserver {
   void disconnect() {
     _session++;
     _timer?.cancel();
+    _ws?.disconnect();
+    _ws = null;
     baseUrl = '';
     connected = false;
     snapshot = null;
@@ -720,6 +730,62 @@ class GameApi extends ChangeNotifier with WidgetsBindingObserver {
     store.setApiAuto(false);
     store.setApiLastSync(null);
     notifyListeners();
+  }
+
+  void _connectWs(String url) {
+    _ws?.disconnect();
+    _ws = GameWebSocket(
+      onEvent: _handleWsEvent,
+      onConnected: () => notifyListeners(),
+      onDisconnected: () => notifyListeners(),
+    )..connect(url);
+  }
+
+  void _handleWsEvent(Map<String, dynamic> raw) {
+    final eventName = raw['Event'] as String? ?? raw['name'] as String? ?? '';
+    final data = raw['Data'] ?? raw['data'];
+
+    if (eventName == 'PlayerWarped' && data is Map) {
+      final newLoc = data['NewLocation'] as String? ??
+          data['newLocation'] as String? ??
+          '';
+      if (newLoc.isNotEmpty && snapshot != null) {
+        final p = snapshot!.player;
+        final updatedPlayer = ApiPlayer(
+          name: p.name,
+          displayName: p.displayName,
+          farmName: p.farmName,
+          money: p.money,
+          stamina: p.stamina,
+          maxStamina: p.maxStamina,
+          health: p.health,
+          maxHealth: p.maxHealth,
+          location: newLoc,
+          dailyLuck: p.dailyLuck,
+          dailyLuckFriendlyValue: p.dailyLuckFriendlyValue,
+          dailyLuckDescription: p.dailyLuckDescription,
+          clothing: p.clothing,
+          skills: p.skills,
+          quests: p.quests,
+          achievements: p.achievements,
+          relationships: p.relationships,
+        );
+        snapshot = ApiSnapshot(
+          world: snapshot!.world,
+          player: updatedPlayer,
+          inventory: snapshot!.inventory,
+        );
+        notifyListeners();
+      }
+      sync(silent: true);
+    } else if (eventName == 'PlayerInventoryChanged' ||
+        eventName == 'TimeChanged' ||
+        eventName == 'DayStarted' ||
+        eventName == 'DayEnding' ||
+        eventName == 'PlayerLevelChanged' ||
+        eventName == 'RelationshipChanged') {
+      sync(silent: true);
+    }
   }
 
   void _startTimer() {

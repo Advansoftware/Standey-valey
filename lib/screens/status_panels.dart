@@ -28,6 +28,7 @@ extension _StatusPanels on _StatusScreenState {
                       label: 'DINHEIRO',
                       value: moneyLabel(p.money),
                       color: _gold,
+                      onTap: () => showMoneyDetailDialog(context, p),
                     ),
                   ),
                   SizedBox(
@@ -38,6 +39,7 @@ extension _StatusPanels on _StatusScreenState {
                       value: '${p.stamina.round()}/${p.maxStamina}',
                       color: const Color(0xFF8BC34A),
                       fraction: p.maxStamina > 0 ? p.stamina / p.maxStamina : 0,
+                      onTap: () => showEnergyDetailDialog(context, p),
                     ),
                   ),
                   SizedBox(
@@ -48,6 +50,7 @@ extension _StatusPanels on _StatusScreenState {
                       value: '${p.health}/${p.maxHealth}',
                       color: _red,
                       fraction: p.maxHealth > 0 ? p.health / p.maxHealth : 0,
+                      onTap: () => showHealthDetailDialog(context, p),
                     ),
                   ),
                   SizedBox(
@@ -61,6 +64,7 @@ extension _StatusPanels on _StatusScreenState {
                           : const Color(0xFF8D6E63),
                       sub: luckPhrase(p.dailyLuck),
                       tooltip: p.dailyLuckDescription,
+                      onTap: () => showFortuneDetailDialog(context, p),
                     ),
                   ),
                 ],

@@ -227,3 +227,15 @@ As frases de "onde achar" do dataset vinham em inglês misturado com português
 (`LOC_PHRASES` em `tools/seed/enrich.py`) e a lista de nomes em PT-BR foi ampliada
 (mudas, gosmas, sementes, baús, presentes). Resultado: **nenhum campo das 563
 entradas fica com texto em inglês**.
+
+## Release v1.3.1 — Meu Status interativo e suporte a tempo real
+
+- Tag: `v1.3.1` — https://github.com/Advansoftware/Standey-valey/releases/tag/v1.3.1
+- Arquivo: `guia-do-vale-1.3.1.apk` (arm64, 70,3 MB, versionCode 5).
+- SHA-256: `2c547d4446f75e3e1f66c5c4df78bf7d113dc273e3d872d0fd937feabc549f07`.
+- **Novidades**:
+  - Diálogos de inspeção em Meu Status ao tocar em Dinheiro, Energia, Vida e Sorte.
+  - Diálogos detalhados de itens do inventário, conquistas e habilidades com profissões.
+  - Cliente WebSocket (`GameWebSocket`) para sincronização em tempo real de eventos da Stardew Web API (movimentação, inventário, relógio, etc.).
+  - Polling a cada 2s enquanto a tela de status estiver aberta.
+

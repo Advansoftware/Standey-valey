@@ -16,6 +16,8 @@ import '../widgets/common.dart';
 part 'status_panels.dart';
 part 'status_widgets.dart';
 part 'status_tiles.dart';
+part 'status_dialogs.dart';
+part 'status_entity_dialogs.dart';
 
 const _ink = Color(0xFF3A2414);
 const _paper = Color(0xFFF8EBCB);
@@ -70,6 +72,7 @@ class _StatusScreenState extends State<StatusScreen>
   String? _aiError;
   bool _aiBusy = false;
   bool _askedSync = false;
+  Timer? _liveTimer;
 
   @override
   void initState() {
@@ -77,6 +80,18 @@ class _StatusScreenState extends State<StatusScreen>
     WidgetsBinding.instance.addObserver(this);
     _immersive(true);
     _keepScreenOn(true);
+    _startLiveSync();
+  }
+
+  void _startLiveSync() {
+    _liveTimer?.cancel();
+    _liveTimer = Timer.periodic(const Duration(seconds: 2), (_) {
+      if (!mounted) return;
+      final api = AppScope.of(context).api;
+      if (api.connected) {
+        api.sync(silent: true);
+      }
+    });
   }
 
   @override
@@ -101,6 +116,7 @@ class _StatusScreenState extends State<StatusScreen>
 
   @override
   void dispose() {
+    _liveTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     _immersive(false);
     _keepScreenOn(false);
