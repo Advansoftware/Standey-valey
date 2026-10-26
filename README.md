@@ -32,9 +32,10 @@ Também tem:
   (fazenda, vila, montanha, minas, praia, floresta, deserto e Ilha Gengibre), com atalho para a wiki offline.
 - **Checklist** dos pacotes do Centro Comunitário, com barra de progresso.
 - **Tema claro e escuro**, seguindo o sistema.
-- **Assistente com IA local**: você pergunta ("o que faço no primeiro dia?") e ele procura no conteúdo do app.
-  Baixando um modelo uma única vez, ele passa a escrever a resposta no próprio celular, sem enviar nada
-  para a internet. Sem o modelo, mostra os trechos mais parecidos com a pergunta.
+- **Assistente com IA local**: você pergunta ("o que faço no primeiro dia?") e a resposta é escrita no
+  próprio celular, sem enviar nada para a internet. O modelo padrão é o **Espírito do Vale**, uma IA
+  treinada só com Stardew Valley que responde sem consultar nada. Sem modelo baixado, o assistente mostra
+  os trechos do app mais parecidos com a pergunta.
 
 ### Modelos de IA
 
@@ -42,7 +43,8 @@ O assistente deixa você escolher o modelo (o botão fica na aba Assistente):
 
 | Modelo | Download | RAM indicada | Quando usar |
 |---|---|---|---|
-| **Gemma 4 E4B** (padrão) | 3,7 GB | 8 GB+ | Melhor resposta;celulares com 8 GB ou mais |
+| **Espírito do Vale** (padrão) | 620 MB | 2 GB+ | Treinado com a wiki inteira; responde sem RAG e roda em qualquer celular |
+| Gemma 4 E4B | 3,7 GB | 8 GB+ | Modelo genérico com RAG; celulares com 8 GB ou mais |
 | Gemma 4 E2B | 2,6 GB | 4 GB+ | Mais leve e rápido, um pouco menos esperto |
 | Qwen3 4B | 2,7 GB | 6 GB+ | Alternativa rápida, muito boa em português |
 | LFM2.5 1.2B | 740 MB | 3 GB+ | Aparelhos fracos ou internet lenta |
@@ -124,7 +126,14 @@ com o jogo fechado, o app abre e funciona normalmente com o conteúdo embutido.
 
 ## IA local: como funciona
 
-O assistente não manda a pergunta para nenhum servidor. Ele combina técnicas simples e verificáveis:
+O assistente não manda a pergunta para nenhum servidor. Há dois modos, escolhidos pelo modelo:
+
+- **Espírito do Vale (sem RAG)**: o modelo recebe só a pergunta. Os fatos do jogo estão nos pesos do
+  modelo, aprendidos no fine-tuning (veja a próxima seção). O mesmo modelo faz o Conselheiro do
+  **Meu Status**: recebe o resumo do save e devolve até 3 linhas `AÇÃO | LUGAR | MOTIVO`, que viram cartões.
+- **Modelos genéricos (Gemma, Qwen3, LFM) com RAG**, descrito abaixo.
+
+No modo com RAG, o app combina técnicas simples e verificáveis:
 
 - **RAG local**: a pergunta vira uma busca BM25 no conteúdo do app (fichas + cerca de 9.900 trechos da wiki).
   Os melhores trechos entram no prompt como contexto, com o título e a categoria de cada ficha.
@@ -137,14 +146,69 @@ O assistente não manda a pergunta para nenhum servidor. Ele combina técnicas s
 - **Pós-processamento**: a resposta é limpa de tokens especiais e renderizada por um Markdown leve feito no
   projeto (negrito, itálico, código e listas), sem pacote externo e sem mostrar `*asteriscos*` literais.
 
-O modelo padrão é o **Gemma 4 E4B**. A aba Assistente permite trocar por modelos menores ou colar outra URL.
+A aba Assistente permite trocar de modelo ou colar a URL de outro `.litertlm`.
+
+## Espírito do Vale: o modelo treinado
+
+O Espírito do Vale é o **Qwen3-0.6B** com fine-tuning completo (todos os pesos) para Stardew Valley, em
+português. Ele foi escolhido por ser pequeno o bastante para qualquer celular (620 MB em int8, cerca de
+5 s por resposta na GPU de um Galaxy S20 FE) e bom em português.
+
+### Como foi feito
+
+1. **Dados gerados do próprio app** (`tools/modelo/`). Nada foi escrito à mão: os scripts leem as 565 fichas
+   da enciclopédia, os guias e as 1.300 páginas da wiki offline e montam cerca de 24 mil pares
+   pergunta → resposta:
+   - perguntas sobre cada campo de cada ficha (estação, preço, onde achar, presentes, horário de pesca…),
+     em várias formas de perguntar, com e sem acento;
+   - a ficha completa de cada item, cada seção dos guias e trechos da wiki;
+   - recusas para perguntas fora do jogo ("Qual a capital da França?") e para itens que não existem;
+   - 1.500 cenários sintéticos do Conselheiro: o script replica o prompt do Meu Status e as regras de
+     prioridade do app (missão, aniversário, festival, energia, clima…) para ensinar o formato
+     `AÇÃO | LUGAR | MOTIVO`.
+2. **Treino no Google Colab** (GPU L4): 4 épocas, bf16, taxa de aprendizado 2e-5, lote efetivo 32,
+   gradient checkpointing, cerca de 2h45 por rodada. O melhor checkpoint pela perda de validação é o que fica.
+3. **Avaliação antes de ir para o celular** (`evaluate.py`), com perguntas reformuladas que o modelo nunca
+   viu. Rodada 2: 99,3% dos fatos corretos, 206/208 respostas perfeitas, 13/15 perguntas reais,
+   nenhuma resposta em loop e 60/60 no formato e na prioridade do Conselheiro.
+4. **Conversão para LiteRT-LM** (`litert-torch export_hf`, pesos int8) e **troca do template de conversa**
+   (`patch_template.py`). O template original do Qwen3 só lê texto puro; o plugin do app manda a
+   mensagem em partes, e a pergunta chegava vazia. O template novo gera exatamente o prompt do treino.
+5. **Teste no celular** (chat e Conselheiro com a API simulada) e só então publicação no
+   [Hugging Face](https://huggingface.co/brunoantunes100/stardew-guia-qwen-0.5b). O modelo não vai dentro
+   do APK: o app baixa uma vez e roda offline.
+
+### Como treinar de novo
+
+O passo a passo completo está na skill [`.claude/skills/treinar-ia`](.claude/skills/treinar-ia/SKILL.md).
+Em resumo:
+
+```bash
+cd tools/modelo
+python build_status_dataset.py && python build_dataset_closed.py   # dados em closed/ e status/
+# envie train.py, evaluate.py, closed/ e status/ para o Colab e rode colab_rodada.py
+python patch_template.py modelo.litertlm modelo_fix.litertlm        # obrigatório depois da conversão
+HF_TOKEN=... python upload_model.py modelo_fix.litertlm "mensagem"  # substitui o modelo publicado
+```
+
+Para corrigir uma resposta errada, corrija a fonte (os assets do app ou o gerador de perguntas) e treine
+de novo. Não edite o dataset à mão: ele é regenerado a cada rodada.
 
 ## Como o projeto foi construído (com IA)
 
-O app, os scripts de dados e os testes foram desenvolvidos em pair programming com um modelo **gratuito** do
-OpenCode — **DeepSeek V4.1 Flash Free** —, com o autor definindo os requisitos, revisando cada mudança e
-validando o resultado no emulador. Não foi "pedir um app pronto": o trabalho foi dividido em etapas pequenas,
-com verificação automática e manual em cada uma.
+O app, os scripts de dados e os testes foram desenvolvidos em pair programming com IA, com o autor definindo
+os requisitos, revisando cada mudança e validando o resultado no emulador e no celular. Foram usadas:
+
+- **OpenCode com DeepSeek V4.1 Flash Free** (gratuito) nas primeiras versões: enciclopédia, wiki offline,
+  busca, RAG, mapa e integração com a API.
+- **Claude Code com Claude Opus** (pago) a partir da v1.5: redesenho no estilo do jogo, Meu Status ao vivo
+  via WebSocket, atualizador do app e o fine-tuning do Espírito do Vale.
+- **Google Colab com GPU L4** (unidades de computação pagas) para treinar e converter o modelo.
+
+O app em si não usa API paga nem manda dados para a internet.
+
+Não foi "pedir um app pronto": o trabalho foi dividido em etapas pequenas, com verificação automática e
+manual em cada uma.
 
 - **Pipeline de dados reproduzível**: `fetch_dataset.sh` → `build_seed.py` → `verify.py`, com checagem de IDs,
   imagens e campos obrigatórios. O mesmo script gera as 16 categorias e as fichas de guia.
@@ -161,8 +225,6 @@ com verificação automática e manual em cada uma.
   (por exemplo: `.litertlm` não roda no emulador x86_64; é preciso testar a busca nele).
 - **Builds otimizados**: Gradle com 10 GB de heap, cache, configuração sob demanda e 16 workers, para usar
   a máquina de 16 núcleos.
-
-Todo o desenvolvimento contou com esse modelo gratuito; o app em si não usa API paga nem manda dados para a internet.
 
 ## Rodando
 
@@ -181,7 +243,7 @@ A API não é necessária para rodar o app. Se for mexer nela, o submódulo vem 
 Pra gerar o APK: `flutter build apk --release --target-platform android-arm64`.
 O build é local; o GitHub Actions do fork não é usado.
 
-Testes: `flutter test` (37 testes que percorrem as telas, o mapa, a busca, os guias e a API) e `flutter analyze`.
+Testes: `flutter test` (49 testes que percorrem as telas, o mapa, a busca, os guias e a API) e `flutter analyze`.
 
 Para testar no celular físico via ADB sem fio, use a skill
 `.opencode/skills/android-phone-test` (passo a passo e helper `phone.sh`).
@@ -215,6 +277,7 @@ python3 tools/scrape_wiki.py       # gera assets/wiki/pages.json.gz e assets/dat
 - `tools/seed/`: scripts que geram o conteúdo
 - `tools/scrape_wiki.py`: baixa a wiki em português
 - `tools/make_icon.py`: gera o ícone do app
+- `tools/modelo/`: dataset, treino, avaliação e publicação do Espírito do Vale
 - `HANDOFF.md` e `PROGRESSO.md`: notas do desenvolvimento
 
 ## Créditos

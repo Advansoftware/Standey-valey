@@ -2,7 +2,7 @@
 
 > Arquivo de continuação para qualquer IA/pessoa que pegar o projeto. **Atualize este arquivo
 > a cada etapa concluída** (marque `[x]`, ajuste "Próximos passos") e faça commit + push.
-> Última atualização: 2026-10-26 (sessão 8 — redesenho completo no estilo do jogo, Meu Status com HUD ao vivo via WebSocket e release v1.5.0).
+> Última atualização: 2026-10-26 (sessão 9 — Espírito do Vale treinado sem RAG publicado no Hugging Face e release v1.5.2).
 
 ## 1. Objetivo (pedido do dono, Bruno)
 
@@ -21,7 +21,27 @@ Requisitos explícitos do dono:
   arquivos); **não perguntar nada**, decidir e seguir; **deixar o app pronto e testado**; **publicar a
   release v1.0.0 no GitHub** com a descrição do que tem na primeira versão.
 
-## 2. Estado atual (sessão 8)
+## 2. Estado atual (sessão 9)
+
+**Sessão 9 (v1.5.2, Espírito do Vale rodada 2):** o modelo padrão agora é um **Qwen3-0.6B com
+fine-tuning completo, sem RAG**, publicado em
+`brunoantunes100/stardew-guia-qwen-0.5b/stardew_qwen_0.5b.litertlm` (mesmo nome de antes; SHA-256
+`77c0ff9096bfe2dc244f39e7fed2d9ebde8ede79505883a766f78f70767e0656`, 620.991.120 bytes).
+- Avaliação da rodada 2 (antes do celular): 99,3% dos fatos em paráfrases inéditas, 206/208 respostas
+  perfeitas, 13/15 perguntas reais, 0 loops, Conselheiro 60/60 em formato e prioridade.
+- Testado no SM-G781B: chat (Abigail, baiacu, carvalho, recusa fora do jogo) e Conselheiro do Meu Status
+  com o mock. Download limpo pelo botão padrão do Hugging Face também testado.
+- **Bug achado no celular:** o template do Qwen3 embutido pelo conversor só lê `message.content` como
+  texto, e o `flutter_edge_ai` manda em partes; a pergunta chegava vazia. `tools/modelo/patch_template.py`
+  troca o template (obrigatório a cada conversão).
+- App: `ask(prompt, exact: true)` para o modelo próprio (topK 1, temperatura 0, 360 tokens).
+  O tipo fica `ModelType.qwen`: com `qwen3` o plugin acrescenta " /no_think" à pergunta.
+- Scripts de treino versionados em `tools/modelo/`; passo a passo na skill `.claude/skills/treinar-ia`.
+  Resultados e checkpoints em `C:/modelo/rodadas` (fora do Git).
+- **Próxima rodada (r3):** "como conseguir uma galinha" deve citar a Marnie (hoje responde a seção do
+  guia sem ela) e, no Conselheiro, o aniversário do dia deve entrar como segundo item quando já há
+  missão (hoje cai num presente para o amigo mais próximo). README atualizado com o processo.
+
 
 **Sessão 8 (v1.5.0 e v1.5.1):** a v1.5.1 corrige o atualizador (APK salvo na pasta `cache`, que o
 FileProvider libera; pedido da permissão "Instalar apps desconhecidos"; versão lida do Android;
@@ -319,6 +339,7 @@ pareamento; a de conexão é a mostrada na tela principal de depuração sem fio
 
 | Versão | Link | Asset | SHA-256 |
 |---|---|---|---|
+| App 1.5.2+10 | https://github.com/Advansoftware/Standey-valey/releases/tag/v1.5.2 | `guia-do-vale-1.5.2.apk` (arm64) | `5d60375e55bc23bce2162b33881ca5acf3ea22bfd1948d2974c81a55f10c9100` |
 | App 1.5.1+9 | https://github.com/Advansoftware/Standey-valey/releases/tag/v1.5.1 | `guia-do-vale-1.5.1.apk` (arm64) | `879a865fbada2315e07fd5276cb4be7224daa7d54f4b10dcd8dafeef0b997186` |
 | App 1.5.0+8 | https://github.com/Advansoftware/Standey-valey/releases/tag/v1.5.0 | `guia-do-vale-1.5.0.apk` (arm64) | `7358b9aba38cad3d71397d808f80012acf139c7d3c4c23f31c057aa476c0d981` |
 | App 1.3.0+4 | https://github.com/Advansoftware/Standey-valey/releases/tag/v1.3.0 | `guia-do-vale-1.3.0.apk` (arm64) | `df81e2cc9c88308b47bf7083b4fa0bd3d42d1c3d3136806f290fbca5accd7bbf` |

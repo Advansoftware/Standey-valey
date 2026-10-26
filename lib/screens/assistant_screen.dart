@@ -101,7 +101,7 @@ class _AssistantScreenState extends State<AssistantScreen> {
         final buf = StringBuffer();
         final currentModel = aiModelById(scope.store.aiModelId) ?? defaultAiModel;
         final prompt = buildPrompt(q, hits, isFineTuned: currentModel.isFineTuned);
-        await for (final tok in scope.ai.ask(prompt)) {
+        await for (final tok in scope.ai.ask(prompt, exact: currentModel.isFineTuned)) {
           buf.write(tok);
           if (!mounted) return;
           setState(() => answer.text = cleanAnswer(buf.toString()));

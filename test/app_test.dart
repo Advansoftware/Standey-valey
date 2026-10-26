@@ -614,7 +614,7 @@ class _FakeAi extends AiService {
   int calls = 0;
 
   @override
-  Stream<String> ask(String prompt) async* {
+  Stream<String> ask(String prompt, {bool exact = false}) async* {
     calls++;
     yield '1. Regar as plantas | Fazenda | O dia está ensolarado\n';
     yield '2. Visitar a Abigail | Vila Pelicanos | Ela está quase no próximo coração\n';

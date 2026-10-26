@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../ai_models.dart';
 import '../ai_service.dart';
 import '../app_scope.dart';
 import '../game_api.dart';
@@ -174,7 +175,8 @@ class _StatusScreenState extends State<StatusScreen>
 
     try {
       final buf = StringBuffer();
-      await for (final token in scope.ai.ask(prompt)) {
+      await for (final token in scope.ai.ask(prompt,
+          exact: (aiModelById(scope.store.aiModelId) ?? defaultAiModel).isFineTuned)) {
         buf.write(token);
       }
       if (!mounted) return;

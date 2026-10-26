@@ -55,10 +55,12 @@ const List<AiModel> aiModels = [
     name: 'Espírito do Vale',
     repo: 'brunoantunes100/stardew-guia-qwen-0.5b',
     url: 'https://huggingface.co/brunoantunes100/stardew-guia-qwen-0.5b/resolve/main/stardew_qwen_0.5b.litertlm',
-    sizeGb: 0.65,
+    sizeGb: 0.62,
     ram: '2 GB+',
+    // Qwen3-0.6B treinado (tools/modelo). Fica `qwen`, não `qwen3`: com `qwen3` o
+    // plugin acrescenta " /no_think" à pergunta e foge do formato do treino.
     type: ModelType.qwen,
-    note: 'IA nativa treinada especialmente para Stardew Valley. Respostas instantâneas, leve e 100% offline.',
+    note: 'IA nativa treinada com a wiki inteira de Stardew Valley. Responde sem consultar nada, leve e 100% offline.',
     isFineTuned: true,
   ),
   AiModel(

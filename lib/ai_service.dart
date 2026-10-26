@@ -104,14 +104,17 @@ class AiService extends ChangeNotifier {
   }
 
   /// Gera a resposta em streaming, token a token.
-  Stream<String> ask(String prompt) async* {
+  ///
+  /// [exact]: modelo próprio (Espírito do Vale). Decodificação gulosa, igual à
+  /// avaliação do treino, para repetir os fatos exatamente como aprendidos.
+  Stream<String> ask(String prompt, {bool exact = false}) async* {
     final model = await FlutterEdgeAi.getActiveModel(maxTokens: 2048);
     try {
       final chat = await model.createChat(
-        maxOutputTokens: 220,
-        temperature: 0.2,
-        topP: 0.85,
-        topK: 40,
+        maxOutputTokens: exact ? 360 : 220,
+        temperature: exact ? 0.0 : 0.2,
+        topP: exact ? 1.0 : 0.85,
+        topK: exact ? 1 : 40,
       );
       await chat.addQueryChunk(Message.text(text: prompt, isUser: true));
 
