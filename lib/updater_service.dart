@@ -5,8 +5,9 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-const String currentAppVersion = '1.4.0';
-const int currentAppBuildNumber = 7;
+/// Versão instalada. Começa com a do pubspec e é confirmada pelo Android
+/// (versionName do pacote) na primeira verificação de atualização.
+String currentAppVersion = '1.5.1';
 const String githubRepoOwner = 'Advansoftware';
 const String githubRepoName = 'Standey-valey';
 
@@ -91,6 +92,20 @@ class UpdaterService extends ChangeNotifier {
   bool get isNewVersionAvailable =>
       status == UpdateStatus.available && latestRelease != null;
 
+  bool _versionLoaded = false;
+
+  /// Lê a versão real do app instalado (evita oferecer a mesma versão de novo).
+  Future<void> _loadInstalledVersion() async {
+    if (_versionLoaded) return;
+    _versionLoaded = true;
+    try {
+      final v = await _channel.invokeMethod<String>('versionName');
+      if (v != null && v.trim().isNotEmpty) currentAppVersion = v.trim();
+    } catch (_) {
+      // Testes e plataformas sem o canal nativo: fica a versão do pubspec.
+    }
+  }
+
   /// Verifica se há uma versão mais recente no GitHub Releases público.
   Future<bool> checkForUpdates({bool silent = false}) async {
     if (status == UpdateStatus.checking || status == UpdateStatus.downloading) {
@@ -99,6 +114,7 @@ class UpdaterService extends ChangeNotifier {
     status = UpdateStatus.checking;
     errorMessage = null;
     if (!silent) notifyListeners();
+    await _loadInstalledVersion();
 
     try {
       final client = HttpClient()..connectionTimeout = const Duration(seconds: 10);
@@ -226,8 +242,9 @@ class UpdaterService extends ChangeNotifier {
         totalBytes = contentLength;
       }
 
-      final tempDir = Directory.systemTemp;
-      final targetFile = File('${tempDir.path}/${release.apkName.isNotEmpty ? release.apkName : 'guia-do-vale-update.apk'}');
+      // Precisa ser a pasta cache do app: é a liberada no FileProvider.
+      final cacheDir = await _channel.invokeMethod<String>('cacheDir') ?? Directory.systemTemp.path;
+      final targetFile = File('$cacheDir/${release.apkName.isNotEmpty ? release.apkName : 'guia-do-vale-update.apk'}');
       if (await targetFile.exists()) {
         await targetFile.delete();
       }
@@ -280,11 +297,13 @@ class UpdaterService extends ChangeNotifier {
     }
 
     try {
+      errorMessage = null;
       final ok = await _channel.invokeMethod<bool>('installApk', {'path': path});
       return ok == true;
     } on PlatformException catch (e) {
       errorMessage = e.message ?? 'Falha ao abrir o instalador de pacotes.';
-      status = UpdateStatus.error;
+      // Sem permissão o APK continua baixado: basta permitir e tocar em Instalar.
+      status = e.code == 'needs_permission' ? UpdateStatus.readyToInstall : UpdateStatus.error;
       notifyListeners();
       return false;
     } catch (e) {

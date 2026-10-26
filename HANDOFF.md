@@ -23,6 +23,10 @@ Requisitos explícitos do dono:
 
 ## 2. Estado atual (sessão 8)
 
+**Sessão 8 (v1.5.0 e v1.5.1):** a v1.5.1 corrige o atualizador (APK salvo na pasta `cache`, que o
+FileProvider libera; pedido da permissão "Instalar apps desconhecidos"; versão lida do Android;
+notas da versão em Markdown). Versões até a 1.5.0 precisam instalar a 1.5.1 manualmente uma vez.
+
 **Sessão 8 (v1.5.0):** o app inteiro foi redesenhado no estilo da interface do Stardew Valley.
 - `lib/widgets/stardew_ui.dart` reúne as peças reutilizáveis: `SdvFrame` (moldura de madeira em
   pixel art), `SdvSlot`, `SdvHearts`, `SdvLevelBoxes`, `SdvVitalBar`, `SdvButton`, `SdvIconButton`,
@@ -315,6 +319,7 @@ pareamento; a de conexão é a mostrada na tela principal de depuração sem fio
 
 | Versão | Link | Asset | SHA-256 |
 |---|---|---|---|
+| App 1.5.1+9 | https://github.com/Advansoftware/Standey-valey/releases/tag/v1.5.1 | `guia-do-vale-1.5.1.apk` (arm64) | `879a865fbada2315e07fd5276cb4be7224daa7d54f4b10dcd8dafeef0b997186` |
 | App 1.5.0+8 | https://github.com/Advansoftware/Standey-valey/releases/tag/v1.5.0 | `guia-do-vale-1.5.0.apk` (arm64) | `7358b9aba38cad3d71397d808f80012acf139c7d3c4c23f31c057aa476c0d981` |
 | App 1.3.0+4 | https://github.com/Advansoftware/Standey-valey/releases/tag/v1.3.0 | `guia-do-vale-1.3.0.apk` (arm64) | `df81e2cc9c88308b47bf7083b4fa0bd3d42d1c3d3136806f290fbca5accd7bbf` |
 | App 1.2.0+3 | https://github.com/Advansoftware/Standey-valey/releases/tag/v1.2.0 | `guia-do-vale-1.2.0.apk` (arm64) | `a3973894a3d14ee5b749d7e5f0091603072fa99449b159c48d1e8a747da8c57b` |

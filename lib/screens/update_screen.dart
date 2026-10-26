@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../app_scope.dart';
 import '../updater_service.dart';
+import '../widgets/markdown_lite.dart';
 
 const _ink = Color(0xFF3A2414);
 const _paper = Color(0xFFF8EBCB);
@@ -82,13 +83,10 @@ class _UpdateScreenState extends State<UpdateScreen> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                Text(
+                MarkdownLite(
                   updater.currentReleaseInfo?.body.isNotEmpty == true
                       ? updater.currentReleaseInfo!.body
-                      : '• Tela Meu Status interativa com inspeção em tempo real.\n'
-                          '• Sincronização automática com a Stardew Web API.\n'
-                          '• Sistema de atualização automática direto pelo GitHub.\n'
-                          '• Enciclopédia 100% offline com 565 fichas ilustradas.',
+                      : 'Carregando as novidades desta versão…',
                   style: const TextStyle(fontSize: 13, height: 1.4, color: _ink),
                 ),
               ],
@@ -366,14 +364,9 @@ class _UpdateScreenState extends State<UpdateScreen> {
               color: Colors.black.withValues(alpha: 0.04),
               borderRadius: BorderRadius.circular(10),
             ),
-            constraints: const BoxConstraints(maxHeight: 160),
-            child: SingleChildScrollView(
-              child: Text(
-                release.body.isNotEmpty
-                    ? release.body
-                    : 'Melhorias de desempenho e correções.',
-                style: const TextStyle(fontSize: 12, height: 1.35, color: _ink),
-              ),
+            child: MarkdownLite(
+              release.body.isNotEmpty ? release.body : 'Melhorias de desempenho e correções.',
+              style: const TextStyle(fontSize: 13, height: 1.4, color: _ink),
             ),
           ),
           const SizedBox(height: 16),
@@ -436,6 +429,15 @@ class _UpdateScreenState extends State<UpdateScreen> {
                 style: TextStyle(fontWeight: FontWeight.w700),
               ),
               onPressed: () => updater.installDownloadedApk(),
+            ),
+          if (isReady && updater.errorMessage != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 10),
+              child: Text(
+                updater.errorMessage!,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 13, color: Color(0xFFB0261C), fontWeight: FontWeight.w700),
+              ),
             )
           else if (!isDownloading)
             FilledButton.icon(

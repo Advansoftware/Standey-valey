@@ -5,8 +5,10 @@ import android.content.Intent
 import android.net.Uri
 import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.provider.Settings
 import android.view.WindowManager
 import androidx.core.content.FileProvider
 import io.flutter.embedding.android.FlutterActivity
@@ -65,6 +67,12 @@ class MainActivity : FlutterActivity() {
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, UPDATER_CHANNEL)
             .setMethodCallHandler { call, result ->
                 when (call.method) {
+                    // Pasta liberada no FileProvider (cache-path). O Directory.systemTemp do
+                    // Dart aponta para code_cache, que o FileProvider recusa.
+                    "cacheDir" -> result.success(cacheDir.absolutePath)
+                    "versionName" -> result.success(
+                        packageManager.getPackageInfo(packageName, 0).versionName ?: ""
+                    )
                     "installApk" -> {
                         val path = call.argument<String>("path")
                         if (path != null) {
@@ -83,6 +91,23 @@ class MainActivity : FlutterActivity() {
             val file = File(path)
             if (!file.exists()) {
                 result.error("file_not_found", "Arquivo APK não existe em $path", null)
+                return
+            }
+            // Android 8+: sem a permissão "Instalar apps desconhecidos" o instalador
+            // fecha na hora. Leva a pessoa direto para a tela da permissão.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
+                !packageManager.canRequestPackageInstalls()
+            ) {
+                val settings = Intent(
+                    Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                    Uri.parse("package:$packageName")
+                ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                startActivity(settings)
+                result.error(
+                    "needs_permission",
+                    "Permita \"Instalar apps desconhecidos\" para o Guia do Vale e toque em Instalar de novo.",
+                    null
+                )
                 return
             }
             val uri = FileProvider.getUriForFile(
