@@ -794,7 +794,11 @@ class GameApi extends ChangeNotifier with WidgetsBindingObserver {
       if (to.isNotEmpty) snapshot = snapshot!.withLocation(to);
     }
 
-    final msg = hudMessageFor(e, place: (raw) => locationInfo(raw).displayName);
+    final msg = hudMessageFor(
+      e,
+      place: (raw) => locationInfo(raw).displayName,
+      npc: (raw) => villagerEntry(repo, raw)?.name ?? raw,
+    );
     if (msg != null) {
       hud.insert(0, msg);
       if (hud.length > 6) hud.removeRange(6, hud.length);

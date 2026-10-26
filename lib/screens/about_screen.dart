@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../app_scope.dart';
 import '../app_theme.dart';
 import '../models.dart';
+import '../widgets/sdv_notice.dart';
 import '../widgets/stardew_ui.dart';
 
 import 'update_screen.dart';
@@ -348,7 +349,7 @@ class _ApiCardState extends State<_ApiCard> {
 
   void _snack(String message) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    showSdvNotice(context, message);
   }
 
   static String _formatDate(DateTime d) {

@@ -898,7 +898,7 @@ String buildStatusPrompt({
     ..sort((a, b) => b.hearts.compareTo(a.hearts));
   if (friends.isNotEmpty) {
     b.writeln(
-      '- Amizades: ${friends.take(6).map((r) => '${r.npcName} ${r.hearts}♥${r.isMarried ? ' (casado)' : ''}').join(', ')}.',
+      '- Amizades: ${friends.take(6).map((r) => '${villagerEntry(repo, r.npcName)?.name ?? r.npcName} ${r.hearts}♥${r.isMarried ? ' (casado)' : ''}').join(', ')}.',
     );
   }
   if (p.skills.isNotEmpty) {

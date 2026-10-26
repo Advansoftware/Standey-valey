@@ -23,6 +23,24 @@ Requisitos explícitos do dono:
 
 ## 2. Estado atual (sessão 9)
 
+**Sessão 9, parte 2 (correções do app; treino pausado a pedido do dono):**
+- Aviso "Conecte ao servidor do jogo" virou `showSdvNotice` (`lib/widgets/sdv_notice.dart`): aviso no
+  topo, no estilo do jogo, que some sozinho em 4 s. No Flutter 3.47 um `SnackBar` com ação fica preso
+  na tela (`persist` vira true); todos os SnackBars do app foram trocados pelo aviso novo.
+- Busca da wiki: o resultado mostra a frase que combina com a busca, com as palavras destacadas, e a
+  página abre rolada até o trecho (`lib/search_snippet.dart`, testes em `test/search_snippet_test.dart`).
+- Português: 47 nomes que estavam em inglês nas fichas (38 peixes, culturas, pratos, monstros) e 126
+  termos dentro dos textos (varas de pesca, Omnigeodo, Minas Perigosas, Carne de Inseto…) foram
+  traduzidos com os nomes da wiki em português. Animais ganharam "Onde comprar" (Rancho da Marnie) ou
+  "Como conseguir". Nomes de moradores vindos da API passam pela ficha (Wizard → Mago).
+- **Treino pausado.** Decisão para quando voltar: Gemma 4 E2B (o `litert-torch export_hf` suporta, com
+  `--externalize_embedder` e o template do `litert-community`, que já aceita mensagem em partes),
+  treinado com 100% da wiki. `tools/modelo/gen_wiki_qa.py` gera perguntas de todos os 9.581 trechos
+  com um modelo professor (vLLM). O piloto (`colab_piloto.py`) deu OOM na A100 de 40 GB no treino
+  completo do E2B: usar AdamW 8-bit ou a A100 80 GB (`--high-mem`). H100 não está liberada na conta.
+  A rodada 2 (Qwen3-0.6B) continua publicada; ela só cobre fichas e guias, não os detalhes da wiki.
+
+
 **Sessão 9 (v1.5.2, Espírito do Vale rodada 2):** o modelo padrão agora é um **Qwen3-0.6B com
 fine-tuning completo, sem RAG**, publicado em
 `brunoantunes100/stardew-guia-qwen-0.5b/stardew_qwen_0.5b.litertlm` (mesmo nome de antes; SHA-256

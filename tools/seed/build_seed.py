@@ -162,9 +162,19 @@ entries["habilidades"] = sk
 
 # ----------------------------------------------------------- ANIMAIS
 alt_img = {"Chicken": "White_Chicken.png", "Cow": "White_Cow.png"}
+ANIMAL_ORIGIN = {
+    "Dinosaur": "Choque um Ovo de dinossauro na Incubadora do Galinheiro grande",
+    "Ostrich": "Choque um Ovo de avestruz na Incubadora de avestruz, dentro do Celeiro",
+    "Horse": "Vem junto com o Estábulo, construído pelo Robin na Carpintaria",
+}
 an = []
 for en, pt, pred, preco, prod, nota, emoji in D.ANIMALS:
-    fields = [["Onde vive", pred], ["Preço", fmt_g(preco) if preco else "Não é comprado"], ["Produtos", prod]]
+    fields = [["Onde vive", pred], ["Preço", fmt_g(preco) if preco else "Não é comprado"]]
+    if preco:
+        fields.append(["Onde comprar", "Rancho da Marnie (Floresta Cinzaseiva), 9h–16h; fechado segunda e terça"])
+    elif en in ANIMAL_ORIGIN:
+        fields.append(["Como conseguir", ANIMAL_ORIGIN[en]])
+    fields.append(["Produtos", prod])
     an.append({
         "id": "animal_" + slug(en), "en": en, "pt": pt, "emoji": emoji,
         "sub": f"{pred}" + (f" · {fmt_g(preco)}" if preco else ""),

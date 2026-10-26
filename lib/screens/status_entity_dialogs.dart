@@ -2,7 +2,7 @@ part of 'status_screen.dart';
 
 /// Modal detalhado para Amizades e Moradores com presentes amados.
 void showVillagerDetailDialog(BuildContext context, ApiRelationship rel, Entry? entry) {
-  final name = rel.npcName;
+  final name = entry?.name ?? rel.npcName;
   final status = rel.isMarried
       ? '💍 Casado(a)'
       : rel.isEngaged

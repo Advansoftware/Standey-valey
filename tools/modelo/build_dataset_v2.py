@@ -496,7 +496,7 @@ GUIA_QS = {
     'guia_pesca': ['Como pescar?', 'Dicas de pesca para iniciante', 'Qual vara de pesca comprar primeiro?'],
     'guia_minas': ['Dicas para as minas', 'O que levar para as minas?', 'Quantos andares têm as minas?'],
     'guia_centro': ['Centro Comunitário ou JojaMart?', 'Vale a pena o Centro Comunitário?', 'Como funcionam os pacotes dos Junimos?'],
-    'guia_animais': ['Como começar a criar animais?', 'Como conseguir uma galinha?', 'Quanto custa o galinheiro?'],
+    'guia_animais': ['Como começar a criar animais?', 'Quanto custa o galinheiro?'],
     'guia_casamento': ['Como casar?', 'Com quem posso casar?', 'Onde compro o Pingente de Sereia?'],
     'guia_lavoura': ['Como plantar?', 'Minha planta morreu na troca de estação, por quê?', 'Como evitar corvos?'],
     'guia_erros': ['Quais erros evitar no começo?', 'Erros comuns de iniciante', 'O que não fazer no início?'],

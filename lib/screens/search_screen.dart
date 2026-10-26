@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../app_scope.dart';
 import '../models.dart';
 import '../search.dart';
+import '../search_snippet.dart';
 import '../widgets/common.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -93,7 +94,12 @@ class _SearchScreenState extends State<SearchScreen> {
               if (search.wikiLoading) const LinearProgressIndicator(minHeight: 3),
               Expanded(
                 child: _query.trim().isEmpty
-                    ? const _Hint()
+                    ? _Hint(
+                        onPick: (q) {
+                          _controller.text = q;
+                          setState(() => _query = q);
+                        },
+                      )
                     : shown.isEmpty
                         ? Center(
                             child: Padding(
@@ -113,7 +119,7 @@ class _SearchScreenState extends State<SearchScreen> {
                               final h = shown[i];
                               final entry = search.entryOf(h.doc);
                               if (entry != null) return EntryTile(entry: entry);
-                              return _WikiTile(hit: h);
+                              return _WikiTile(hit: h, query: _query);
                             },
                           ),
               ),
@@ -126,7 +132,8 @@ class _SearchScreenState extends State<SearchScreen> {
 }
 
 class _Hint extends StatelessWidget {
-  const _Hint();
+  final ValueChanged<String> onPick;
+  const _Hint({required this.onPick});
 
   @override
   Widget build(BuildContext context) {
@@ -140,7 +147,7 @@ class _Hint extends StatelessWidget {
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: [for (final e in examples) Chip(label: Text(e))],
+          children: [for (final e in examples) ActionChip(label: Text(e), onPressed: () => onPick(e))],
         ),
         const SizedBox(height: 16),
         Text('${repo.all.length} itens na enciclopédia, tudo offline.'),
@@ -151,44 +158,100 @@ class _Hint extends StatelessWidget {
 
 class _WikiTile extends StatelessWidget {
   final Hit hit;
-  const _WikiTile({required this.hit});
+  final String query;
+  const _WikiTile({required this.hit, required this.query});
 
   @override
   Widget build(BuildContext context) {
     final search = AppScope.of(context).search;
     final title = hit.doc.pageTitle ?? hit.doc.title;
-    var snippet = hit.doc.text.replaceAll(RegExp(r'\s+'), ' ').trim();
-    if (snippet.length > 160) snippet = '${snippet.substring(0, 160)}…';
+    final theme = Theme.of(context);
+    final mark = TextStyle(fontWeight: FontWeight.w800, color: theme.colorScheme.primary);
     return ListTile(
       leading: const Text('📜', style: TextStyle(fontSize: 26)),
       title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
-      subtitle: Text(snippet, maxLines: 3, overflow: TextOverflow.ellipsis),
+      subtitle: Text.rich(
+        TextSpan(children: highlightSpans(bestSnippet(hit.doc.text, query), query, mark)),
+        maxLines: 4,
+        overflow: TextOverflow.ellipsis,
+      ),
       onTap: () {
         final page = search.pages[title];
         if (page != null) {
-          Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => WikiPageScreen(page: page)));
+          Navigator.of(context).push(MaterialPageRoute<void>(
+            builder: (_) => WikiPageScreen(page: page, query: query, focusText: hit.doc.text),
+          ));
         }
       },
     );
   }
 }
 
-/// Leitura de um artigo da wiki offline.
-class WikiPageScreen extends StatelessWidget {
+/// Leitura de um artigo da wiki offline. Com [query], rola até o trecho da busca
+/// ([focusText], ou o que mais combina) e destaca as palavras buscadas.
+class WikiPageScreen extends StatefulWidget {
   final WikiPage page;
-  const WikiPageScreen({super.key, required this.page});
+  final String query;
+  final String? focusText;
+  const WikiPageScreen({super.key, required this.page, this.query = '', this.focusText});
+
+  @override
+  State<WikiPageScreen> createState() => _WikiPageScreenState();
+}
+
+class _WikiPageScreenState extends State<WikiPageScreen> {
+  final _focusKey = GlobalKey();
+  late final int _focus = widget.query.trim().isEmpty
+      ? -1
+      : (widget.focusText != null && widget.page.chunks.contains(widget.focusText)
+          ? widget.page.chunks.indexOf(widget.focusText!)
+          : bestChunk(widget.page.chunks, widget.query));
+
+  @override
+  void initState() {
+    super.initState();
+    if (_focus > 0) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final ctx = _focusKey.currentContext;
+        if (ctx != null) Scrollable.ensureVisible(ctx, alignment: 0.05, duration: const Duration(milliseconds: 350));
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final body = theme.textTheme.bodyLarge;
+    final mark = TextStyle(
+      fontWeight: FontWeight.w800,
+      backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.22),
+    );
+    final chunks = widget.page.chunks;
     return Scaffold(
-      appBar: AppBar(title: Text(page.title, maxLines: 1, overflow: TextOverflow.ellipsis)),
-      body: ListView(
+      appBar: AppBar(title: Text(widget.page.title, maxLines: 1, overflow: TextOverflow.ellipsis)),
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
-        children: [
-          SelectableText(page.text, style: Theme.of(context).textTheme.bodyLarge),
-          const SizedBox(height: 16),
-          Text('Texto da Stardew Valley Wiki (CC BY-NC-SA 3.0).', style: Theme.of(context).textTheme.bodySmall),
-        ],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (var i = 0; i < chunks.length; i++)
+              Container(
+                key: i == _focus ? _focusKey : null,
+                margin: const EdgeInsets.only(bottom: 16),
+                padding: i == _focus ? const EdgeInsets.all(10) : EdgeInsets.zero,
+                decoration: i == _focus
+                    ? BoxDecoration(
+                        color: theme.colorScheme.primary.withValues(alpha: 0.07),
+                        border: Border(left: BorderSide(color: theme.colorScheme.primary, width: 3)),
+                      )
+                    : null,
+                child: SelectableText.rich(
+                  TextSpan(style: body, children: highlightSpans(chunks[i], widget.query, mark)),
+                ),
+              ),
+            Text('Texto da Stardew Valley Wiki (CC BY-NC-SA 3.0).', style: theme.textTheme.bodySmall),
+          ],
+        ),
       ),
     );
   }

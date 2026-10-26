@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../app_scope.dart';
 import '../app_theme.dart';
 import '../models.dart';
+import '../widgets/sdv_notice.dart';
 import '../widgets/common.dart';
 import '../widgets/stardew_ui.dart';
 
@@ -56,14 +57,29 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     Row(
                       children: [
                         for (final d in ['S', 'T', 'Q', 'Q', 'S', 'S', 'D'])
-                          Expanded(child: Center(child: Text(d, style: const TextStyle(fontWeight: FontWeight.w700)))),
+                          Expanded(
+                            child: Center(
+                              child: Text(
+                                d,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ),
                       ],
                     ),
                     const SizedBox(height: 6),
                     for (var week = 0; week < 4; week++)
                       Row(
                         children: [
-                          for (var i = 0; i < 7; i++) Expanded(child: _DayCell(season: season, day: week * 7 + i + 1)),
+                          for (var i = 0; i < 7; i++)
+                            Expanded(
+                              child: _DayCell(
+                                season: season,
+                                day: week * 7 + i + 1,
+                              ),
+                            ),
                         ],
                       ),
                   ],
@@ -78,14 +94,31 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       onTap: () => openEntry(context, ev.entry),
                       child: Row(
                         children: [
-                          SdvSlot(size: 46, child: Text(ev.emoji, style: const TextStyle(fontSize: 22))),
+                          SdvSlot(
+                            size: 46,
+                            child: Text(
+                              ev.emoji,
+                              style: const TextStyle(fontSize: 22),
+                            ),
+                          ),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(ev.label, style: sdvText(15, color: Theme.of(context).colorScheme.onSurface)),
-                                Text('${seasonNames[season]} $d', style: Theme.of(context).textTheme.bodySmall),
+                                Text(
+                                  ev.label,
+                                  style: sdvText(
+                                    15,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurface,
+                                  ),
+                                ),
+                                Text(
+                                  '${seasonNames[season]} $d',
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
                               ],
                             ),
                           ),
@@ -118,24 +151,34 @@ class _DayCell extends StatelessWidget {
       onTap: () => _showDay(context, events),
       onLongPress: () {
         store.setDate(season, day);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Data do jogo: ${seasonNames[season]} $day')),
-        );
+        showSdvNotice(context, 'Data do jogo: ${seasonNames[season]} $day');
       },
       child: Container(
         margin: const EdgeInsets.all(2),
         height: 54,
         decoration: BoxDecoration(
-          color: isToday ? scheme.primary.withValues(alpha: 0.25) : (events.isNotEmpty ? const Color(0xFFF9A825).withValues(alpha: 0.16) : null),
+          color: isToday
+              ? scheme.primary.withValues(alpha: 0.25)
+              : (events.isNotEmpty
+                    ? const Color(0xFFF9A825).withValues(alpha: 0.16)
+                    : null),
           borderRadius: BorderRadius.circular(3),
           border: isToday ? Border.all(color: scheme.primary, width: 2) : null,
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('$day', style: TextStyle(fontWeight: isToday ? FontWeight.w700 : FontWeight.w600)),
+            Text(
+              '$day',
+              style: TextStyle(
+                fontWeight: isToday ? FontWeight.w700 : FontWeight.w600,
+              ),
+            ),
             if (events.isNotEmpty)
-              Text(events.take(2).map((e) => e.emoji).join(), style: const TextStyle(fontSize: 12)),
+              Text(
+                events.take(2).map((e) => e.emoji).join(),
+                style: const TextStyle(fontSize: 12),
+              ),
           ],
         ),
       ),
@@ -154,14 +197,22 @@ class _DayCell extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('${seasonNames[season]} $day', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700)),
+              Text(
+                '${seasonNames[season]} $day',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+              ),
               const SizedBox(height: 8),
               if (events.isEmpty) const Text('Sem eventos neste dia.'),
               for (final ev in events)
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: Text(ev.emoji, style: const TextStyle(fontSize: 26)),
-                  title: Text(ev.label, style: const TextStyle(fontWeight: FontWeight.w700)),
+                  title: Text(
+                    ev.label,
+                    style: const TextStyle(fontWeight: FontWeight.w700),
+                  ),
                   onTap: () {
                     Navigator.of(context).pop();
                     openEntry(context, ev.entry);
@@ -174,8 +225,9 @@ class _DayCell extends StatelessWidget {
                 onPressed: () {
                   store.setDate(season, day);
                   Navigator.of(context).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Data do jogo: ${seasonNames[season]} $day')),
+                  showSdvNotice(
+                    context,
+                    'Data do jogo: ${seasonNames[season]} $day',
                   );
                 },
               ),

@@ -7,6 +7,7 @@ import 'category_screen.dart';
 import 'favorites_screen.dart';
 import 'home_screen.dart';
 import 'status_screen.dart';
+import '../widgets/sdv_notice.dart';
 import '../widgets/stardew_ui.dart';
 
 class AppShell extends StatefulWidget {
@@ -24,20 +25,13 @@ class _AppShellState extends State<AppShell> {
       openStatusScreen(context);
       return;
     }
-    final messenger = ScaffoldMessenger.of(context);
-    messenger.hideCurrentSnackBar();
-    messenger.showSnackBar(
-      SnackBar(
-        content: const Text(
-          'Conecte ao servidor do jogo para abrir Meu Status.',
-        ),
-        action: SnackBarAction(
-          label: 'Conectar',
-          onPressed: () => Navigator.of(
-            context,
-          ).push(MaterialPageRoute<void>(builder: (_) => const AboutScreen())),
-        ),
-      ),
+    showSdvNotice(
+      context,
+      'Conecte ao servidor do jogo para abrir Meu Status.',
+      actionLabel: 'Conectar',
+      onAction: () => Navigator.of(
+        context,
+      ).push(MaterialPageRoute<void>(builder: (_) => const AboutScreen())),
     );
   }
 

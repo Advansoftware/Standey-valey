@@ -341,6 +341,12 @@ def answer(w, p, loc, nxt, tips):
     else:
         lines.append(weather_line(w, loc))
 
+    # Aniversário hoje vale 8x a amizade: entra logo depois da prioridade principal.
+    if kind != 'birthday' and w['birthdays']:
+        v = w['birthdays'][0]
+        gift = f" ({v['loves'][0]})" if v['loves'] else ''
+        lines.append(f"Dar um presente amado para {v['name']}{gift} | {short_place(v['home'])} | Hoje é aniversário: o presente vale 8x")
+
     for title, body, k in tips:
         if len(lines) >= 3:
             break

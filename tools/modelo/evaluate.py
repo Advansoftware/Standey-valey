@@ -22,11 +22,13 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 
 sys.stdout.reconfigure(encoding='utf-8')
 HERE = os.path.dirname(os.path.abspath(__file__))
-BASE = 'Qwen/Qwen3-0.6B'
+BASE = 'google/gemma-4-E2B-it'
 
 
-def device_chat_text(prompt):
-    return f'<|im_start|>user\n{prompt}<|im_end|>\n<|im_start|>assistant\n'
+def device_chat_text(tok, prompt):
+    """Mesmo prompt do treino e do celular: template do modelo, sem system e sem raciocínio."""
+    return tok.apply_chat_template([{'role': 'user', 'content': prompt}], tokenize=False,
+                                   add_generation_prompt=True, enable_thinking=False)
 
 
 DATA = HERE
@@ -67,12 +69,13 @@ def has_loop(text):
 def generate(model, tok, prompts, max_new=220, bs=8):
     outs = []
     tok.padding_side = 'left'
-    end_id = tok.convert_tokens_to_ids('<|im_end|>')
+    from train import answer_suffix
+    end_ids = [tok.eos_token_id] + tok(answer_suffix(tok).strip(), add_special_tokens=False)['input_ids'][:1]
     for i in range(0, len(prompts), bs):
-        batch = [device_chat_text(p) for p in prompts[i:i + bs]]
+        batch = [device_chat_text(tok, p) for p in prompts[i:i + bs]]
         enc = tok(batch, return_tensors='pt', padding=True, add_special_tokens=False).to(model.device)
         gen = model.generate(**enc, max_new_tokens=max_new, do_sample=False, repetition_penalty=1.0,
-                             eos_token_id=[end_id, tok.eos_token_id], pad_token_id=tok.pad_token_id)
+                             eos_token_id=end_ids, pad_token_id=tok.pad_token_id if tok.pad_token_id is not None else tok.eos_token_id)
         for row in gen[:, enc['input_ids'].shape[1]:]:
             txt = tok.decode(row, skip_special_tokens=True)
             outs.append(re.sub(r'<think>.*?</think>', '', txt, flags=re.S).strip())
@@ -94,7 +97,7 @@ def main():
     DATA = os.path.join(HERE, a.data)
 
     tok = AutoTokenizer.from_pretrained(a.model if not a.adapter else a.base)
-    model = AutoModelForCausalLM.from_pretrained(a.model, dtype=torch.float16).cuda().eval()
+    model = AutoModelForCausalLM.from_pretrained(a.model, dtype=torch.bfloat16).cuda().eval()
     if a.adapter:
         from peft import PeftModel
         model = PeftModel.from_pretrained(model, a.adapter).eval()
