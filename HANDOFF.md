@@ -23,6 +23,14 @@ Requisitos explícitos do dono:
 
 ## 2. Estado atual (sessão 9)
 
+**Sessão 9, parte 4 (v1.5.4, celular deitado e tablet):** deitado (ou tablet), a barra de baixo vira
+barra lateral (`SdvNavBar(vertical: true)` em `shell.dart`). As telas usam `ContentWidth`
+(`widgets/common.dart`) para não esticar o texto; grades usam `SliverGridDelegateWithMaxCrossAxisExtent`
+(Enciclopédia em 3 colunas deitado e 5 no tablet); listas de categoria viram 2–3 colunas a partir de
+700 px; na Home, Mapa e "Hoje na fazenda" ficam lado a lado. Testado no SM-G781B deitado e no tablet
+SM-P615 (inclusive Meu Status com o mock). Cartões das categorias e eventos do Calendário com
+espaço interno.
+
 **Sessão 9, parte 3 (v1.5.3, leitura da wiki):** a página da wiki deixou de ser texto corrido.
 `lib/wiki_article.dart` entende a estrutura do texto raspado (títulos, índice, ficha "Informações",
 listas, barras de navegação, tabelas achatadas) e `lib/screens/wiki_page_screen.dart` desenha no estilo
@@ -370,6 +378,7 @@ pareamento; a de conexão é a mostrada na tela principal de depuração sem fio
 
 | Versão | Link | Asset | SHA-256 |
 |---|---|---|---|
+| App 1.5.4+12 | https://github.com/Advansoftware/Standey-valey/releases/tag/v1.5.4 | `guia-do-vale-1.5.4.apk` (arm64) | `d035fb54dce35cd53c0c2bf565efe9a1a25a2353d7ebf62ff55f100d9635427d` |
 | App 1.5.3+11 | https://github.com/Advansoftware/Standey-valey/releases/tag/v1.5.3 | `guia-do-vale-1.5.3.apk` (arm64) | `2f6027daf9b06f32e616efb298687fee52b4867d08af27229de58d385e7f5e28` |
 | App 1.5.2+10 | https://github.com/Advansoftware/Standey-valey/releases/tag/v1.5.2 | `guia-do-vale-1.5.2.apk` (arm64) | `5d60375e55bc23bce2162b33881ca5acf3ea22bfd1948d2974c81a55f10c9100` |
 | App 1.5.1+9 | https://github.com/Advansoftware/Standey-valey/releases/tag/v1.5.1 | `guia-do-vale-1.5.1.apk` (arm64) | `879a865fbada2315e07fd5276cb4be7224daa7d54f4b10dcd8dafeef0b997186` |

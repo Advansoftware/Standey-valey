@@ -62,7 +62,7 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
         ),
       ),
-      body: ListenableBuilder(
+      body: ContentWidth(child: ListenableBuilder(
         listenable: search,
         builder: (context, _) {
           final all = _query.trim().isEmpty
@@ -127,7 +127,7 @@ class _SearchScreenState extends State<SearchScreen> {
             ],
           );
         },
-      ),
+      )),
     );
   }
 }

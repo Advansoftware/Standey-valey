@@ -146,7 +146,7 @@ class _WikiPageScreenState extends State<WikiPageScreen> {
               onTap: () => _goTo(_keys[tocIndex]!),
             )
           : null,
-      body: SingleChildScrollView(
+      body: ContentWidth(child: SingleChildScrollView(
         controller: _scroll,
         padding: const EdgeInsets.fromLTRB(14, 12, 14, 40),
         child: Column(
@@ -158,7 +158,7 @@ class _WikiPageScreenState extends State<WikiPageScreen> {
             Text('Texto da Stardew Valley Wiki (CC BY-NC-SA 3.0).', style: Theme.of(context).textTheme.bodySmall),
           ],
         ),
-      ),
+      )),
     );
   }
 }

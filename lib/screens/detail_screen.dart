@@ -31,7 +31,7 @@ class DetailScreen extends StatelessWidget {
               ),
             ],
           ),
-          body: ListView(
+          body: ContentWidth(child: ListView(
             padding: const EdgeInsets.only(bottom: 32),
             children: [
               _Header(entry: entry, cat: cat),
@@ -74,7 +74,7 @@ class DetailScreen extends StatelessWidget {
                 ),
               ),
             ],
-          ),
+          )),
         );
       },
     );

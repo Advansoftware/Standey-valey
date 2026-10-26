@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../widgets/common.dart';
+
 import '../app_scope.dart';
 import '../app_theme.dart';
 import '../models.dart';
@@ -19,7 +21,7 @@ class AboutScreen extends StatelessWidget {
     final updater = scope.updater;
     return Scaffold(
       appBar: AppBar(title: const Text('Sobre e ajustes')),
-      body: ListenableBuilder(
+      body: ContentWidth(child: ListenableBuilder(
         listenable: Listenable.merge([store, scope.ai, scope.search, scope.api, updater]),
         builder: (context, _) {
           return ListView(
@@ -134,7 +136,7 @@ class AboutScreen extends StatelessWidget {
             ],
           );
         },
-      ),
+      )),
     );
   }
 }

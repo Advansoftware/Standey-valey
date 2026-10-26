@@ -23,7 +23,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Calendário')),
-      body: ListenableBuilder(
+      body: ContentWidth(child: ListenableBuilder(
         listenable: store,
         builder: (context, _) {
           // Sempre a estação atual do jogo: mudar a data em outra tela
@@ -92,6 +92,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 3),
                     child: Parchment(
                       onTap: () => openEntry(context, ev.entry),
+                      padding: const EdgeInsets.fromLTRB(4, 4, 4, 4),
                       child: Row(
                         children: [
                           SdvSlot(
@@ -130,7 +131,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ],
           );
         },
-      ),
+      )),
     );
   }
 }

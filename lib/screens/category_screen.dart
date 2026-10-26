@@ -107,8 +107,9 @@ class _CategoryScreenState extends State<CategoryScreen> {
                     : grid
                         ? GridView.builder(
                             padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
+                            // 2 colunas em pé; mais colunas deitado ou no tablet.
+                            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                              maxCrossAxisExtent: 200,
                               mainAxisSpacing: 12,
                               crossAxisSpacing: 12,
                               childAspectRatio: 0.82,
@@ -116,10 +117,23 @@ class _CategoryScreenState extends State<CategoryScreen> {
                             itemCount: list.length,
                             itemBuilder: (context, i) => DexCard(entry: list[i], color: cat.color, showCollected: cat.collect.isNotEmpty),
                           )
-                        : ListView.builder(
-                            padding: const EdgeInsets.only(top: 4, bottom: 24),
-                            itemCount: list.length,
-                            itemBuilder: (context, i) => EntryTile(entry: list[i], color: cat.color),
+                        : LayoutBuilder(
+                            // Tela larga (deitado, tablet): a lista vira colunas de linhas.
+                            builder: (context, c) => c.maxWidth >= 700
+                                ? GridView.builder(
+                                    padding: const EdgeInsets.only(top: 4, bottom: 24),
+                                    gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                                      maxCrossAxisExtent: 520,
+                                      mainAxisExtent: 118,
+                                    ),
+                                    itemCount: list.length,
+                                    itemBuilder: (context, i) => EntryTile(entry: list[i], color: cat.color),
+                                  )
+                                : ListView.builder(
+                                    padding: const EdgeInsets.only(top: 4, bottom: 24),
+                                    itemCount: list.length,
+                                    itemBuilder: (context, i) => EntryTile(entry: list[i], color: cat.color),
+                                  ),
                           ),
               ),
             ],
@@ -146,8 +160,8 @@ class EncyclopediaScreen extends StatelessWidget {
         builder: (context, _) {
           return GridView.builder(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
+            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 240,
               mainAxisSpacing: 12,
               crossAxisSpacing: 12,
               mainAxisExtent: 160,
@@ -176,6 +190,7 @@ class CategoryTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Parchment(
       onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => CategoryScreen(cat: cat))),
+      padding: const EdgeInsets.fromLTRB(6, 4, 6, 6),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

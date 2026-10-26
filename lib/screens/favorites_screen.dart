@@ -12,7 +12,7 @@ class FavoritesScreen extends StatelessWidget {
     final scope = AppScope.of(context);
     return Scaffold(
       appBar: AppBar(title: const Text('Favoritos')),
-      body: ListenableBuilder(
+      body: ContentWidth(child: ListenableBuilder(
         listenable: scope.store,
         builder: (context, _) {
           final list = entriesByIds(context, scope.store.favorites).toList()
@@ -37,7 +37,7 @@ class FavoritesScreen extends StatelessWidget {
             ),
           );
         },
-      ),
+      )),
     );
   }
 }

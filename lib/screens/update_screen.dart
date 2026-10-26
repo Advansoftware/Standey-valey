@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../widgets/common.dart';
+
 import '../app_scope.dart';
 import '../updater_service.dart';
 import '../widgets/markdown_lite.dart';
@@ -120,7 +122,7 @@ class _UpdateScreenState extends State<UpdateScreen> {
           style: TextStyle(fontFamily: 'PixelifySans', letterSpacing: 1.1),
         ),
       ),
-      body: ListenableBuilder(
+      body: ContentWidth(child: ListenableBuilder(
         listenable: updater,
         builder: (context, _) {
           return ListView(
@@ -141,7 +143,7 @@ class _UpdateScreenState extends State<UpdateScreen> {
             ],
           );
         },
-      ),
+      )),
     );
   }
 

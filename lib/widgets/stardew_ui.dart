@@ -447,14 +447,43 @@ class SdvNavItem {
 }
 
 /// Barra inferior do app no formato da barra de ferramentas do jogo.
+/// Com [vertical], vira a barra lateral (celular deitado).
 class SdvNavBar extends StatelessWidget {
   final List<SdvNavItem> items;
   final int selected;
   final ValueChanged<int> onTap;
-  const SdvNavBar({super.key, required this.items, required this.selected, required this.onTap});
+  final bool vertical;
+  const SdvNavBar({super.key, required this.items, required this.selected, required this.onTap, this.vertical = false});
 
   @override
   Widget build(BuildContext context) {
+    if (vertical) {
+      return Container(
+        color: const Color(0xFF2A1206),
+        child: SafeArea(
+          right: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(4, 6, 6, 6),
+            child: SdvFrame(
+              px: 2,
+              width: 104,
+              padding: const EdgeInsets.all(9),
+              child: Column(
+                children: [
+                  for (var i = 0; i < items.length; i++)
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 3),
+                        child: _slot(items[i], i == selected, () => onTap(i)),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
     return Container(
       color: const Color(0xFF2A1206),
       child: SafeArea(
@@ -498,7 +527,8 @@ class SdvNavBar extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.fromLTRB(7, 7, 7, 6),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisSize: vertical ? MainAxisSize.max : MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(item.locked ? Icons.lock_rounded : item.icon,
                       size: 24, color: on ? const Color(0xFFB4561A) : SdvColors.inkSoft),

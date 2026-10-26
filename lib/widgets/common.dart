@@ -186,3 +186,18 @@ class TagPill extends StatelessWidget {
     );
   }
 }
+
+/// Limita a largura do conteúdo em telas largas (celular deitado, tablet) e
+/// centraliza: o texto não estica de ponta a ponta. Em telas estreitas não muda nada.
+class ContentWidth extends StatelessWidget {
+  final Widget child;
+  final double maxWidth;
+  const ContentWidth({super.key, required this.child, this.maxWidth = 920});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: ConstrainedBox(constraints: BoxConstraints(maxWidth: maxWidth), child: child),
+    );
+  }
+}

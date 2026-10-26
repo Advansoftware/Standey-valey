@@ -51,7 +51,7 @@ class _MapScreenState extends State<MapScreen> {
     final places = _filtered;
     return Scaffold(
       appBar: AppBar(title: const Text('🗺️ Mapa do Vale')),
-      body: ListView(
+      body: ContentWidth(maxWidth: 1100, child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 4, 16, 28),
         children: [
           const _OrientationCard(),
@@ -119,7 +119,7 @@ class _MapScreenState extends State<MapScreen> {
               child: Center(child: Text('Nenhum lugar com esse filtro.')),
             ),
         ],
-      ),
+      )),
     );
   }
 

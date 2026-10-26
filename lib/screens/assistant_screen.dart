@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../widgets/common.dart';
+
 import '../ai_models.dart';
 import '../ai_service.dart';
 import '../app_scope.dart';
@@ -154,7 +156,7 @@ class _AssistantScreenState extends State<AssistantScreen> {
     final scope = AppScope.of(context);
     return Scaffold(
       appBar: AppBar(title: const Text('Assistente')),
-      body: ListenableBuilder(
+      body: ContentWidth(child: ListenableBuilder(
         listenable: Listenable.merge([scope.store, scope.ai, scope.search]),
         builder: (context, _) {
           final installed = scope.store.aiModelInstalled;
@@ -211,7 +213,7 @@ class _AssistantScreenState extends State<AssistantScreen> {
             ],
           );
         },
-      ),
+      )),
     );
   }
 }

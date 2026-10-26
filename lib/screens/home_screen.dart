@@ -26,7 +26,7 @@ class HomeScreen extends StatelessWidget {
     // próprio ListenableBuilder. Assim, arrastar o slider da data reconstrói
     // só o cartão "Hoje na fazenda" — nada de remontar a home inteira.
     return Scaffold(
-      body: SafeArea(
+      body: ContentWidth(maxWidth: 1100, child: SafeArea(
         child: ListView(
           padding: const EdgeInsets.only(bottom: 24),
           children: [
@@ -83,8 +83,18 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
             ),
-            const _MapCard(),
-            const _TodayCard(),
+            // Tela larga (deitado, tablet): mapa e "Hoje na fazenda" lado a lado.
+            LayoutBuilder(
+              builder: (context, c) => c.maxWidth >= 760
+                  ? const Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(flex: 4, child: _MapCard(tall: true)),
+                        Expanded(flex: 5, child: _TodayCard()),
+                      ],
+                    )
+                  : const Column(children: [_MapCard(), _TodayCard()]),
+            ),
             const SectionTitle('📖 Comece aqui'),
             SizedBox(
               height: 166,
@@ -123,18 +133,57 @@ class HomeScreen extends StatelessWidget {
             ),
           ],
         ),
-      ),
+      )),
     );
   }
 }
 
 /// Cartão de entrada para o mapa: miniatura do vale + atalho.
 class _MapCard extends StatelessWidget {
-  const _MapCard();
+  /// Tela larga: imagem grande em cima e texto embaixo (ao lado do "Hoje na fazenda").
+  final bool tall;
+  const _MapCard({this.tall = false});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    if (tall) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(16, 14, 4, 0),
+        child: Parchment(
+          accent: const Color(0xFF2E7D32),
+          onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const MapScreen())),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              ClipRect(
+                child: AspectRatio(
+                  aspectRatio: 2.4,
+                  child: Image.asset('assets/img/map_valley.png', fit: BoxFit.cover, filterQuality: FilterQuality.none),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 10, 4, 4),
+                child: Row(
+                  children: [
+                    const Text('🗺️', style: TextStyle(fontSize: 18)),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text('Mapa do Vale', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+                    ),
+                    const Icon(Icons.chevron_right_rounded),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 0, 8, 6),
+                child: Text('Norte, sul e como chegar em cada lugar — do iniciante ao avançado.', style: theme.textTheme.bodySmall),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
       child: Parchment(
