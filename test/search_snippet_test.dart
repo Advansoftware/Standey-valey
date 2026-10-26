@@ -30,4 +30,10 @@ void main() {
     final marked = spans.where((s) => s.style == mark).map((s) => s.text).toList();
     expect(marked, ['Missão', 'shorts']);
   });
+
+  test('o trecho não mostra os marcadores de título da wiki', () {
+    final s = bestSnippet('## Missões\n\nNão é usado em nenhuma missão.', 'missoes');
+    expect(s, isNot(contains('#')));
+    expect(s, contains('Missões'));
+  });
 }

@@ -209,7 +209,7 @@ void main() {
 
     await tester.tap(find.text('Página da wiki'));
     await tester.pumpAndSettle();
-    expect(find.text('Vila_Pelicanos'), findsOneWidget);
+    expect(find.widgetWithText(AppBar, 'Vila Pelicanos'), findsOneWidget);
   });
 
   testWidgets('detalhe mostra dados, alterna coletado e favorita', (

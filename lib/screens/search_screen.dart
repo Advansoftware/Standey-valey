@@ -5,6 +5,7 @@ import '../models.dart';
 import '../search.dart';
 import '../search_snippet.dart';
 import '../widgets/common.dart';
+import 'wiki_page_screen.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -169,7 +170,7 @@ class _WikiTile extends StatelessWidget {
     final mark = TextStyle(fontWeight: FontWeight.w800, color: theme.colorScheme.primary);
     return ListTile(
       leading: const Text('📜', style: TextStyle(fontSize: 26)),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
+      title: Text(title.replaceAll('_', ' '), style: const TextStyle(fontWeight: FontWeight.w700)),
       subtitle: Text.rich(
         TextSpan(children: highlightSpans(bestSnippet(hit.doc.text, query), query, mark)),
         maxLines: 4,
@@ -183,76 +184,6 @@ class _WikiTile extends StatelessWidget {
           ));
         }
       },
-    );
-  }
-}
-
-/// Leitura de um artigo da wiki offline. Com [query], rola até o trecho da busca
-/// ([focusText], ou o que mais combina) e destaca as palavras buscadas.
-class WikiPageScreen extends StatefulWidget {
-  final WikiPage page;
-  final String query;
-  final String? focusText;
-  const WikiPageScreen({super.key, required this.page, this.query = '', this.focusText});
-
-  @override
-  State<WikiPageScreen> createState() => _WikiPageScreenState();
-}
-
-class _WikiPageScreenState extends State<WikiPageScreen> {
-  final _focusKey = GlobalKey();
-  late final int _focus = widget.query.trim().isEmpty
-      ? -1
-      : (widget.focusText != null && widget.page.chunks.contains(widget.focusText)
-          ? widget.page.chunks.indexOf(widget.focusText!)
-          : bestChunk(widget.page.chunks, widget.query));
-
-  @override
-  void initState() {
-    super.initState();
-    if (_focus > 0) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        final ctx = _focusKey.currentContext;
-        if (ctx != null) Scrollable.ensureVisible(ctx, alignment: 0.05, duration: const Duration(milliseconds: 350));
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final body = theme.textTheme.bodyLarge;
-    final mark = TextStyle(
-      fontWeight: FontWeight.w800,
-      backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.22),
-    );
-    final chunks = widget.page.chunks;
-    return Scaffold(
-      appBar: AppBar(title: Text(widget.page.title, maxLines: 1, overflow: TextOverflow.ellipsis)),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            for (var i = 0; i < chunks.length; i++)
-              Container(
-                key: i == _focus ? _focusKey : null,
-                margin: const EdgeInsets.only(bottom: 16),
-                padding: i == _focus ? const EdgeInsets.all(10) : EdgeInsets.zero,
-                decoration: i == _focus
-                    ? BoxDecoration(
-                        color: theme.colorScheme.primary.withValues(alpha: 0.07),
-                        border: Border(left: BorderSide(color: theme.colorScheme.primary, width: 3)),
-                      )
-                    : null,
-                child: SelectableText.rich(
-                  TextSpan(style: body, children: highlightSpans(chunks[i], widget.query, mark)),
-                ),
-              ),
-            Text('Texto da Stardew Valley Wiki (CC BY-NC-SA 3.0).', style: theme.textTheme.bodySmall),
-          ],
-        ),
-      ),
     );
   }
 }

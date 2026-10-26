@@ -35,7 +35,12 @@ int _score(String sentence, List<String> terms) {
 /// Trecho de [text] que mais combina com [query]: a frase com mais termos da busca,
 /// completada com a seguinte se for curta. Sem termos em comum, devolve o começo.
 String bestSnippet(String text, String query, {int maxChars = 220}) {
-  final clean = text.replaceAll(RegExp(r'[ \t]+'), ' ').trim();
+  // Só a exibição: tira os marcadores de título/lista do texto da wiki.
+  final clean = text
+      .replaceAll(RegExp(r'^#{2,4}\s*', multiLine: true), '')
+      .replaceAll(RegExp(r'^•\s*', multiLine: true), '')
+      .replaceAll(RegExp(r'[ \t]+'), ' ')
+      .trim();
   final terms = queryTerms(query);
   final parts = clean.split(_sentenceEnd).map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
   if (parts.isEmpty) return '';

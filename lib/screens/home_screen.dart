@@ -87,7 +87,7 @@ class HomeScreen extends StatelessWidget {
             const _TodayCard(),
             const SectionTitle('📖 Comece aqui'),
             SizedBox(
-              height: 150,
+              height: 166,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -274,6 +274,7 @@ class _GuideCard extends StatelessWidget {
         width: 200,
         child: Parchment(
           accent: cat.color,
+          padding: const EdgeInsets.fromLTRB(8, 6, 8, 8),
           onTap: () => openEntry(context, entry),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

@@ -7,7 +7,7 @@ import '../search.dart';
 import '../widgets/sdv_notice.dart';
 import '../widgets/common.dart';
 import '../widgets/stardew_ui.dart';
-import 'search_screen.dart';
+import 'wiki_page_screen.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});

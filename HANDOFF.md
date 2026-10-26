@@ -23,6 +23,19 @@ Requisitos explícitos do dono:
 
 ## 2. Estado atual (sessão 9)
 
+**Sessão 9, parte 3 (v1.5.3, leitura da wiki):** a página da wiki deixou de ser texto corrido.
+`lib/wiki_article.dart` entende a estrutura do texto raspado (títulos, índice, ficha "Informações",
+listas, barras de navegação, tabelas achatadas) e `lib/screens/wiki_page_screen.dart` desenha no estilo
+do jogo: cabeçalho com sprite e "Abrir ficha" quando a página é de algo da enciclopédia, índice clicável
+(rola até a seção) e botão de voltar ao índice, seções em placa de madeira, presentes em etiquetas,
+falas em caixa de diálogo com retrato, tabelas em cartões (sem rótulo por coluna, porque a tabela
+achatada às vezes perde células), agendas como linha do tempo, valores por qualidade (energia,
+preços por profissão) em grade com as estrelas normal/prata/ouro/irídio e o Lago de Peixes como tabela
+de capacidade. Cartões da Home e da enciclopédia (`DexCard`, `EntryTile`, "Comece aqui") ganharam
+espaço interno para o texto não encostar na moldura. Só muda a exibição: o texto do índice
+de busca e do RAG é o mesmo. `test/wiki_article_test.dart` lê as 1.300 páginas e confere que nenhuma
+palavra some.
+
 **Sessão 9, parte 2 (correções do app; treino pausado a pedido do dono):**
 - Aviso "Conecte ao servidor do jogo" virou `showSdvNotice` (`lib/widgets/sdv_notice.dart`): aviso no
   topo, no estilo do jogo, que some sozinho em 4 s. No Flutter 3.47 um `SnackBar` com ação fica preso
@@ -357,6 +370,7 @@ pareamento; a de conexão é a mostrada na tela principal de depuração sem fio
 
 | Versão | Link | Asset | SHA-256 |
 |---|---|---|---|
+| App 1.5.3+11 | https://github.com/Advansoftware/Standey-valey/releases/tag/v1.5.3 | `guia-do-vale-1.5.3.apk` (arm64) | `2f6027daf9b06f32e616efb298687fee52b4867d08af27229de58d385e7f5e28` |
 | App 1.5.2+10 | https://github.com/Advansoftware/Standey-valey/releases/tag/v1.5.2 | `guia-do-vale-1.5.2.apk` (arm64) | `5d60375e55bc23bce2162b33881ca5acf3ea22bfd1948d2974c81a55f10c9100` |
 | App 1.5.1+9 | https://github.com/Advansoftware/Standey-valey/releases/tag/v1.5.1 | `guia-do-vale-1.5.1.apk` (arm64) | `879a865fbada2315e07fd5276cb4be7224daa7d54f4b10dcd8dafeef0b997186` |
 | App 1.5.0+8 | https://github.com/Advansoftware/Standey-valey/releases/tag/v1.5.0 | `guia-do-vale-1.5.0.apk` (arm64) | `7358b9aba38cad3d71397d808f80012acf139c7d3c4c23f31c057aa476c0d981` |

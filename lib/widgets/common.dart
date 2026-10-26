@@ -82,6 +82,7 @@ class DexCard extends StatelessWidget {
         final fav = store.isFav(entry.id);
         return Parchment(
           onTap: () => openEntry(context, entry),
+          padding: const EdgeInsets.fromLTRB(6, 4, 6, 4),
           child: Column(
             children: [
               Row(
@@ -143,6 +144,7 @@ class EntryTile extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
       child: Parchment(
         onTap: onTap ?? () => openEntry(context, entry),
+        padding: const EdgeInsets.fromLTRB(4, 4, 2, 4),
         child: Row(
           children: [
             SdvSlot(size: 54, child: EntryImage(entry: entry, size: 38)),
