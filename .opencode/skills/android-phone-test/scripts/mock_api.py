@@ -1,4 +1,9 @@
+import base64
+import hashlib
 import json
+import random
+import struct
+import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
@@ -179,6 +184,85 @@ GAME_STATE = {
 LOCATIONS_CYCLE = ["Farm", "BusStop", "Town", "Beach", "Forest", "Mountain", "Mine"]
 _location_idx = 0
 
+# ---- WebSocket /events: imita o mod (JSON camelCase {"event", "data"}) ----
+_WS_GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
+_ws_clients = []
+_ws_lock = threading.Lock()
+_game_time = 600  # 6:00 da manhã, como no jogo (formato HHMM)
+
+
+def _ws_frame(text):
+    data = text.encode("utf-8")
+    n = len(data)
+    if n < 126:
+        head = struct.pack("!BB", 0x81, n)
+    elif n < 65536:
+        head = struct.pack("!BBH", 0x81, 126, n)
+    else:
+        head = struct.pack("!BBQ", 0x81, 127, n)
+    return head + data
+
+
+def broadcast(event, data=None):
+    msg = {"event": event}
+    if data is not None:
+        msg["data"] = data
+    frame = _ws_frame(json.dumps(msg, ensure_ascii=False))
+    with _ws_lock:
+        for c in list(_ws_clients):
+            try:
+                c.sendall(frame)
+            except OSError:
+                _ws_clients.remove(c)
+    print(f"[ws] {event} {json.dumps(data, ensure_ascii=False) if data else ''}")
+
+
+def _next_time(t):
+    h, m = divmod(t, 100)
+    m += 10
+    if m >= 60:
+        h, m = h + 1, 0
+    return 600 if h >= 26 else h * 100 + m
+
+
+def simulate_game(interval=4.0):
+    """Relógio andando de 10 em 10 minutos, troca de local, mochila e níveis."""
+    global _game_time, _location_idx
+    tick = 0
+    while True:
+        time.sleep(interval)
+        tick += 1
+        old = _game_time
+        _game_time = _next_time(_game_time)
+        broadcast("TimeChanged", {"oldTime": old, "newTime": _game_time})
+        p = GAME_STATE["player"]
+        p["stamina"] = max(30.0, p["stamina"] - random.choice([0, 2, 4, 8]))
+        if _game_time == 600:
+            p["stamina"] = float(p["maxStamina"])
+            broadcast("DayStarted", {"date": GAME_STATE["world"]["today"]["date"], "weather": "Sunny", "birthdays": []})
+        if tick % 5 == 0:
+            old_loc = p["location"]
+            _location_idx = (_location_idx + 1) % len(LOCATIONS_CYCLE)
+            p["location"] = LOCATIONS_CYCLE[_location_idx]
+            broadcast("PlayerWarped", {"playerName": p["name"], "oldLocation": old_loc, "newLocation": p["location"]})
+        if tick % 3 == 0:
+            item = random.choice(GAME_STATE["inventory"][:7])
+            old_n = item["stackSize"]
+            item["stackSize"] += random.choice([1, 1, 2, 5])
+            p["money"] += random.choice([0, 0, 35, 120])
+            broadcast("PlayerInventoryChanged", {"playerName": p["name"], "added": [], "removed": [],
+                                                 "quantityChanged": [{"item": item, "oldSize": old_n, "newSize": item["stackSize"]}]})
+        if tick % 17 == 0:
+            sk = random.choice(p["skills"])
+            if sk["level"] < 10:
+                sk["level"] += 1
+                broadcast("PlayerLevelChanged", {"playerName": p["name"], "skill": sk["name"],
+                                                 "oldLevel": sk["level"] - 1, "newLevel": sk["level"]})
+        if tick % 11 == 0:
+            r = random.choice(p["relationships"])
+            r["points"] += 20
+            broadcast("FriendshipIncreased", {"npc": r["npc"], "oldPoints": r["points"] - 20, "newPoints": r["points"]})
+
 
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, fmt, *args):
@@ -187,6 +271,28 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         global _location_idx
         path = self.path.split("?")[0]
+
+        if path == "/events" and self.headers.get("Upgrade", "").lower() == "websocket":
+            key = self.headers.get("Sec-WebSocket-Key", "")
+            accept = base64.b64encode(hashlib.sha1((key + _WS_GUID).encode()).digest()).decode()
+            self.send_response(101, "Switching Protocols")
+            self.send_header("Upgrade", "websocket")
+            self.send_header("Connection", "Upgrade")
+            self.send_header("Sec-WebSocket-Accept", accept)
+            self.end_headers()
+            self.wfile.flush()
+            self.connection.sendall(_ws_frame(json.dumps({"event": "Connected"})))
+            with _ws_lock:
+                _ws_clients.append(self.connection)
+            try:
+                while self.connection.recv(1024):
+                    pass
+            except OSError:
+                pass
+            with _ws_lock:
+                if self.connection in _ws_clients:
+                    _ws_clients.remove(self.connection)
+            return
 
         # Endpoints de controle para simular deslocamento pelo mapa ao vivo
         if path == "/control/next_location":
@@ -241,6 +347,7 @@ if __name__ == "__main__":
     server = ThreadingHTTPServer(("0.0.0.0", 7882), Handler)
     print("=========================================================")
     print(" Stardew Web API Mock ativo em http://0.0.0.0:7882")
-    print(" Acesse pelo celular em: http://192.168.3.28:7882")
+    print(" Acesse pelo celular em: http://IP_DO_PC:7882  (WebSocket em /events)")
     print("=========================================================", flush=True)
+    threading.Thread(target=simulate_game, daemon=True).start()
     server.serve_forever()

@@ -6,6 +6,7 @@ import '../app_scope.dart';
 import '../search.dart';
 import '../widgets/assistant_bubble.dart';
 import '../widgets/assistant_install_card.dart';
+import '../widgets/stardew_ui.dart';
 
 /// Assistente: busca (RAG) no conteúdo do app e, se o modelo estiver instalado,
 /// gera a resposta com a IA local. Sem modelo, mostra os trechos encontrados.
@@ -32,7 +33,16 @@ class _AssistantScreenState extends State<AssistantScreen> {
     _started = true;
     final scope = AppScope.of(context);
     scope.search.loadWiki();
-    _modelId = scope.store.aiModelId.isEmpty ? defaultAiModel.id : scope.store.aiModelId;
+    final savedId = scope.store.aiModelId;
+    if (!scope.store.aiModelInstalled || savedId.isEmpty || aiModelById(savedId) == null) {
+      _modelId = defaultAiModel.id;
+      // Notificar o Store durante o build quebra a árvore: grava depois do frame.
+      if (savedId != defaultAiModel.id) {
+        WidgetsBinding.instance.addPostFrameCallback((_) => scope.store.setAiModelId(defaultAiModel.id));
+      }
+    } else {
+      _modelId = savedId;
+    }
     final q = widget.initialQuestion;
     if (q != null && q.trim().isNotEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _ask(q));
@@ -89,7 +99,9 @@ class _AssistantScreenState extends State<AssistantScreen> {
     if (useAi) {
       try {
         final buf = StringBuffer();
-        await for (final tok in scope.ai.ask(buildPrompt(q, hits))) {
+        final currentModel = aiModelById(scope.store.aiModelId) ?? defaultAiModel;
+        final prompt = buildPrompt(q, hits, isFineTuned: currentModel.isFineTuned);
+        await for (final tok in scope.ai.ask(prompt)) {
           buf.write(tok);
           if (!mounted) return;
           setState(() => answer.text = cleanAnswer(buf.toString()));
@@ -146,6 +158,7 @@ class _AssistantScreenState extends State<AssistantScreen> {
         listenable: Listenable.merge([scope.store, scope.ai, scope.search]),
         builder: (context, _) {
           final installed = scope.store.aiModelInstalled;
+          final downloading = scope.ai.downloading;
           return Column(
             children: [
               Expanded(
@@ -162,36 +175,39 @@ class _AssistantScreenState extends State<AssistantScreen> {
                         },
                         onInstall: _install,
                       ),
-                    if (_msgs.isEmpty) AssistantSuggestions(onTap: _ask),
+                    if (!downloading && _msgs.isEmpty) AssistantSuggestions(onTap: _ask),
                     for (final m in _msgs) AssistantBubble(msg: m),
                   ],
                 ),
               ),
-              SafeArea(
-                top: false,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _input,
-                          textInputAction: TextInputAction.send,
-                          onSubmitted: _ask,
-                          decoration: InputDecoration(
-                            hintText: installed ? 'Pergunte qualquer coisa do jogo…' : 'Pergunte (busca inteligente)…',
+              if (!downloading)
+                SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _input,
+                            textInputAction: TextInputAction.send,
+                            onSubmitted: _ask,
+                            decoration: InputDecoration(
+                              hintText: installed ? 'Pergunte qualquer coisa do jogo…' : 'Pergunte (busca inteligente)…',
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      IconButton.filled(
-                        onPressed: _asking ? null : () => _ask(_input.text),
-                        icon: const Icon(Icons.send_rounded),
-                      ),
-                    ],
+                        const SizedBox(width: 8),
+                        SdvIconButton(
+                          tooltip: 'Enviar',
+                          size: 50,
+                          icon: Icons.send_rounded,
+                          onTap: _asking ? null : () => _ask(_input.text),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
             ],
           );
         },

@@ -130,9 +130,15 @@ class Bm25Index {
       if (q.length >= 3) {
         var count = 0;
         for (final term in _post.keys) {
-          if (term != q && term.startsWith(q)) {
-            scoreTerm(term, 0.35);
-            if (++count >= 25) break;
+          if (term != q) {
+            if (term.startsWith(q)) {
+              scoreTerm(term, 0.4);
+              if (++count >= 25) break;
+            } else if (term.length >= 4 && q.length > term.length && q.startsWith(term)) {
+              // Tolerância a caractere digitado a mais por acidente (ex: 'galinhak' -> 'galinha')
+              scoreTerm(term, 0.35);
+              if (++count >= 25) break;
+            }
           }
         }
       }

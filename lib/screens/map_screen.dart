@@ -5,6 +5,7 @@ import '../app_theme.dart';
 import '../map_data.dart';
 import '../search.dart';
 import '../widgets/common.dart';
+import '../widgets/stardew_ui.dart';
 import 'search_screen.dart';
 
 class MapScreen extends StatefulWidget {
@@ -57,7 +58,10 @@ class _MapScreenState extends State<MapScreen> {
             children: [
               const Icon(Icons.pinch_rounded, size: 15),
               const SizedBox(width: 5),
-              Text('Use dois dedos para dar zoom e arraste para explorar.', style: Theme.of(context).textTheme.bodySmall),
+              Flexible(
+                child: Text('Use dois dedos para dar zoom e arraste para explorar.',
+                    maxLines: 2, style: Theme.of(context).textTheme.bodySmall),
+              ),
             ],
           ),
           const SizedBox(height: 12),
@@ -134,7 +138,7 @@ class _OrientationCard extends StatelessWidget {
             children: [
               const Icon(Icons.explore_rounded, color: Color(0xFF2E7D32)),
               const SizedBox(width: 8),
-              Text('Como se orientar', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900)),
+              Text('Como se orientar', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
             ],
           ),
           const SizedBox(height: 8),
@@ -170,7 +174,7 @@ class _Direction extends StatelessWidget {
           const SizedBox(width: 6),
           SizedBox(
             width: 88,
-            child: Text(label, style: const TextStyle(fontWeight: FontWeight.w800)),
+            child: Text(label, style: const TextStyle(fontWeight: FontWeight.w700)),
           ),
           Expanded(child: Text(text)),
         ],
@@ -193,9 +197,9 @@ class _MapCanvas extends StatelessWidget {
         final w = c.maxWidth;
         final h = w * 244 / 400;
         return ClipRRect(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(3),
           child: Container(
-            decoration: BoxDecoration(border: Border.all(color: const Color(0xFF33691E), width: 2)),
+            decoration: BoxDecoration(border: Border.all(color: SdvColors.woodDark, width: 3)),
             child: InteractiveViewer(
               minScale: 1,
               maxScale: 4,
@@ -255,7 +259,7 @@ class _Pin extends StatelessWidget {
             width: 30,
             height: 30,
             child: Center(
-              child: Text('$number', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 13)),
+              child: Text('$number', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 13)),
             ),
           ),
         ),
@@ -282,7 +286,7 @@ class _Compass extends StatelessWidget {
         children: [
           Icon(Icons.navigation_rounded, size: 15, color: Color(0xFFC62828)),
           SizedBox(width: 2),
-          Text('N', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 12)),
+          Text('N', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
         ],
       ),
     );
@@ -337,15 +341,15 @@ class _PlaceCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Text('$n. ', style: TextStyle(color: color, fontWeight: FontWeight.w900)),
+                    Text('$n. ', style: TextStyle(color: color, fontWeight: FontWeight.w700)),
                     Expanded(
-                      child: Text(place.name, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 15)),
+                      child: Text(place.name, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
                     ),
                     if (place.beginner)
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(8)),
-                        child: Text('iniciante', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: color)),
+                        child: Text('iniciante', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: color)),
                       ),
                   ],
                 ),
@@ -420,7 +424,7 @@ class _PlaceSheet extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(place.name, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900)),
+                      Text(place.name, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700)),
                       Text('${mapRegionNames[place.region]} · ${place.beginner ? "bom para iniciante" : "conteúdo mais avançado"}',
                           style: Theme.of(context).textTheme.bodySmall),
                     ],
@@ -491,7 +495,7 @@ class _Section extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: TextStyle(fontWeight: FontWeight.w900, color: color)),
+                Text(title, style: TextStyle(fontWeight: FontWeight.w700, color: color)),
                 Text(text, style: Theme.of(context).textTheme.bodyMedium),
               ],
             ),

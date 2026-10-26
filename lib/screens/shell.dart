@@ -7,6 +7,7 @@ import 'category_screen.dart';
 import 'favorites_screen.dart';
 import 'home_screen.dart';
 import 'status_screen.dart';
+import '../widgets/stardew_ui.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
@@ -57,9 +58,9 @@ class _AppShellState extends State<AppShell> {
               FavoritesScreen(),
             ],
           ),
-          bottomNavigationBar: NavigationBar(
-            selectedIndex: _index >= 2 ? _index + 1 : _index,
-            onDestinationSelected: (i) {
+          bottomNavigationBar: SdvNavBar(
+            selected: _index >= 2 ? _index + 1 : _index,
+            onTap: (i) {
               // O item central abre o painel imersivo e não vira aba: ao
               // fechar, a pessoa continua exatamente onde estava.
               if (i == 2) {
@@ -68,43 +69,12 @@ class _AppShellState extends State<AppShell> {
               }
               setState(() => _index = i > 2 ? i - 1 : i);
             },
-            destinations: [
-              const NavigationDestination(
-                icon: Icon(Icons.home_outlined),
-                selectedIcon: Icon(Icons.home_rounded),
-                label: 'Início',
-              ),
-              const NavigationDestination(
-                icon: Icon(Icons.menu_book_outlined),
-                selectedIcon: Icon(Icons.menu_book_rounded),
-                label: 'Enciclopédia',
-              ),
-              NavigationDestination(
-                icon: Icon(
-                  connected
-                      ? Icons.space_dashboard_outlined
-                      : Icons.lock_outline_rounded,
-                ),
-                selectedIcon: Icon(
-                  connected
-                      ? Icons.space_dashboard_rounded
-                      : Icons.lock_outline_rounded,
-                ),
-                label: 'Meu Status',
-                tooltip: connected
-                    ? 'Abrir Meu Status'
-                    : 'Conecte ao servidor para liberar',
-              ),
-              const NavigationDestination(
-                icon: Icon(Icons.auto_awesome_outlined),
-                selectedIcon: Icon(Icons.auto_awesome_rounded),
-                label: 'Assistente',
-              ),
-              const NavigationDestination(
-                icon: Icon(Icons.star_outline_rounded),
-                selectedIcon: Icon(Icons.star_rounded),
-                label: 'Favoritos',
-              ),
+            items: [
+              const SdvNavItem(Icons.home_rounded, 'Início'),
+              const SdvNavItem(Icons.menu_book_rounded, 'Enciclopédia'),
+              SdvNavItem(Icons.space_dashboard_rounded, 'Meu Status', locked: !connected),
+              const SdvNavItem(Icons.auto_awesome_rounded, 'Assistente'),
+              const SdvNavItem(Icons.star_rounded, 'Favoritos'),
             ],
           ),
         );

@@ -9,6 +9,8 @@ import 'models.dart';
 import 'repository.dart';
 import 'search.dart';
 import 'store.dart';
+import 'game_events.dart';
+import 'game_status.dart';
 import 'game_ws.dart';
 
 /// Erro de comunicação com a API local.
@@ -470,6 +472,34 @@ class ApiSnapshot {
     required this.player,
     required this.inventory,
   });
+
+  /// Cópia com o jogador em outro local (evento PlayerWarped).
+  ApiSnapshot withLocation(String location) {
+    final p = player;
+    return ApiSnapshot(
+      world: world,
+      inventory: inventory,
+      player: ApiPlayer(
+        name: p.name,
+        displayName: p.displayName,
+        farmName: p.farmName,
+        money: p.money,
+        stamina: p.stamina,
+        maxStamina: p.maxStamina,
+        health: p.health,
+        maxHealth: p.maxHealth,
+        location: location,
+        dailyLuck: p.dailyLuck,
+        dailyLuckFriendlyValue: p.dailyLuckFriendlyValue,
+        dailyLuckDescription: p.dailyLuckDescription,
+        clothing: p.clothing,
+        skills: p.skills,
+        quests: p.quests,
+        achievements: p.achievements,
+        relationships: p.relationships,
+      ),
+    );
+  }
 }
 
 /// Integração opcional com a Stardew Web API na rede local.
@@ -501,6 +531,12 @@ class GameApi extends ChangeNotifier with WidgetsBindingObserver {
   ApiSnapshot? snapshot;
   int lastAutoMarked = 0;
   DateTime? lastSync;
+
+  /// Hora do jogo (HHMM) vinda do evento TimeChanged; null até o 1º evento.
+  int? gameTime;
+
+  /// Mensagens recentes dos eventos ao vivo (mais nova primeiro).
+  final List<HudMessage> hud = [];
   Map<String, List<Entry>>? _nameIndex;
   Timer? _timer;
   GameWebSocket? _ws;
@@ -744,55 +780,27 @@ class GameApi extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   void _handleWsEvent(Map<String, dynamic> raw) {
-    final eventName = raw['Event'] as String? ?? raw['name'] as String? ?? '';
-    final data = raw['Data'] ?? raw['data'];
+    final e = LiveEvent.parse(raw);
+    if (e == null) return;
 
-    if (eventName == 'PlayerWarped' && data is Map) {
-      final newLoc = data['NewLocation'] as String? ??
-          data['newLocation'] as String? ??
-          '';
-      if (newLoc.isNotEmpty && snapshot != null) {
-        final p = snapshot!.player;
-        final updatedPlayer = ApiPlayer(
-          name: p.name,
-          displayName: p.displayName,
-          farmName: p.farmName,
-          money: p.money,
-          stamina: p.stamina,
-          maxStamina: p.maxStamina,
-          health: p.health,
-          maxHealth: p.maxHealth,
-          location: newLoc,
-          dailyLuck: p.dailyLuck,
-          dailyLuckFriendlyValue: p.dailyLuckFriendlyValue,
-          dailyLuckDescription: p.dailyLuckDescription,
-          clothing: p.clothing,
-          skills: p.skills,
-          quests: p.quests,
-          achievements: p.achievements,
-          relationships: p.relationships,
-        );
-        snapshot = ApiSnapshot(
-          world: snapshot!.world,
-          player: updatedPlayer,
-          inventory: snapshot!.inventory,
-        );
-        notifyListeners();
-      }
-      sync(silent: true);
-    } else {
-      final normName = eventName.toLowerCase();
-      if (normName.contains('saveloaded') ||
-          normName.contains('savecreated') ||
-          normName.contains('daystarted') ||
-          normName.contains('dayending') ||
-          normName.contains('timechanged') ||
-          normName.contains('playerinventorychanged') ||
-          normName.contains('playerlevelchanged') ||
-          normName.contains('relationshipchanged')) {
-        sync(silent: true);
-      }
+    if (e.name == 'TimeChanged') {
+      gameTime = e.intOf('newTime') ?? gameTime;
+    } else if (e.name == 'DayStarted' || e.name == 'SaveLoaded') {
+      gameTime = 600;
+    } else if (e.name == 'ReturnedToTitle') {
+      gameTime = null;
+    } else if (e.name == 'PlayerWarped' && snapshot != null) {
+      final to = e.strOf('newLocation');
+      if (to.isNotEmpty) snapshot = snapshot!.withLocation(to);
     }
+
+    final msg = hudMessageFor(e, place: (raw) => locationInfo(raw).displayName);
+    if (msg != null) {
+      hud.insert(0, msg);
+      if (hud.length > 6) hud.removeRange(6, hud.length);
+    }
+    notifyListeners();
+    if (e.needsSync) sync(silent: true);
   }
 
   void _startTimer() {

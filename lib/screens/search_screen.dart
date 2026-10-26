@@ -46,8 +46,8 @@ class _SearchScreenState extends State<SearchScreen> {
           onChanged: (v) => setState(() => _query = v),
           decoration: InputDecoration(
             hintText: 'Buscar peixe, árvore, morador, dica…',
-            filled: false,
-            border: InputBorder.none,
+            isDense: true,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             suffixIcon: _query.isEmpty
                 ? null
                 : IconButton(
@@ -135,7 +135,7 @@ class _Hint extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        Text('Experimente buscar', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+        Text('Experimente buscar', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -161,7 +161,7 @@ class _WikiTile extends StatelessWidget {
     if (snippet.length > 160) snippet = '${snippet.substring(0, 160)}…';
     return ListTile(
       leading: const Text('📜', style: TextStyle(fontSize: 26)),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w800)),
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
       subtitle: Text(snippet, maxLines: 3, overflow: TextOverflow.ellipsis),
       onTap: () {
         final page = search.pages[title];

@@ -79,11 +79,13 @@ class Repository {
   /// Próximos eventos a partir de (season, day), até [days] dias à frente.
   List<MapEntry<int, CalendarEvent>> upcoming(int season, int day, int days) {
     final out = <MapEntry<int, CalendarEvent>>[];
+    final seen = <String>{};
     var s = season;
     var d = day;
     for (var i = 0; i <= days; i++) {
       for (final ev in eventsOn(s, d)) {
-        out.add(MapEntry(i, ev));
+        // Festivais de vários dias aparecem só no primeiro dia.
+        if (seen.add(ev.label)) out.add(MapEntry(i, ev));
       }
       d++;
       if (d > 28) {

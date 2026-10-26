@@ -331,7 +331,7 @@ class _UpdateScreenState extends State<UpdateScreen> {
                   style: TextStyle(
                     fontFamily: 'PixelifySans',
                     fontSize: 10,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w700,
                     letterSpacing: 1.1,
                     color: _ink,
                   ),
@@ -433,7 +433,7 @@ class _UpdateScreenState extends State<UpdateScreen> {
               icon: const Icon(Icons.install_mobile_rounded),
               label: const Text(
                 'INSTALAR ATUALIZAÇÃO AGORA',
-                style: TextStyle(fontWeight: FontWeight.w900),
+                style: TextStyle(fontWeight: FontWeight.w700),
               ),
               onPressed: () => updater.installDownloadedApk(),
             )
@@ -447,7 +447,7 @@ class _UpdateScreenState extends State<UpdateScreen> {
               icon: const Icon(Icons.download_rounded),
               label: Text(
                 'BAIXAR E ATUALIZAR (${release.sizeLabel})',
-                style: const TextStyle(fontWeight: FontWeight.w900),
+                style: const TextStyle(fontWeight: FontWeight.w700),
               ),
               onPressed: () => updater.downloadAndInstallUpdate(),
             ),

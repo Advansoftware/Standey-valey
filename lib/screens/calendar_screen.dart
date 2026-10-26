@@ -4,6 +4,7 @@ import '../app_scope.dart';
 import '../app_theme.dart';
 import '../models.dart';
 import '../widgets/common.dart';
+import '../widgets/stardew_ui.dart';
 
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});
@@ -55,7 +56,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     Row(
                       children: [
                         for (final d in ['S', 'T', 'Q', 'Q', 'S', 'S', 'D'])
-                          Expanded(child: Center(child: Text(d, style: const TextStyle(fontWeight: FontWeight.w800)))),
+                          Expanded(child: Center(child: Text(d, style: const TextStyle(fontWeight: FontWeight.w700)))),
                       ],
                     ),
                     const SizedBox(height: 6),
@@ -73,14 +74,24 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 for (final ev in repo.eventsOn(season, d))
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 3),
-                    child: ListTile(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      tileColor: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF2A241A) : const Color(0xFFFFFBEB),
-                      leading: Text(ev.emoji, style: const TextStyle(fontSize: 26)),
-                      title: Text(ev.label, style: const TextStyle(fontWeight: FontWeight.w800)),
-                      subtitle: Text('${seasonNames[season]} $d'),
-                      trailing: const Icon(Icons.chevron_right_rounded),
+                    child: Parchment(
                       onTap: () => openEntry(context, ev.entry),
+                      child: Row(
+                        children: [
+                          SdvSlot(size: 46, child: Text(ev.emoji, style: const TextStyle(fontSize: 22))),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(ev.label, style: sdvText(15, color: Theme.of(context).colorScheme.onSurface)),
+                                Text('${seasonNames[season]} $d', style: Theme.of(context).textTheme.bodySmall),
+                              ],
+                            ),
+                          ),
+                          const Icon(Icons.chevron_right_rounded),
+                        ],
+                      ),
                     ),
                   ),
             ],
@@ -116,13 +127,13 @@ class _DayCell extends StatelessWidget {
         height: 54,
         decoration: BoxDecoration(
           color: isToday ? scheme.primary.withValues(alpha: 0.25) : (events.isNotEmpty ? const Color(0xFFF9A825).withValues(alpha: 0.16) : null),
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(3),
           border: isToday ? Border.all(color: scheme.primary, width: 2) : null,
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('$day', style: TextStyle(fontWeight: isToday ? FontWeight.w900 : FontWeight.w600)),
+            Text('$day', style: TextStyle(fontWeight: isToday ? FontWeight.w700 : FontWeight.w600)),
             if (events.isNotEmpty)
               Text(events.take(2).map((e) => e.emoji).join(), style: const TextStyle(fontSize: 12)),
           ],
@@ -143,14 +154,14 @@ class _DayCell extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('${seasonNames[season]} $day', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900)),
+              Text('${seasonNames[season]} $day', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700)),
               const SizedBox(height: 8),
               if (events.isEmpty) const Text('Sem eventos neste dia.'),
               for (final ev in events)
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: Text(ev.emoji, style: const TextStyle(fontSize: 26)),
-                  title: Text(ev.label, style: const TextStyle(fontWeight: FontWeight.w800)),
+                  title: Text(ev.label, style: const TextStyle(fontWeight: FontWeight.w700)),
                   onTap: () {
                     Navigator.of(context).pop();
                     openEntry(context, ev.entry);

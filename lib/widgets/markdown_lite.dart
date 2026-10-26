@@ -32,17 +32,17 @@ class MarkdownLite extends StatelessWidget {
       if (token.startsWith('***') && token.endsWith('***')) {
         spans.add(TextSpan(
           text: token.substring(3, token.length - 3),
-          style: base.copyWith(fontWeight: FontWeight.w800, fontStyle: FontStyle.italic),
+          style: base.copyWith(fontWeight: FontWeight.w700, fontStyle: FontStyle.italic),
         ));
       } else if (token.startsWith('**') && token.endsWith('**')) {
         spans.add(TextSpan(
           text: token.substring(2, token.length - 2),
-          style: base.copyWith(fontWeight: FontWeight.w800),
+          style: base.copyWith(fontWeight: FontWeight.w700),
         ));
       } else if (token.startsWith('__') && token.endsWith('__')) {
         spans.add(TextSpan(
           text: token.substring(2, token.length - 2),
-          style: base.copyWith(fontWeight: FontWeight.w800),
+          style: base.copyWith(fontWeight: FontWeight.w700),
         ));
       } else if (token.startsWith('*') && token.endsWith('*')) {
         spans.add(TextSpan(
@@ -91,7 +91,7 @@ class MarkdownLite extends StatelessWidget {
         out.add(TextSpan(
           text: '${heading.group(2)}\n',
           style: base.copyWith(
-            fontWeight: FontWeight.w900,
+            fontWeight: FontWeight.w700,
             fontSize: (base.fontSize ?? 14) + (level == 1 ? 3 : level == 2 ? 2 : 1),
           ),
         ));

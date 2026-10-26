@@ -107,10 +107,58 @@ class AiService extends ChangeNotifier {
   Stream<String> ask(String prompt) async* {
     final model = await FlutterEdgeAi.getActiveModel(maxTokens: 2048);
     try {
-      final chat = await model.createChat();
+      final chat = await model.createChat(
+        maxOutputTokens: 220,
+        temperature: 0.2,
+        topP: 0.85,
+        topK: 40,
+      );
       await chat.addQueryChunk(Message.text(text: prompt, isUser: true));
+
+      final lines = <String>[];
+      var currentLine = StringBuffer();
+      final fullOutput = StringBuffer();
+
       await for (final r in chat.generateChatResponseAsync()) {
-        if (r is TextResponse) yield r.token;
+        if (r is TextResponse) {
+          final tok = r.token;
+          if (tok.contains('<|im_end|>') || tok.contains('<|endoftext|>')) {
+            break;
+          }
+          currentLine.write(tok);
+          fullOutput.write(tok);
+
+          // 1. Detector de repetição de frase contínua (ex: 'e comprar da Marnie e comprar da Marnie')
+          final full = fullOutput.toString();
+          if (full.length > 50) {
+            final tail = full.substring(full.length - 20);
+            if (RegExp(RegExp.escape(tail)).allMatches(full).length >= 3) {
+              break;
+            }
+          }
+
+          if (tok.contains('\n')) {
+            final lineText = currentLine.toString().trim();
+            currentLine = StringBuffer();
+            if (lineText.isNotEmpty) {
+              final clean = lineText.replaceAll(RegExp(r'^\s*(\d+[\.\)]|\-|\*)\s*'), '').trim().toLowerCase();
+              lines.add(clean);
+              // 2. Proteção contra repetição de linhas semelhantes
+              if (lines.length >= 3) {
+                final last = lines.last;
+                if (last.length > 8) {
+                  final prev1 = lines[lines.length - 2];
+                  final prev2 = lines[lines.length - 3];
+                  if (prev1 == last || prev2 == last ||
+                      (prev1.length > 15 && last.startsWith(prev1.substring(0, 15)))) {
+                    break;
+                  }
+                }
+              }
+            }
+          }
+          yield tok;
+        }
       }
     } finally {
       await model.close();
@@ -118,8 +166,15 @@ class AiService extends ChangeNotifier {
   }
 }
 
-/// Monta o prompt RAG com os trechos recuperados.
-String buildPrompt(String question, List<Hit> hits) {
+/// Monta o prompt para a IA.
+///
+/// - Modelo próprio ([isFineTuned], Espírito do Vale): recebe só a pergunta, sem
+///   RAG. Os fatos do jogo estão nos pesos do modelo; o dataset de treino
+///   (C:\modelo\v2\closed) usa exatamente este formato.
+/// - Modelos generalistas (Gemma, etc.): RAG com os trechos recuperados.
+String buildPrompt(String question, List<Hit> hits, {bool isFineTuned = false}) {
+  if (isFineTuned) return question.trim();
+
   final b = StringBuffer();
   b.writeln('Você é o assistente do Guia do Vale, um guia de Stardew Valley em português do Brasil para iniciantes.');
   b.writeln('Responda em português do Brasil, de forma curta (até 6 frases), clara e amigável.');

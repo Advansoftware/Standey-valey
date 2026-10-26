@@ -38,7 +38,7 @@ void showVillagerDetailDialog(BuildContext context, ApiRelationship rel, Entry? 
                   : Center(
                       child: Text(
                         name.isNotEmpty ? name[0].toUpperCase() : '?',
-                        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900),
+                        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
                       ),
                     ),
             ),
@@ -120,7 +120,7 @@ void showVillagerDetailDialog(BuildContext context, ApiRelationship rel, Entry? 
             'SOBRE O MORADOR',
             style: TextStyle(
               fontSize: 10,
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w700,
               letterSpacing: 0.8,
               color: Color(0xFF7A5826),
             ),
@@ -187,7 +187,7 @@ void showSkillDetailDialog(BuildContext context, ApiSkill skill) {
           'PROFISSÕES ESCOLHIDAS',
           style: TextStyle(
             fontSize: 10,
-            fontWeight: FontWeight.w900,
+            fontWeight: FontWeight.w700,
             letterSpacing: 0.8,
             color: Color(0xFF7A5826),
           ),
@@ -262,7 +262,7 @@ void showAiPlanDetailDialog(
           'PLANO ESTRATÉGICO PARA O SEU SAVE',
           style: TextStyle(
             fontSize: 10,
-            fontWeight: FontWeight.w900,
+            fontWeight: FontWeight.w700,
             letterSpacing: 0.8,
             color: Color(0xFF7A5826),
           ),
@@ -295,7 +295,7 @@ void showAiPlanDetailDialog(
                           'PASSO ${idx + 1}',
                           style: const TextStyle(
                             fontSize: 9,
-                            fontWeight: FontWeight.w900,
+                            fontWeight: FontWeight.w700,
                             color: Colors.white,
                           ),
                         ),
@@ -401,7 +401,7 @@ void showFortuneDetailDialog(BuildContext context, ApiPlayer p) {
           'ONDE A SORTE AFETA O JOGO',
           style: TextStyle(
             fontSize: 10,
-            fontWeight: FontWeight.w900,
+            fontWeight: FontWeight.w700,
             letterSpacing: 0.8,
             color: Color(0xFF7A5826),
           ),
@@ -474,7 +474,7 @@ void showEnergyDetailDialog(BuildContext context, ApiPlayer p) {
           'COMO RECUPERAR ENERGIA',
           style: TextStyle(
             fontSize: 10,
-            fontWeight: FontWeight.w900,
+            fontWeight: FontWeight.w700,
             letterSpacing: 0.8,
             color: Color(0xFF7A5826),
           ),
@@ -541,7 +541,7 @@ void showHealthDetailDialog(BuildContext context, ApiPlayer p) {
           'DICAS DE SOBREVIVÊNCIA',
           style: TextStyle(
             fontSize: 10,
-            fontWeight: FontWeight.w900,
+            fontWeight: FontWeight.w700,
             letterSpacing: 0.8,
             color: Color(0xFF7A5826),
           ),
@@ -582,7 +582,7 @@ void showMoneyDetailDialog(BuildContext context, ApiPlayer p) {
           'DICAS FINANCEIRAS',
           style: TextStyle(
             fontSize: 10,
-            fontWeight: FontWeight.w900,
+            fontWeight: FontWeight.w700,
             letterSpacing: 0.8,
             color: Color(0xFF7A5826),
           ),
@@ -637,7 +637,7 @@ void showNextStepDetailDialog(
                     'Local: ${loc.displayName} (${loc.region})',
                     style: const TextStyle(
                       fontSize: 12,
-                      fontWeight: FontWeight.w900,
+                      fontWeight: FontWeight.w700,
                       color: _green,
                     ),
                   ),

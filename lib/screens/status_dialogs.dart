@@ -169,7 +169,7 @@ void showQuestDetailDialog(BuildContext context, ApiQuest quest) {
                   'OBJETIVO ATUAL',
                   style: TextStyle(
                     fontSize: 9.5,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w700,
                     letterSpacing: 0.8,
                     color: Color(0xFF7A5826),
                   ),
@@ -179,7 +179,7 @@ void showQuestDetailDialog(BuildContext context, ApiQuest quest) {
                   objective,
                   style: const TextStyle(
                     fontSize: 13,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w700,
                     height: 1.25,
                     color: _ink,
                   ),
@@ -195,7 +195,7 @@ void showQuestDetailDialog(BuildContext context, ApiQuest quest) {
             'DESCRIÇÃO DA MISSÃO',
             style: TextStyle(
               fontSize: 10,
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w700,
               letterSpacing: 0.8,
               color: Color(0xFF7A5826),
             ),
@@ -217,7 +217,7 @@ void showQuestDetailDialog(BuildContext context, ApiQuest quest) {
             'RECOMPENSAS',
             style: TextStyle(
               fontSize: 10,
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w700,
               letterSpacing: 0.8,
               color: Color(0xFF7A5826),
             ),
@@ -243,7 +243,7 @@ void showQuestDetailDialog(BuildContext context, ApiQuest quest) {
                       Text(
                         '+${moneyLabel(quest.moneyReward!)}',
                         style: const TextStyle(
-                          fontWeight: FontWeight.w900,
+                          fontWeight: FontWeight.w700,
                           fontSize: 12,
                           color: _ink,
                         ),
@@ -267,7 +267,7 @@ void showQuestDetailDialog(BuildContext context, ApiQuest quest) {
                       Text(
                         quest.rewardDescription!,
                         style: const TextStyle(
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w700,
                           fontSize: 11.5,
                           color: _ink,
                         ),
@@ -358,7 +358,7 @@ void showItemDetailDialog(BuildContext context, ApiItem item, Entry? entry) {
             'SOBRE O ITEM',
             style: TextStyle(
               fontSize: 10,
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w700,
               letterSpacing: 0.8,
               color: Color(0xFF7A5826),
             ),

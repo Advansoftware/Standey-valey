@@ -4,6 +4,7 @@ import '../app_scope.dart';
 import '../app_theme.dart';
 import '../models.dart';
 import '../widgets/common.dart';
+import '../widgets/stardew_ui.dart';
 import 'about_screen.dart';
 import 'assistant_screen.dart';
 import 'calendar_screen.dart';
@@ -30,48 +31,33 @@ class HomeScreen extends StatelessWidget {
           padding: const EdgeInsets.only(bottom: 24),
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 8, 0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Guia do Vale',
-                          style: theme.textTheme.headlineMedium?.copyWith(
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                        Text(
-                          'Sua enciclopédia de Stardew Valley',
-                          style: theme.textTheme.bodyMedium,
-                        ),
-                      ],
-                    ),
-                  ),
-                  IconButton(
+              padding: const EdgeInsets.fromLTRB(12, 10, 12, 0),
+              child: SdvTitleBoard(
+                title: 'Guia do Vale',
+                subtitle: 'Sua enciclopédia de Stardew Valley',
+                actions: [
+                  SdvIconButton(
                     tooltip: 'Calendário',
-                    icon: const Icon(Icons.calendar_month_rounded),
-                    onPressed: () => Navigator.of(context).push(
+                    icon: Icons.calendar_month_rounded,
+                    onTap: () => Navigator.of(context).push(
                       MaterialPageRoute<void>(
                         builder: (_) => const CalendarScreen(),
                       ),
                     ),
                   ),
-                  IconButton(
+                  SdvIconButton(
                     tooltip: 'Mapa do Vale',
-                    icon: const Icon(Icons.map_rounded),
-                    onPressed: () => Navigator.of(context).push(
+                    icon: Icons.map_rounded,
+                    onTap: () => Navigator.of(context).push(
                       MaterialPageRoute<void>(
                         builder: (_) => const MapScreen(),
                       ),
                     ),
                   ),
-                  IconButton(
+                  SdvIconButton(
                     tooltip: 'Sobre e ajustes',
-                    icon: const Icon(Icons.settings_rounded),
-                    onPressed: () => Navigator.of(context).push(
+                    icon: Icons.settings_rounded,
+                    onTap: () => Navigator.of(context).push(
                       MaterialPageRoute<void>(
                         builder: (_) => const AboutScreen(),
                       ),
@@ -161,10 +147,7 @@ class _MapCard extends StatelessWidget {
           height: 104,
           child: Row(
             children: [
-              ClipRRect(
-                borderRadius: const BorderRadius.horizontal(
-                  left: Radius.circular(17),
-                ),
+              ClipRect(
                 child: SizedBox(
                   width: 118,
                   height: 104,
@@ -189,7 +172,7 @@ class _MapCard extends StatelessWidget {
                           Text(
                             'Mapa do Vale',
                             style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w900,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         ],
@@ -253,7 +236,7 @@ class _SeasonCrops extends StatelessWidget {
               )
             else
               SizedBox(
-                height: 170,
+                height: 196,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -289,54 +272,47 @@ class _GuideCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 4),
       child: SizedBox(
         width: 200,
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(20),
-            onTap: () => openEntry(context, entry),
-            child: Ink(
-              decoration: parchment(context, accent: cat.color),
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        child: Parchment(
+          accent: cat.color,
+          onTap: () => openEntry(context, entry),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 40,
-                        height: 40,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: cat.color.withValues(alpha: 0.16),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Text(
-                          entry.emoji,
-                          style: const TextStyle(fontSize: 22),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const Spacer(),
-                  Text(
-                    entry.name,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w900,
-                      fontSize: 15,
+                  Container(
+                    width: 40,
+                    height: 40,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: cat.color.withValues(alpha: 0.16),
+                      shape: BoxShape.circle,
                     ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    entry.sub,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.bodySmall,
+                    child: Text(
+                      entry.emoji,
+                      style: const TextStyle(fontSize: 22),
+                    ),
                   ),
                 ],
               ),
-            ),
+              const Spacer(),
+              Text(
+                entry.name,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 15,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                entry.sub,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
           ),
         ),
       ),
@@ -361,14 +337,15 @@ class _CategoryStrip extends StatelessWidget {
           final c = cats[i];
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(20),
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(builder: (_) => CategoryScreen(cat: c)),
-              ),
-              child: Ink(
-                width: 92,
-                decoration: parchment(context, accent: c.color),
+            child: SizedBox(
+              width: 96,
+              child: Parchment(
+                accent: c.color,
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => CategoryScreen(cat: c),
+                  ),
+                ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -381,7 +358,7 @@ class _CategoryStrip extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w700,
                           fontSize: 12,
                         ),
                       ),
@@ -418,104 +395,101 @@ class _TodayCard extends StatelessWidget {
 
         String when(int d) => d == 1 ? 'amanhã' : 'em $d dias';
 
-        return Container(
-          margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-          padding: const EdgeInsets.all(16),
-          decoration: parchment(
-            context,
-            accent: const Color(0xFFF9A825),
-            radius: 24,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  const Text('🌾', style: TextStyle(fontSize: 22)),
-                  const SizedBox(width: 8),
-                  const Expanded(
-                    child: Text(
-                      'Hoje na fazenda',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w900,
-                        fontSize: 17,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    visualDensity: VisualDensity.compact,
-                    icon: const Icon(Icons.chevron_left_rounded),
-                    onPressed: store.prevDay,
-                  ),
-                  Text(
-                    '${seasonEmojis[store.season]} ${seasonNames[store.season]} ${store.day}',
-                    style: const TextStyle(fontWeight: FontWeight.w800),
-                  ),
-                  IconButton(
-                    visualDensity: VisualDensity.compact,
-                    icon: const Icon(Icons.chevron_right_rounded),
-                    onPressed: store.nextDay,
-                  ),
-                ],
-              ),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(12, 14, 12, 0),
+          child: Parchment(
+            padding: const EdgeInsets.all(4),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
-                    for (var s = 0; s < 4; s++)
-                      Padding(
-                        padding: const EdgeInsets.only(right: 6),
-                        child: ChoiceChip(
-                          label: Text('${seasonEmojis[s]} ${seasonNames[s]}'),
-                          selected: store.season == s,
-                          onSelected: (_) => store.setDate(s, store.day),
+                    const Text('🌾', style: TextStyle(fontSize: 22)),
+                    const SizedBox(width: 8),
+                    const Expanded(
+                      child: Text(
+                        'Hoje na fazenda',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 17,
                         ),
                       ),
+                    ),
+                    IconButton(
+                      visualDensity: VisualDensity.compact,
+                      icon: const Icon(Icons.chevron_left_rounded),
+                      onPressed: store.prevDay,
+                    ),
+                    Text(
+                      '${seasonEmojis[store.season]} ${seasonNames[store.season]} ${store.day}',
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                    IconButton(
+                      visualDensity: VisualDensity.compact,
+                      icon: const Icon(Icons.chevron_right_rounded),
+                      onPressed: store.nextDay,
+                    ),
                   ],
                 ),
-              ),
-              Slider(
-                value: store.day.toDouble(),
-                min: 1,
-                max: 28,
-                divisions: 27,
-                label: '${store.day}',
-                onChanged: (v) => store.setDate(store.season, v.round()),
-              ),
-              if (today.isEmpty)
-                const Text(
-                  'Dia tranquilo: regue as plantas, colete itens e converse com os moradores.',
-                )
-              else
-                for (final ev in today)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 2),
-                    child: InkWell(
-                      onTap: () => openEntry(context, ev.entry),
-                      child: Text(
-                        '${ev.emoji} ${ev.label}',
-                        style: const TextStyle(fontWeight: FontWeight.w800),
-                      ),
-                    ),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      for (var s = 0; s < 4; s++)
+                        Padding(
+                          padding: const EdgeInsets.only(right: 6),
+                          child: ChoiceChip(
+                            label: Text('${seasonEmojis[s]} ${seasonNames[s]}'),
+                            selected: store.season == s,
+                            onSelected: (_) => store.setDate(s, store.day),
+                          ),
+                        ),
+                    ],
                   ),
-              if (next.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                Text(
-                  'Nos próximos dias',
-                  style: Theme.of(context).textTheme.labelLarge,
                 ),
-                for (final e in next.take(4))
-                  Padding(
-                    padding: const EdgeInsets.only(top: 2),
-                    child: InkWell(
-                      onTap: () => openEntry(context, e.value.entry),
-                      child: Text(
-                        '${e.value.emoji} ${e.value.label} — ${when(e.key)}',
+                Slider(
+                  value: store.day.toDouble(),
+                  min: 1,
+                  max: 28,
+                  divisions: 27,
+                  label: '${store.day}',
+                  onChanged: (v) => store.setDate(store.season, v.round()),
+                ),
+                if (today.isEmpty)
+                  const Text(
+                    'Dia tranquilo: regue as plantas, colete itens e converse com os moradores.',
+                  )
+                else
+                  for (final ev in today)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 2),
+                      child: InkWell(
+                        onTap: () => openEntry(context, ev.entry),
+                        child: Text(
+                          '${ev.emoji} ${ev.label}',
+                          style: const TextStyle(fontWeight: FontWeight.w700),
+                        ),
                       ),
                     ),
+                if (next.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    'Nos próximos dias',
+                    style: Theme.of(context).textTheme.labelLarge,
                   ),
+                  for (final e in next.take(4))
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: InkWell(
+                        onTap: () => openEntry(context, e.value.entry),
+                        child: Text(
+                          '${e.value.emoji} ${e.value.label} — ${when(e.key)}',
+                        ),
+                      ),
+                    ),
+                ],
               ],
-            ],
+            ),
           ),
         );
       },

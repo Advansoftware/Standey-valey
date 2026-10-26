@@ -22,6 +22,7 @@ import 'package:stardew_guia/store.dart';
 import 'package:stardew_guia/updater_service.dart';
 import 'package:stardew_guia/widgets/common.dart';
 import 'package:stardew_guia/widgets/markdown_lite.dart';
+import 'package:stardew_guia/widgets/stardew_ui.dart';
 
 late Repository repo;
 
@@ -163,7 +164,7 @@ void main() {
     await pumpFullApp(tester);
     expect(find.text('Guia do Vale'), findsOneWidget);
     expect(find.text('Hoje na fazenda'), findsOneWidget);
-    expect(find.byType(NavigationBar), findsOneWidget);
+    expect(find.byType(SdvNavBar), findsOneWidget);
     // rola até as seções de baixo
     await scrollMain(tester, times: 4);
     expect(find.textContaining('Explorar'), findsOneWidget);
@@ -343,7 +344,7 @@ void main() {
   ) async {
     await pumpFullApp(tester);
     expect(find.text('Meu Status'), findsOneWidget);
-    expect(find.byIcon(Icons.lock_outline_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.lock_rounded), findsOneWidget);
     await tester.tap(find.text('Meu Status'));
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.textContaining('Conecte ao servidor'), findsOneWidget);
@@ -391,14 +392,15 @@ void main() {
       ),
     );
     await tester.pump();
-    expect(find.byIcon(Icons.lock_outline_rounded), findsNothing);
+    expect(find.byIcon(Icons.lock_rounded), findsNothing);
     await tester.tap(find.text('Meu Status'));
     await tester.pumpAndSettle();
     expect(find.byType(StatusScreen), findsOneWidget);
-    expect(find.text('MEU STATUS'), findsOneWidget);
-    expect(find.text('PRÓXIMO PASSO'), findsOneWidget);
+    // HUD do jogo: barras de energia e vida, e o Conselheiro aberto
+    expect(find.byType(SdvVitalBar), findsNWidgets(2));
+    expect(find.text('Conselheiro'), findsWidgets);
     expect(find.text('AJUDA'), findsOneWidget);
-    await tester.tap(find.byIcon(Icons.close_rounded).first);
+    await tester.tap(find.text('✕').first);
     await tester.pumpAndSettle();
     expect(find.byType(StatusScreen), findsNothing);
     expect(tester.takeException(), isNull);
@@ -452,11 +454,11 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(ai.calls, 1);
-    expect(find.text('PLANO DO CONSELHEIRO'), findsOneWidget);
+    expect(find.text('Plano do conselheiro para agora:'), findsOneWidget);
     expect(find.text('Regar as plantas'), findsOneWidget);
-    expect(find.text('Fazenda'), findsWidgets);
+    expect(find.textContaining('Fazenda'), findsWidgets);
     expect(find.text('Visitar a Abigail'), findsOneWidget);
-    expect(find.text('Vila Pelicanos'), findsWidgets);
+    expect(find.textContaining('Vila Pelicanos'), findsWidgets);
     expect(find.text('Minerar cobre'), findsOneWidget);
     expect(find.textContaining('Falta cobre'), findsOneWidget);
 

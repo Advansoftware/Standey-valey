@@ -5,6 +5,7 @@ import '../app_theme.dart';
 import '../models.dart';
 import '../search.dart';
 import '../widgets/common.dart';
+import '../widgets/stardew_ui.dart';
 
 class CategoryScreen extends StatefulWidget {
   final Category cat;
@@ -73,15 +74,10 @@ class _CategoryScreenState extends State<CategoryScreen> {
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
                   child: Row(
                     children: [
-                      Text('${cat.collect}: $got/${all.length}', style: const TextStyle(fontWeight: FontWeight.w800)),
+                      Text('${cat.collect}: $got/${all.length}', style: sdvText(14, color: Theme.of(context).colorScheme.onSurface)),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: LinearProgressIndicator(
-                          value: all.isEmpty ? 0 : got / all.length,
-                          color: cat.color,
-                          minHeight: 8,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
+                        child: SdvProgressBar(value: all.isEmpty ? 0 : got / all.length, color: cat.color),
                       ),
                     ],
                   ),
@@ -154,7 +150,7 @@ class EncyclopediaScreen extends StatelessWidget {
               crossAxisCount: 2,
               mainAxisSpacing: 12,
               crossAxisSpacing: 12,
-              childAspectRatio: 1.0,
+              mainAxisExtent: 160,
             ),
             itemCount: cats.length,
             itemBuilder: (context, i) {
@@ -178,35 +174,28 @@ class CategoryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(22),
-        onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => CategoryScreen(cat: cat))),
-        child: Ink(
-          decoration: parchment(context, accent: cat.color, radius: 22),
-          padding: const EdgeInsets.all(14),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return Parchment(
+      onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => CategoryScreen(cat: cat))),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
-              Container(
-                width: 52,
-                height: 52,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(color: cat.color.withValues(alpha: 0.18), shape: BoxShape.circle),
-                child: Text(cat.emoji, style: const TextStyle(fontSize: 28)),
-              ),
+              SdvSlot(size: 50, child: Text(cat.emoji, style: const TextStyle(fontSize: 24))),
               const Spacer(),
-              Text(cat.title, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
-              const SizedBox(height: 2),
-              Text(cat.collect.isNotEmpty ? '$got/$total ${cat.collect.toLowerCase()}' : '$total itens',
-                  style: Theme.of(context).textTheme.bodySmall),
-              const SizedBox(height: 6),
-              if (cat.collect.isNotEmpty)
-                LinearProgressIndicator(value: total == 0 ? 0 : got / total, color: cat.color, minHeight: 6, borderRadius: BorderRadius.circular(6)),
+              if (cat.collect.isNotEmpty) Text('$got/$total', style: sdvText(14, color: cat.color)),
             ],
           ),
-        ),
+          const Spacer(),
+          Text(cat.title, maxLines: 2, overflow: TextOverflow.ellipsis,
+              style: sdvText(16, color: Theme.of(context).colorScheme.onSurface, height: 1.1)),
+          Text(cat.collect.isNotEmpty ? cat.collect.toLowerCase() : '$total itens',
+              maxLines: 1, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodySmall),
+          if (cat.collect.isNotEmpty) ...[
+            const SizedBox(height: 5),
+            SdvProgressBar(value: total == 0 ? 0 : got / total, color: cat.color),
+          ],
+        ],
       ),
     );
   }

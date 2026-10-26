@@ -28,6 +28,9 @@ class AiModel {
   /// Observação curta mostrada na lista.
   final String note;
 
+  /// Se o modelo foi treinado exclusivamente para Stardew Valley.
+  final bool isFineTuned;
+
   const AiModel({
     required this.id,
     required this.name,
@@ -37,6 +40,7 @@ class AiModel {
     required this.ram,
     required this.type,
     this.note = '',
+    this.isFineTuned = false,
   });
 
   String get sizeLabel => sizeGb < 1
@@ -45,10 +49,18 @@ class AiModel {
 }
 
 /// Catálogo de modelos. O primeiro da lista é o padrão do app.
-///
-/// Para um celular com 12 GB de RAM o Gemma 4 E4B é a melhor escolha
-/// (respostas boas e roda bem com o app aberto).
 const List<AiModel> aiModels = [
+  AiModel(
+    id: 'stardew-qwen-05b',
+    name: 'Espírito do Vale',
+    repo: 'brunoantunes100/stardew-guia-qwen-0.5b',
+    url: 'https://huggingface.co/brunoantunes100/stardew-guia-qwen-0.5b/resolve/main/stardew_qwen_0.5b.litertlm',
+    sizeGb: 0.65,
+    ram: '2 GB+',
+    type: ModelType.qwen,
+    note: 'IA nativa treinada especialmente para Stardew Valley. Respostas instantâneas, leve e 100% offline.',
+    isFineTuned: true,
+  ),
   AiModel(
     id: 'gemma4-e4b',
     name: 'Gemma 4 E4B',

@@ -55,7 +55,7 @@ class _AssistantInstallCardState extends State<AssistantInstallCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('🧠 IA no seu celular', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
+          const Text('🧠 IA no seu celular', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
           const SizedBox(height: 6),
           const Text(
             'Sem o modelo, o assistente mostra os trechos mais parecidos com a sua pergunta. '
@@ -153,7 +153,7 @@ class _SelectedModel extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Modelo escolhido: ${model.name}', style: const TextStyle(fontWeight: FontWeight.w800)),
+                Text('Modelo escolhido: ${model.name}', style: const TextStyle(fontWeight: FontWeight.w700)),
                 Text('${model.sizeLabel} · RAM ${model.ram}', style: Theme.of(context).textTheme.bodySmall),
               ],
             ),
@@ -176,7 +176,7 @@ class _ModelList extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Escolha o modelo', style: TextStyle(fontWeight: FontWeight.w800)),
+        const Text('Escolha o modelo', style: TextStyle(fontWeight: FontWeight.w700)),
         const SizedBox(height: 4),
         RadioGroup<String>(
           groupValue: selectedId,
@@ -224,7 +224,7 @@ class _Badge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(color: color.withValues(alpha: 0.18), borderRadius: BorderRadius.circular(10)),
-      child: Text(text, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: color)),
+      child: Text(text, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: color)),
     );
   }
 }

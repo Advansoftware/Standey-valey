@@ -31,7 +31,9 @@ class Store extends ChangeNotifier {
         aiModelInstalled = _p.getBool('aiok') ?? false,
         aiDownloading = _p.getBool('aidl') ?? false,
         aiModelUrl = _p.getString('aiurl') ?? '',
-        aiModelId = _p.getString('aimodel') ?? defaultAiModel.id,
+        aiModelId = (_p.getBool('aiok') ?? false)
+            ? (_p.getString('aimodel') ?? defaultAiModel.id)
+            : defaultAiModel.id,
         apiUrl = _p.getString('apiurl') ?? '',
         apiName = _p.getString('apiname') ?? '',
         apiAuto = _p.getBool('apiauto') ?? true,

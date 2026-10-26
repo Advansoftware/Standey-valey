@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../app_scope.dart';
 import '../app_theme.dart';
 import '../models.dart';
+import '../widgets/stardew_ui.dart';
 
 import 'update_screen.dart';
 import '../updater_service.dart';
@@ -58,7 +59,7 @@ class AboutScreen extends StatelessWidget {
                         updater.isNewVersionAvailable
                             ? 'Atualizar agora'
                             : 'Buscar atualizações',
-                        style: const TextStyle(fontWeight: FontWeight.w800),
+                        style: const TextStyle(fontWeight: FontWeight.w700),
                       ),
                     ),
                   ],
@@ -67,6 +68,7 @@ class AboutScreen extends StatelessWidget {
               _Card(
                 title: 'Aparência',
                 child: SegmentedButton<ThemeMode>(
+                  showSelectedIcon: false,
                   segments: const [
                     ButtonSegment(value: ThemeMode.system, label: Text('Sistema')),
                     ButtonSegment(value: ThemeMode.light, label: Text('Claro')),
@@ -362,17 +364,18 @@ class _Card extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(top: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: parchment(context),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
-          const SizedBox(height: 10),
-          child,
-        ],
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Parchment(
+        padding: const EdgeInsets.all(6),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: sdvText(17, color: Theme.of(context).colorScheme.onSurface)),
+            const SizedBox(height: 10),
+            child,
+          ],
+        ),
       ),
     );
   }

@@ -2,7 +2,7 @@
 
 > Arquivo de continuação para qualquer IA/pessoa que pegar o projeto. **Atualize este arquivo
 > a cada etapa concluída** (marque `[x]`, ajuste "Próximos passos") e faça commit + push.
-> Última atualização: 2026-10-23 (sessão 7 — correções de navegação, sincronização imediata, download de IA estável e release v1.3.2).
+> Última atualização: 2026-10-26 (sessão 8 — redesenho completo no estilo do jogo, Meu Status com HUD ao vivo via WebSocket e release v1.5.0).
 
 ## 1. Objetivo (pedido do dono, Bruno)
 
@@ -21,7 +21,26 @@ Requisitos explícitos do dono:
   arquivos); **não perguntar nada**, decidir e seguir; **deixar o app pronto e testado**; **publicar a
   release v1.0.0 no GitHub** com a descrição do que tem na primeira versão.
 
-## 2. Estado atual (sessão 6)
+## 2. Estado atual (sessão 8)
+
+**Sessão 8 (v1.5.0):** o app inteiro foi redesenhado no estilo da interface do Stardew Valley.
+- `lib/widgets/stardew_ui.dart` reúne as peças reutilizáveis: `SdvFrame` (moldura de madeira em
+  pixel art), `SdvSlot`, `SdvHearts`, `SdvLevelBoxes`, `SdvVitalBar`, `SdvButton`, `SdvIconButton`,
+  `SdvTitleBoard`, `SdvProgressBar` e `SdvNavBar`. Use sempre essas peças em telas novas.
+- `app_theme.dart` aplica o tema (papel, madeira, fonte PixelifySans em títulos e botões); o modo
+  escuro é a "noite" de madeira escura. `Parchment` desenha a moldura do jogo.
+- **Meu Status** virou uma HUD de jogo (`status_hud.dart`, `status_menu.dart`, `status_live_map.dart`):
+  relógio com mostrador e hora do jogo, contador de ouro, barras E/V, barra de ferramentas, minimapa
+  ao vivo, mensagens dos eventos e menu com abas (Conselheiro, Inventário, Habilidades, Social,
+  Diário, Conquistas, Mapa). Paisagem em 3 colunas; retrato em coluna única.
+- **WebSocket corrigido**: o mod só aceita `/events` e envia `{"event","data"}` em camelCase
+  (`lib/game_events.dart`). A hora do jogo só existe no evento `TimeChanged`.
+- O mock da skill `android-phone-test` agora simula o WebSocket (`/events`) com relógio, troca de
+  local, mochila, níveis e amizades.
+- O modelo próprio (Espírito do Vale) recebe só a pergunta, sem RAG (`buildPrompt`); os outros
+  modelos usam RAG. O treino do modelo fica em `C:/modelo/v2` (ver a skill `treinar-ia`).
+
+### Sessão 6
 
 O que existia até a sessão 5 está **funcionando e testado**. A sessão 6 entregou a tela
 **Meu Status**, um dashboard imersivo para usar com o celular deitado ao lado do PC. O item central
@@ -296,6 +315,7 @@ pareamento; a de conexão é a mostrada na tela principal de depuração sem fio
 
 | Versão | Link | Asset | SHA-256 |
 |---|---|---|---|
+| App 1.5.0+8 | https://github.com/Advansoftware/Standey-valey/releases/tag/v1.5.0 | `guia-do-vale-1.5.0.apk` (arm64) | `7358b9aba38cad3d71397d808f80012acf139c7d3c4c23f31c057aa476c0d981` |
 | App 1.3.0+4 | https://github.com/Advansoftware/Standey-valey/releases/tag/v1.3.0 | `guia-do-vale-1.3.0.apk` (arm64) | `df81e2cc9c88308b47bf7083b4fa0bd3d42d1c3d3136806f290fbca5accd7bbf` |
 | App 1.2.0+3 | https://github.com/Advansoftware/Standey-valey/releases/tag/v1.2.0 | `guia-do-vale-1.2.0.apk` (arm64) | `a3973894a3d14ee5b749d7e5f0091603072fa99449b159c48d1e8a747da8c57b` |
 | API 0.7.0 | https://github.com/Advansoftware/StardewWebApi/releases/tag/0.7.0 | `StardewWebApi-0.7.0.zip` | `fb535d823751e17320164f63d13b67ad3bf276a62920d008b503a47ccd25839b` |

@@ -4,6 +4,7 @@ import '../app_scope.dart';
 import '../app_theme.dart';
 import '../models.dart';
 import '../widgets/common.dart';
+import '../widgets/stardew_ui.dart';
 import 'assistant_screen.dart';
 
 class DetailScreen extends StatelessWidget {
@@ -87,33 +88,27 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-      padding: const EdgeInsets.all(16),
-      decoration: parchment(context, accent: cat.color, radius: 24),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+      child: Parchment(
+      padding: const EdgeInsets.all(6),
       child: Column(
         children: [
           Row(
             children: [
               Text('${cat.emoji} ${cat.title}',
-                  style: TextStyle(color: cat.color, fontWeight: FontWeight.w800, fontSize: 13)),
+                  style: sdvText(14, color: cat.color)),
               const Spacer(),
               if (entry.n > 0)
-                Text(entry.numberLabel, style: TextStyle(color: cat.color, fontWeight: FontWeight.w800)),
+                Text(entry.numberLabel, style: sdvText(15, color: cat.color)),
             ],
           ),
           const SizedBox(height: 8),
-          Container(
-            width: 160,
-            height: 160,
-            padding: const EdgeInsets.all(22),
-            decoration: BoxDecoration(color: cat.color.withValues(alpha: 0.14), shape: BoxShape.circle),
-            child: EntryImage(entry: entry, size: 116),
-          ),
+          SdvSlot(size: 150, child: EntryImage(entry: entry, size: 110)),
           const SizedBox(height: 12),
           Text(entry.name,
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900)),
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700)),
           if (entry.en.isNotEmpty && entry.en != entry.name)
             Text(entry.en, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontStyle: FontStyle.italic)),
           if (entry.tags.isNotEmpty) ...[
@@ -127,6 +122,7 @@ class _Header extends StatelessWidget {
           ],
         ],
       ),
+      ),
     );
   }
 }
@@ -138,10 +134,10 @@ class _Fields extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-      padding: const EdgeInsets.all(14),
-      decoration: parchment(context),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 14, 12, 0),
+      child: Parchment(
+      padding: const EdgeInsets.all(4),
       child: Column(
         children: [
           for (var i = 0; i < entry.fields.length; i++) ...[
@@ -149,6 +145,7 @@ class _Fields extends StatelessWidget {
             _FieldRow(label: entry.fields[i][0], value: entry.fields[i].length > 1 ? entry.fields[i][1] : '', color: color),
           ],
         ],
+      ),
       ),
     );
   }
@@ -168,7 +165,7 @@ class _FieldRow extends StatelessWidget {
       children: [
         SizedBox(
           width: 118,
-          child: Text(label, style: TextStyle(fontWeight: FontWeight.w800, color: color)),
+          child: Text(label, style: sdvText(14, color: Theme.of(context).colorScheme.primary)),
         ),
         Expanded(
           child: asChips
@@ -205,20 +202,15 @@ class _Checklist extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
               child: Row(
                 children: [
-                  Text('Checklist', style: TextStyle(fontWeight: FontWeight.w800, color: color)),
+                  Text('Checklist', style: sdvText(16, color: Theme.of(context).colorScheme.primary)),
                   const Spacer(),
-                  Text('$done de $need', style: const TextStyle(fontWeight: FontWeight.w700)),
+                  Text('$done de $need', style: sdvText(15, color: Theme.of(context).colorScheme.onSurface)),
                 ],
               ),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: LinearProgressIndicator(
-                value: need == 0 ? 0 : (done / need).clamp(0.0, 1.0),
-                color: color,
-                minHeight: 6,
-                borderRadius: BorderRadius.circular(6),
-              ),
+              child: SdvProgressBar(value: need == 0 ? 0 : done / need, color: color),
             ),
             for (final item in entry.checklist)
               CheckboxListTile(
@@ -252,7 +244,7 @@ class BodyView extends StatelessWidget {
       } else if (line.startsWith('## ')) {
         widgets.add(Padding(
           padding: const EdgeInsets.only(top: 14, bottom: 4),
-          child: Text(line.substring(3), style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900, color: theme.colorScheme.primary)),
+          child: Text(line.substring(3), style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: theme.colorScheme.primary)),
         ));
       } else if (line.startsWith('• ')) {
         widgets.add(Padding(
@@ -260,7 +252,7 @@ class BodyView extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('•  ', style: TextStyle(fontWeight: FontWeight.w900)),
+              const Text('•  ', style: TextStyle(fontWeight: FontWeight.w700)),
               Expanded(child: Text(line.substring(2), style: theme.textTheme.bodyLarge)),
             ],
           ),
@@ -269,11 +261,12 @@ class BodyView extends StatelessWidget {
         widgets.add(Text(line, style: theme.textTheme.bodyLarge));
       }
     }
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-      padding: const EdgeInsets.all(16),
-      decoration: parchment(context),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: widgets),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 14, 12, 0),
+      child: Parchment(
+        padding: const EdgeInsets.all(6),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: widgets),
+      ),
     );
   }
 }
@@ -298,10 +291,12 @@ class _Gallery extends StatelessWidget {
           separatorBuilder: (_, _) => const SizedBox(width: 10),
           itemBuilder: (context, i) {
             final g = entry.gallery[i];
-            return Container(
+            return SizedBox(
               width: 92,
-              padding: const EdgeInsets.all(6),
-              decoration: parchment(context, accent: color, radius: 14),
+              child: SdvFrame(
+              style: SdvFrameStyle.inset,
+              px: 2,
+              padding: const EdgeInsets.all(7),
               child: Column(
                 children: [
                   Expanded(
@@ -309,8 +304,9 @@ class _Gallery extends StatelessWidget {
                         errorBuilder: (_, _, _) => const SizedBox()),
                   ),
                   const SizedBox(height: 4),
-                  Text(g.length > 1 ? g[1] : '', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
+                  Text(g.length > 1 ? g[1] : '', maxLines: 1, overflow: TextOverflow.ellipsis, style: sdvText(11)),
                 ],
+              ),
               ),
             );
           },

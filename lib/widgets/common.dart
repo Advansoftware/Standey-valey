@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../app_scope.dart';
 import '../app_theme.dart';
+import 'stardew_ui.dart';
 import '../models.dart';
 import '../screens/detail_screen.dart';
 
@@ -35,6 +36,7 @@ class EntryImage extends StatelessWidget {
   }
 }
 
+/// Título de seção com a fonte de pixel e um traço de madeira, como nos menus.
 class SectionTitle extends StatelessWidget {
   final String text;
   final Widget? trailing;
@@ -42,21 +44,28 @@ class SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(
-            child: Text(text, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+          Row(
+            children: [
+              Expanded(
+                child: Text(text, style: sdvText(18, color: dark ? const Color(0xFFF6DDB0) : SdvColors.ink)),
+              ),
+              ?trailing,
+            ],
           ),
-          ?trailing,
+          Container(height: 3, margin: const EdgeInsets.only(top: 4), color: SdvColors.woodDark),
         ],
       ),
     );
   }
 }
 
-/// Cartão estilo Pokédex: número, imagem, nome.
+/// Cartão estilo Pokédex: número, sprite no slot e nome, na moldura do jogo.
 class DexCard extends StatelessWidget {
   final Entry entry;
   final Color color;
@@ -71,59 +80,49 @@ class DexCard extends StatelessWidget {
       builder: (context, _) {
         final got = store.isCollected(entry.id);
         final fav = store.isFav(entry.id);
-        return Material(
-          color: Colors.transparent,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(20),
-            onTap: () => openEntry(context, entry),
-            child: Ink(
-              decoration: parchment(context, accent: got ? color : null),
-              child: Padding(
-                padding: const EdgeInsets.all(10),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Text(entry.numberLabel,
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w700, color: color)),
-                        const Spacer(),
-                        if (fav) const Icon(Icons.star_rounded, size: 16, color: Color(0xFFF9A825)),
-                        if (showCollected && got) Icon(Icons.check_circle_rounded, size: 16, color: color),
-                      ],
-                    ),
-                    Expanded(
-                      child: Container(
-                        margin: const EdgeInsets.symmetric(vertical: 4),
-                        decoration: BoxDecoration(
-                          color: color.withValues(alpha: 0.14),
-                          shape: BoxShape.circle,
+        return Parchment(
+          onTap: () => openEntry(context, entry),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Text(entry.numberLabel, style: sdvText(12, color: color)),
+                  const Spacer(),
+                  if (fav) const Icon(Icons.star_rounded, size: 16, color: Color(0xFFF9A825)),
+                  if (showCollected && got) Icon(Icons.check_circle_rounded, size: 16, color: color),
+                ],
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: LayoutBuilder(
+                    builder: (context, c) {
+                      final side = c.biggest.shortestSide;
+                      return Center(
+                        child: SdvSlot(
+                          size: side,
+                          child: EntryImage(entry: entry, size: side * 0.7),
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(14),
-                          child: LayoutBuilder(
-                            builder: (context, c) => EntryImage(entry: entry, size: c.biggest.shortestSide),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Text(
-                      entry.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
-                    ),
-                    Text(
-                      entry.sub,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ],
+                      );
+                    },
+                  ),
                 ),
               ),
-            ),
+              Text(
+                entry.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: sdvText(14, color: Theme.of(context).colorScheme.onSurface),
+              ),
+              Text(
+                entry.sub,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
           ),
         );
       },
@@ -131,7 +130,7 @@ class DexCard extends StatelessWidget {
   }
 }
 
-/// Linha de lista com imagem, nome e subtítulo.
+/// Linha de lista com sprite no slot, nome e subtítulo.
 class EntryTile extends StatelessWidget {
   final Entry entry;
   final Color? color;
@@ -140,48 +139,33 @@ class EntryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = color ?? Theme.of(context).colorScheme.primary;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(18),
-          onTap: onTap ?? () => openEntry(context, entry),
-          child: Ink(
-            decoration: parchment(context, radius: 18),
-            padding: const EdgeInsets.all(10),
-            child: Row(
-              children: [
-                Container(
-                  width: 56,
-                  height: 56,
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(color: c.withValues(alpha: 0.14), shape: BoxShape.circle),
-                  child: EntryImage(entry: entry, size: 44),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(entry.name, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
-                      if (entry.sub.isNotEmpty)
-                        Text(entry.sub, maxLines: 2, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodySmall),
-                    ],
-                  ),
-                ),
-                const Icon(Icons.chevron_right_rounded),
-              ],
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
+      child: Parchment(
+        onTap: onTap ?? () => openEntry(context, entry),
+        child: Row(
+          children: [
+            SdvSlot(size: 54, child: EntryImage(entry: entry, size: 38)),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(entry.name, style: sdvText(16, color: Theme.of(context).colorScheme.onSurface)),
+                  if (entry.sub.isNotEmpty)
+                    Text(entry.sub, maxLines: 2, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodySmall),
+                ],
+              ),
             ),
-          ),
+            const Icon(Icons.chevron_right_rounded),
+          ],
         ),
       ),
     );
   }
 }
 
-/// Pequeno rótulo colorido.
+/// Pequeno rótulo colorido (quadrado, como as etiquetas do jogo).
 class TagPill extends StatelessWidget {
   final String text;
   final Color color;
@@ -190,9 +174,13 @@ class TagPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(color: color.withValues(alpha: 0.18), borderRadius: BorderRadius.circular(20)),
-      child: Text(text, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: color)),
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.18),
+        borderRadius: BorderRadius.circular(2),
+        border: Border.all(color: color.withValues(alpha: 0.7), width: 1.5),
+      ),
+      child: Text(text, style: sdvText(12, color: color)),
     );
   }
 }

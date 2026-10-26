@@ -34,9 +34,11 @@ class GameWebSocket {
       wsUrl = 'ws://$wsUrl';
     }
 
-    if (!wsUrl.endsWith('/')) {
-      wsUrl = '$wsUrl/';
+    // O mod só aceita WebSocket no caminho /events.
+    while (wsUrl.endsWith('/')) {
+      wsUrl = wsUrl.substring(0, wsUrl.length - 1);
     }
+    wsUrl = '$wsUrl/events';
 
     _currentUrl = wsUrl;
     _active = true;

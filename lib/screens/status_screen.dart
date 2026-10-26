@@ -11,16 +11,19 @@ import '../game_status.dart';
 import '../map_data.dart';
 import '../models.dart';
 import '../search.dart';
+import '../game_events.dart';
 import '../widgets/common.dart';
+import '../widgets/stardew_ui.dart';
 
-part 'status_panels.dart';
 part 'status_widgets.dart';
 part 'status_tiles.dart';
 part 'status_dialogs.dart';
+part 'status_hud.dart';
+part 'status_live_map.dart';
+part 'status_menu.dart';
 part 'status_entity_dialogs.dart';
 
 const _ink = Color(0xFF3A2414);
-const _paper = Color(0xFFF8EBCB);
 const _paper2 = Color(0xFFF0DDAF);
 const _wood = Color(0xFF4A2B16);
 const _woodDark = Color(0xFF1D120B);
@@ -73,6 +76,11 @@ class _StatusScreenState extends State<StatusScreen>
   bool _aiBusy = false;
   bool _askedSync = false;
   Timer? _liveTimer;
+  _Tab _tab = _Tab.advisor;
+  int _quest = 0;
+
+  void _selectTab(_Tab t) => setState(() => _tab = t);
+  void _selectQuest(int i) => setState(() => _quest = i);
 
   @override
   void initState() {
@@ -83,14 +91,19 @@ class _StatusScreenState extends State<StatusScreen>
     _startLiveSync();
   }
 
+  /// Com o WebSocket ativo os eventos do jogo já atualizam tudo; o timer só
+  /// faz o polling de reserva e apaga as mensagens antigas da HUD.
   void _startLiveSync() {
     _liveTimer?.cancel();
+    var ticks = 0;
     _liveTimer = Timer.periodic(const Duration(seconds: 2), (_) {
       if (!mounted) return;
       final api = AppScope.of(context).api;
-      if (api.connected) {
+      ticks++;
+      if (api.connected && (!api.wsConnected || ticks % 10 == 0)) {
         api.sync(silent: true);
       }
+      if (api.hud.isNotEmpty) setState(() {});
     });
   }
 
@@ -321,7 +334,7 @@ class _StatusScreenState extends State<StatusScreen>
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(10, 6, 10, 6),
                     child: live
-                        ? _buildDashboard(scope, snap, scope.api)
+                        ? _buildGame(scope, snap, scope.api)
                         : _NoSnapshot(api: scope.api, onClose: _close),
                   ),
                 ),
@@ -330,154 +343,6 @@ class _StatusScreenState extends State<StatusScreen>
           },
         ),
       ),
-    );
-  }
-
-  Widget _buildDashboard(AppScope scope, ApiSnapshot snap, GameApi api) {
-    final loc = locationInfo(snap.player.location);
-    final next = recommendedNextStep(snap, scope.repo);
-    final tips = buildStatusTips(snap, scope.repo);
-    final canAi = scope.store.aiModelInstalled && scope.ai.engineReady;
-
-    return LayoutBuilder(
-      builder: (context, c) {
-        final landscape = c.maxWidth > c.maxHeight * 1.12;
-        final left = <Widget>[
-          _vitalsPanel(snap),
-          const SizedBox(height: 7),
-          _mapPanel(context, snap, loc),
-          const SizedBox(height: 7),
-          _locationPanel(loc),
-          const SizedBox(height: 7),
-          _farmPanel(snap),
-        ];
-        final right = <Widget>[
-          _nextStepPanel(context, snap, loc, next, tips, canAi),
-          const SizedBox(height: 7),
-          _questsPanel(snap),
-          const SizedBox(height: 7),
-          _todayPanel(scope, snap),
-          const SizedBox(height: 7),
-          _inventoryPanel(snap),
-          const SizedBox(height: 7),
-          _skillsPanel(snap),
-          const SizedBox(height: 7),
-          _relationshipsPanel(snap),
-          const SizedBox(height: 7),
-          _equipmentPanel(snap),
-          const SizedBox(height: 7),
-          _achievementsPanel(snap),
-          const SizedBox(height: 7),
-          _footer(api),
-        ];
-
-        return Column(
-          children: [
-            _topBar(context, snap, api),
-            const SizedBox(height: 6),
-            Expanded(
-              child: landscape
-                  ? Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(
-                          width: math.min(340, c.maxWidth * 0.37),
-                          child: SingleChildScrollView(
-                            padding: const EdgeInsets.only(bottom: 10),
-                            child: Column(children: left),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: SingleChildScrollView(
-                            padding: const EdgeInsets.only(bottom: 10),
-                            child: Column(children: right),
-                          ),
-                        ),
-                      ],
-                    )
-                  : SingleChildScrollView(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: Column(
-                        children: [
-                          ...left.take(1),
-                          const SizedBox(height: 7),
-                          _nextStepPanel(context, snap, loc, next, tips, canAi),
-                          ...left.skip(1),
-                          const SizedBox(height: 7),
-                          ...right.skip(1),
-                        ],
-                      ),
-                    ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _topBar(BuildContext context, ApiSnapshot snap, GameApi api) {
-    final p = snap.player;
-    final w = snap.world;
-    final weather = weatherInfo(w.weather);
-    final name = p.displayName.trim().isEmpty ? p.name : p.displayName;
-    return LayoutBuilder(
-      builder: (context, c) {
-        final compact = c.maxWidth < 540;
-        return Row(
-          children: [
-            Container(
-              width: 3,
-              height: 34,
-              decoration: BoxDecoration(
-                color: _gold,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'MEU STATUS',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontFamily: 'PixelifySans',
-                      color: _goldSoft,
-                      fontSize: 10,
-                      letterSpacing: 2.2,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  Text(
-                    compact ? name : '$name · ${w.farmName}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontFamily: 'PixelifySans',
-                      color: Colors.white,
-                      fontSize: compact ? 17 : 19,
-                      fontWeight: FontWeight.w700,
-                      shadows: const [
-                        Shadow(color: Colors.black54, blurRadius: 4),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (api.connected && !compact) ...[
-              const _LivePill(),
-              const SizedBox(width: 6),
-            ],
-            _DatePill(world: w, weather: weather),
-            const SizedBox(width: 6),
-            _CloseButton(onTap: _close),
-          ],
-        );
-      },
     );
   }
 }

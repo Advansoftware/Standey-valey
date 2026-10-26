@@ -93,42 +93,19 @@ class _GamePanel extends StatelessWidget {
   final Widget child;
   final Color? accent;
   final EdgeInsetsGeometry padding;
-  final bool dark;
 
   const _GamePanel({
     required this.child,
     this.accent,
     this.padding = const EdgeInsets.all(10),
-    this.dark = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    final border =
-        accent ??
-        (dark ? _gold.withValues(alpha: 0.65) : const Color(0xFFB78645));
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: _woodDark, width: 2.2),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.42),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(2),
-      child: Container(
-        decoration: BoxDecoration(
-          color: dark ? _wood.withValues(alpha: 0.92) : _paper,
-          borderRadius: BorderRadius.circular(7),
-          border: Border.all(color: border, width: 1.4),
-        ),
-        padding: padding,
-        child: child,
-      ),
+    return SdvFrame(
+      px: 2.5,
+      padding: padding.add(const EdgeInsets.all(12)),
+      child: child,
     );
   }
 }
@@ -160,50 +137,6 @@ class _PanelLabel extends StatelessWidget {
   }
 }
 
-class _PanelHeader extends StatelessWidget {
-  final String title;
-  final IconData icon;
-  final Color color;
-  final String? count;
-  const _PanelHeader({
-    required this.title,
-    required this.icon,
-    required this.color,
-    this.count,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, size: 17, color: color),
-        const SizedBox(width: 5),
-        Expanded(
-          child: Text(
-            title,
-            style: TextStyle(
-              fontFamily: 'PixelifySans',
-              fontSize: 15,
-              letterSpacing: 1.1,
-              fontWeight: FontWeight.w700,
-              color: color,
-            ),
-          ),
-        ),
-        if (count != null)
-          Text(
-            count!,
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w900,
-              color: color.withValues(alpha: 0.8),
-            ),
-          ),
-      ],
-    );
-  }
-}
-
 class _TinyTag extends StatelessWidget {
   final String text;
   final Color color;
@@ -222,7 +155,7 @@ class _TinyTag extends StatelessWidget {
         text,
         style: TextStyle(
           fontSize: 8.5,
-          fontWeight: FontWeight.w900,
+          fontWeight: FontWeight.w700,
           color: color,
           letterSpacing: 0.4,
         ),
@@ -255,302 +188,12 @@ class _LivePill extends StatelessWidget {
             style: TextStyle(
               color: Color(0xFFD9F0B8),
               fontSize: 9,
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w700,
               letterSpacing: 0.5,
             ),
           ),
         ],
       ),
-    );
-  }
-}
-
-class _DatePill extends StatelessWidget {
-  final ApiWorld world;
-  final WeatherInfo weather;
-  const _DatePill({required this.world, required this.weather});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: _paper.withValues(alpha: 0.95),
-        borderRadius: BorderRadius.circular(7),
-        border: Border.all(color: _gold, width: 1.3),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.25),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(weather.emoji, style: const TextStyle(fontSize: 15)),
-          const SizedBox(width: 4),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '${seasonEmojiFor(world.season)} ${seasonNameFor(world.season)} ${world.day}',
-                style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w900,
-                  color: _ink,
-                  height: 1.1,
-                ),
-              ),
-              Text(
-                'Ano ${world.year} · ${weather.label}',
-                style: const TextStyle(
-                  fontSize: 9,
-                  color: Color(0xFF6B5238),
-                  height: 1.1,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _CloseButton extends StatelessWidget {
-  final VoidCallback onTap;
-  const _CloseButton({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        onTap: onTap,
-        child: Container(
-          width: 38,
-          height: 38,
-          decoration: BoxDecoration(
-            color: _wood.withValues(alpha: 0.92),
-            shape: BoxShape.circle,
-            border: Border.all(color: _gold, width: 2),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.45),
-                blurRadius: 5,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: const Icon(Icons.close_rounded, color: _goldSoft, size: 22),
-        ),
-      ),
-    );
-  }
-}
-
-class _StatTile extends StatelessWidget {
-  final Object icon;
-  final String label;
-  final String value;
-  final Color color;
-  final double? fraction;
-  final String? sub;
-  final String? tooltip;
-  final VoidCallback? onTap;
-
-  const _StatTile({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.color,
-    this.fraction,
-    this.sub,
-    this.tooltip,
-    this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final content = InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(6),
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(6, 5, 6, 5),
-        decoration: BoxDecoration(
-          color: Colors.black.withValues(alpha: 0.18),
-          borderRadius: BorderRadius.circular(6),
-          border: Border.all(color: color.withValues(alpha: 0.35)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                SizedBox(
-                  width: 15,
-                  height: 15,
-                  child: icon is String
-                      ? Image.asset(
-                          icon as String,
-                          filterQuality: FilterQuality.none,
-                          errorBuilder: (_, _, _) =>
-                              Icon(Icons.circle, size: 11, color: color),
-                        )
-                      : Icon(icon as IconData, size: 13, color: color),
-                ),
-                const SizedBox(width: 3),
-                Expanded(
-                  child: Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 8,
-                      letterSpacing: 0.7,
-                      fontWeight: FontWeight.w900,
-                      color: _goldSoft,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 1),
-            Text(
-              value,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontFamily: 'PixelifySans',
-                fontSize: 15,
-                height: 1.05,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-              ),
-            ),
-            if (fraction != null) ...[
-              const SizedBox(height: 3),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(3),
-                child: LinearProgressIndicator(
-                  value: clamp01(fraction!),
-                  minHeight: 4,
-                  backgroundColor: Colors.white.withValues(alpha: 0.12),
-                  valueColor: AlwaysStoppedAnimation(color),
-                ),
-              ),
-            ] else if (sub != null) ...[
-              const SizedBox(height: 1),
-              Text(
-                sub!,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 8.5,
-                  height: 1.1,
-                  color: Color(0xFFD9C9A8),
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-    return tooltip == null || tooltip!.trim().isEmpty
-        ? content
-        : Tooltip(message: tooltip!, child: content);
-  }
-}
-
-class _MapCanvas extends StatelessWidget {
-  final LocationInfo info;
-  final VoidCallback onTap;
-  const _MapCanvas({required this.info, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, c) {
-        final available = c.maxWidth;
-        var w = available;
-        var h = w * 244 / 400;
-        const maxH = 152.0;
-        if (h > maxH) {
-          h = maxH;
-          w = h * 400 / 244;
-        }
-        return Center(
-          child: GestureDetector(
-            onTap: onTap,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(6),
-              child: Container(
-                width: w,
-                height: h,
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: _gold.withValues(alpha: 0.7),
-                    width: 1.2,
-                  ),
-                ),
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    Image.asset(
-                      'assets/img/map_valley.png',
-                      fit: BoxFit.fill,
-                      filterQuality: FilterQuality.none,
-                    ),
-                    Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.black.withValues(alpha: 0.08),
-                            Colors.black.withValues(alpha: 0.28),
-                          ],
-                        ),
-                      ),
-                    ),
-                    if (info.hasPin)
-                      Positioned(
-                        left: (info.x! * w - 18).clamp(0.0, w - 36),
-                        top: (info.y! * h - 30).clamp(0.0, h - 38),
-                        child: _YouPin(label: info.displayName),
-                      ),
-                    Positioned(
-                      right: 5,
-                      bottom: 4,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 5,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.62),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: const Text(
-                          'N',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 9,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
-      },
     );
   }
 }
@@ -578,7 +221,7 @@ class _YouPin extends StatelessWidget {
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 7.5,
-                fontWeight: FontWeight.w900,
+                fontWeight: FontWeight.w700,
                 letterSpacing: 0.5,
               ),
             ),
