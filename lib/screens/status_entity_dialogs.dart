@@ -253,7 +253,7 @@ void showAiPlanDetailDialog(
     context,
     title: 'Conselheiro do Vale',
     icon: Icons.auto_awesome_rounded,
-    tag: 'IA LOCAL',
+    tag: AppScope.of(context).store.aiProvider.isCloud ? 'IA WEB' : 'IA LOCAL',
     tagColor: _blue,
     content: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

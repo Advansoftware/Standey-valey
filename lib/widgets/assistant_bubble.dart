@@ -31,6 +31,11 @@ class AssistantBubble extends StatelessWidget {
       final e = search.entryOf(h.doc);
       if (e != null && seen.add(e.id)) entries.add(e);
     }
+    // Atalhos para as fichas que a resposta cita, na ordem do texto; se ela
+    // não citar nenhuma (ex.: resposta da busca sem IA), ficam as duas
+    // primeiras da busca.
+    final shortcuts = msg.busy || msg.user ? <Entry>[] : citedEntries(AppScope.of(context).repo.all, msg.text);
+    if (shortcuts.isEmpty) shortcuts.addAll(entries.take(2));
     return Align(
       alignment: msg.user ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
@@ -49,15 +54,15 @@ class AssistantBubble extends StatelessWidget {
               SelectableText(msg.text)
             else
               MarkdownLite(msg.text),
-            if (!msg.user && !msg.busy && entries.isNotEmpty) ...[
+            if (!msg.user && !msg.busy && shortcuts.isNotEmpty) ...[
               const SizedBox(height: 8),
               Wrap(
                 spacing: 6,
                 runSpacing: 6,
                 children: [
-                  for (final e in entries.take(4))
+                  for (final e in shortcuts.take(4))
                     ActionChip(
-                      avatar: Text(e.emoji),
+                      avatar: EntryImage(entry: e, size: 24),
                       label: Text(e.name),
                       onPressed: () => openEntry(context, e),
                     ),
@@ -93,4 +98,25 @@ class AssistantSuggestions extends StatelessWidget {
       children: [for (final q in questions) ActionChip(label: Text(q), onPressed: () => onTap(q))],
     );
   }
+}
+
+/// Fichas cujo nome aparece no texto (palavra inteira), na ordem em que
+/// aparecem. Nomes curtos demais ficam de fora para não confundir.
+List<Entry> citedEntries(Iterable<Entry> all, String text) {
+  final t = ' ${normalize(text).replaceAll(RegExp(r'[^a-z0-9]+'), ' ')} ';
+  final found = <(int, Entry)>[];
+  final seen = <String>{};
+  for (final e in all) {
+    final name = normalize(e.name).replaceAll(RegExp(r'[^a-z0-9]+'), ' ').trim();
+    if (name.length < 4 || !seen.add(name)) continue;
+    final at = t.indexOf(' $name ');
+    if (at >= 0) found.add((at, e));
+  }
+  found.sort((a, b) => a.$1.compareTo(b.$1));
+  // "Isca Mágica" já cobre "Isca": tira nomes contidos num nome maior citado.
+  final names = [for (final f in found) normalize(f.$2.name)];
+  return [
+    for (final f in found)
+      if (!names.any((n) => n != normalize(f.$2.name) && n.contains(normalize(f.$2.name)))) f.$2,
+  ];
 }

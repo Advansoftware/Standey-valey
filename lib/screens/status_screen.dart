@@ -241,7 +241,7 @@ class _StatusScreenState extends State<StatusScreen>
                         ),
                         const SizedBox(height: 8),
                         const Text(
-                          'A IA local ainda não está pronta neste aparelho.',
+                          'A IA ainda não está configurada.',
                           style: TextStyle(
                             fontFamily: 'PixelifySans',
                             fontSize: 18,

@@ -3,6 +3,7 @@ import 'package:stardew_guia/ai_cloud.dart';
 import 'package:stardew_guia/ai_rag.dart';
 import 'package:stardew_guia/repository.dart';
 import 'package:stardew_guia/search.dart';
+import 'package:stardew_guia/widgets/assistant_bubble.dart';
 
 /// Perguntas reais, escritas como um jogador escreve, que a busca antiga
 /// respondia com falas de moradores em vez da página do assunto.
@@ -28,14 +29,26 @@ void main() {
     expect(
       retrieveForChat(search, 'eu tenho um galinheiro com até 4 galinhas, quero comprar um que caiba 8 da pra demolir e comprar?',
               const [], limit: 12)
-          .take(4)
-          .map((h) => h.doc.pageTitle),
+          .take(6)
+          .map((h) => h.doc.pageTitle ?? search.entryOf(h.doc)?.name),
       contains('Galinheiro'),
     );
     expect(
       top('estou no festival do vale do orvalho la pedia para eu levar 9 itens bons mas o que eu faço com eles?'),
       'Feira do Vale Stardew',
     );
+  });
+
+  test('a ficha citada na pergunta vem primeiro (vira o botão da resposta)', () {
+    final hits = retrieveForChat(search, 'onde posso encontrar emily', const [], limit: 12);
+    final first = hits.map((h) => search.entryOf(h.doc)).whereType<Object>().first;
+    expect((first as dynamic).name, 'Emily');
+  });
+
+  test('os atalhos da resposta são as fichas citadas, na ordem do texto', () {
+    final cited = citedEntries(search.repo.all,
+        'A **Emily** gosta de **Esmeralda**, **Jade** e **Tecido**. Ela mora na Vila Pelicanos.');
+    expect(cited.take(3).map((e) => e.name), ['Emily', 'Esmeralda', 'Jade']);
   });
 
   test('falas de morador não tomam o lugar do assunto', () {

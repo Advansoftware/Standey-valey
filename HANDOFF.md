@@ -2,7 +2,7 @@
 
 > Arquivo de continuação para qualquer IA/pessoa que pegar o projeto. **Atualize este arquivo
 > a cada etapa concluída** (marque `[x]`, ajuste "Próximos passos") e faça commit + push.
-> Última atualização: 2026-10-28 (sessão 10 — provedores web de IA, troca de modelo, RAG melhor e release v1.6.0).
+> Última atualização: 2026-10-28 (sessão 10 — provedores web de IA, troca de modelo, RAG melhor e releases v1.6.0 e v1.6.1).
 
 ## 1. Objetivo (pedido do dono, Bruno)
 
@@ -22,6 +22,10 @@ Requisitos explícitos do dono:
   release v1.0.0 no GitHub** com a descrição do que tem na primeira versão.
 
 ## 2. Estado atual (sessão 10)
+
+**Sessão 10, parte 2 (v1.6.1):** a ficha citada na pergunta ("onde encontrar emily") entra antes da
+página da wiki de mesmo nome, e os botões embaixo da resposta passaram a ser as fichas que a resposta
+cita (`citedEntries` em `assistant_bubble.dart`), na ordem do texto, com o desenho do jogo em vez do emoji.
 
 **Sessão 10 (v1.6.0, IA web e troca de modelo):**
 - **Provedores web**: OpenAI (API Responses), Google Gemini (`streamGenerateContent`) e Anthropic

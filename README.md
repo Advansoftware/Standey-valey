@@ -2,7 +2,8 @@
 
 Um app de Android com tudo sobre Stardew Valley, em português. Comecei a jogar e vivia abrindo a wiki
 no navegador pra descobrir qual árvore era qual, o que plantar na primavera ou o que a Abigail gosta de ganhar.
-Resolvi juntar isso num app só, que funciona sem internet.
+Resolvi juntar isso num app só. O conteúdo funciona sem internet, e o assistente de IA pode rodar no
+próprio celular ou usar um provedor web (OpenAI, Gemini ou Anthropic) com a sua chave.
 
 Projeto de fã, sem fins comerciais, sem ligação com a ConcernedApe.
 
@@ -135,8 +136,10 @@ A API não expõe histórico nem eventos do save, então estas coisas continuam 
 
 ### Privacidade e offline
 
-A conexão é direta entre o celular e o seu PC, dentro da sua rede. Não há conta, nuvem nem envio de
-dados de jogo para a internet. O tráfego é HTTP simples, sem TLS, e a API fica acessível a quem
+A conexão é direta entre o celular e o seu PC, dentro da sua rede, sem conta nem nuvem. O app só manda
+dados de jogo para a internet se você escolher um provedor web de IA: nesse caso, a pergunta, os trechos
+do guia e o resumo do save vão para a API do provedor escolhido. Com o modelo no celular, nada sai do
+aparelho. O tráfego é HTTP simples, sem TLS, e a API fica acessível a quem
 estiver na mesma rede: use em rede confiável e não exponha a porta 7882 na internet. Sem a API, ou
 com o jogo fechado, o app abre e funciona normalmente com o conteúdo embutido.
 

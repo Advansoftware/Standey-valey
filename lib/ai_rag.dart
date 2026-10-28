@@ -74,6 +74,13 @@ List<Hit> retrieveForChat(SearchService search, String question, List<ChatTurn> 
       search.searchWhere(focus, (d) => d.entryId == id, limit: 1).forEach((h) => add(Hit(h.doc, 100)));
       continue;
     }
+    // A ficha com o mesmo nome da página (Emily, Fornalha…) vem antes: é ela
+    // que vira o botão de atalho embaixo da resposta.
+    for (final e in search.repo.all) {
+      if (e.name == title) {
+        search.searchWhere(focus, (d) => d.entryId == e.id, limit: 1).forEach((h) => add(Hit(h.doc, 100)));
+      }
+    }
     final page = search.pages[title];
     if (page == null || page.chunks.isEmpty) continue;
     final first = search.searchWhere(title, (d) => d.pageTitle == title && d.text == page.chunks.first, limit: 1);
