@@ -425,7 +425,7 @@ extension _StatusMenu on _StatusScreenState {
     final w = snap.world;
     final next = recommendedNextStep(snap, scope.repo);
     final tips = buildStatusTips(snap, scope.repo);
-    final canAi = scope.store.aiModelInstalled && scope.ai.engineReady;
+    final canAi = scope.ai.available(scope.store);
     final objectives = parseAiObjectives(_aiText);
     final weather = weatherInfo(w.weather);
     final upcoming = scope.repo.upcoming(w.season, w.day, 7).where((e) => e.key > 0).take(4).toList();
@@ -436,11 +436,13 @@ extension _StatusMenu on _StatusScreenState {
     return ListView(
       children: [
         _Row(
+          onTap: () => _explain(next.title, next.body),
           child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
             Row(children: [
               const Text('❗', style: TextStyle(fontSize: 18)),
               const SizedBox(width: 6),
               Expanded(child: Text(next.title, style: sdvText(16))),
+              const _MoreHint(),
             ]),
             const SizedBox(height: 4),
             Text(next.body, style: sdvText(13, weight: FontWeight.w500, height: 1.25)),
@@ -453,7 +455,7 @@ extension _StatusMenu on _StatusScreenState {
                   ? 'Plano do conselheiro para agora:'
                   : canAi
                       ? 'Peça um plano feito para o seu save:'
-                      : 'Instale a IA no Assistente para pedir um plano.',
+                      : 'Configure a IA no Assistente para pedir um plano.',
               style: sdvText(12.5, color: SdvColors.inkSoft, weight: FontWeight.w500),
             ),
           ),
@@ -471,6 +473,7 @@ extension _StatusMenu on _StatusScreenState {
         const SizedBox(height: 6),
         for (final o in objectives)
           _Row(
+            onTap: () => _explain(o.action, _objectiveDetail(o)),
             child: Row(children: [
               const Text('➤', style: TextStyle(fontSize: 16, color: SdvColors.woodDark)),
               const SizedBox(width: 8),
@@ -482,6 +485,7 @@ extension _StatusMenu on _StatusScreenState {
                     Text(o.detail!, style: sdvText(12, weight: FontWeight.w500, color: SdvColors.inkSoft)),
                 ]),
               ),
+              const _MoreHint(),
             ]),
           ),
         section('HOJE'),
@@ -507,6 +511,7 @@ extension _StatusMenu on _StatusScreenState {
         section('DICAS DO GUIA'),
         for (final t in tips)
           _Row(
+            onTap: () => _explain(t.title, t.body),
             child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(t.emoji, style: const TextStyle(fontSize: 16)),
               const SizedBox(width: 8),
@@ -516,6 +521,7 @@ extension _StatusMenu on _StatusScreenState {
                   Text(t.body, style: sdvText(12, weight: FontWeight.w500, color: SdvColors.inkSoft, height: 1.2)),
                 ]),
               ),
+              const _MoreHint(),
             ]),
           ),
         if (upcoming.isNotEmpty) ...[
@@ -530,4 +536,13 @@ extension _StatusMenu on _StatusScreenState {
       ],
     );
   }
+}
+
+/// Seta que avisa que a linha abre mais detalhes no Assistente.
+class _MoreHint extends StatelessWidget {
+  const _MoreHint();
+
+  @override
+  Widget build(BuildContext context) =>
+      const Padding(padding: EdgeInsets.only(left: 4), child: Icon(Icons.chevron_right_rounded, color: SdvColors.woodDark));
 }

@@ -7,7 +7,7 @@ import 'package:flutter/services.dart';
 
 /// Versão instalada. Começa com a do pubspec e é confirmada pelo Android
 /// (versionName do pacote) na primeira verificação de atualização.
-String currentAppVersion = '1.5.4';
+String currentAppVersion = '1.6.0';
 const String githubRepoOwner = 'Advansoftware';
 const String githubRepoName = 'Standey-valey';
 

@@ -4,12 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:stardew_guia/ai_cloud.dart';
+import 'package:stardew_guia/ai_models.dart';
 import 'package:stardew_guia/ai_service.dart';
 import 'package:stardew_guia/app_scope.dart';
 import 'package:stardew_guia/app_theme.dart';
 import 'package:stardew_guia/game_api.dart';
 import 'package:stardew_guia/repository.dart';
 import 'package:stardew_guia/screens/about_screen.dart';
+import 'package:stardew_guia/screens/ai_settings_screen.dart';
 import 'package:stardew_guia/screens/assistant_screen.dart';
 import 'package:stardew_guia/screens/category_screen.dart';
 import 'package:stardew_guia/screens/detail_screen.dart';
@@ -275,21 +278,95 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('assistente mostra o cartão de modelo e responde', (
+  testWidgets('assistente abre a configuração da IA e responde', (
     tester,
   ) async {
     await pumpFullApp(tester);
     await tester.tap(find.text('Assistente').last);
     await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Configurar IA'));
+    await tester.pumpAndSettle();
+    expect(find.byType(AiSettingsScreen), findsOneWidget);
     expect(find.textContaining('IA no seu celular'), findsOneWidget);
-    expect(find.textContaining('Gemma 4 E4B'), findsWidgets);
     expect(find.textContaining('Recomendado'), findsWidgets);
-    // as sugestões ficam abaixo do cartão de modelo
-    await scrollMain(tester, times: 2);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
     expect(find.text('Qual árvore é o carvalho?'), findsOneWidget);
     await tester.tap(find.text('Qual árvore é o carvalho?'));
     await tester.pumpAndSettle();
     expect(find.textContaining('Encontrei isto no guia'), findsOneWidget);
+  });
+
+  testWidgets('trocar o provedor redesenha a configuração na hora', (
+    tester,
+  ) async {
+    setBigScreen(tester);
+    final store = await pumpScreen(tester, const AiSettingsScreen());
+    await tester.pumpAndSettle();
+    expect(find.textContaining('IA no seu celular'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('prov-gemini')));
+    await tester.pumpAndSettle();
+    expect(store.aiProvider, AiProvider.gemini);
+    expect(find.textContaining('IA no seu celular'), findsNothing);
+    expect(find.text('Chave da API'), findsOneWidget);
+
+    // Modelos já listados: o select aparece e a escolha vale na hora.
+    store.setAiKey(AiProvider.gemini, 'chave-teste');
+    store.setAiCloudModels(AiProvider.gemini, const [
+      CloudModel('gemini-2.5-flash', 'Gemini 2.5 Flash'),
+      CloudModel('gemini-2.5-pro', 'Gemini 2.5 Pro'),
+    ]);
+    store.setAiCloudModel(AiProvider.gemini, 'gemini-2.5-flash');
+    await tester.pumpAndSettle();
+    expect(find.textContaining('2 disponíveis'), findsOneWidget);
+    expect(find.text('Testar modelo'), findsOneWidget);
+    expect(find.text('Em uso'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('prov-local')));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('IA no seu celular'), findsOneWidget);
+    expect(find.text('Chave da API'), findsNothing);
+  });
+
+  testWidgets('dá para trocar o modelo local depois de baixado', (
+    tester,
+  ) async {
+    setBigScreen(tester);
+    final store = await makeStore();
+    store.addLocalModel('stardew-qwen-05b', 'https://exemplo/a.litertlm');
+    store.addLocalModel('gemma4-e2b', 'https://exemplo/b.litertlm');
+    store.setAiModelId('stardew-qwen-05b');
+    final ai = _FakeAi();
+    await tester.pumpWidget(
+      AppScope(
+        store: store,
+        repo: repo,
+        search: SearchService(repo),
+        ai: ai,
+        api: GameApi(store, repo),
+        updater: UpdaterService(),
+        child: MaterialApp(theme: buildTheme(Brightness.light), home: const AiSettingsScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final gemma = find.byKey(const ValueKey('local-gemma4-e2b'));
+    await tester.tap(find.descendant(of: gemma, matching: find.text('Usar')));
+    await tester.pumpAndSettle();
+    expect(store.aiModelId, 'gemma4-e2b');
+    expect(find.descendant(of: gemma, matching: find.text('Em uso')), findsOneWidget);
+    final qwen = find.byKey(const ValueKey('local-stardew-qwen-05b'));
+    expect(find.descendant(of: qwen, matching: find.text('Usar')), findsOneWidget);
+    expect(find.textContaining('Modelo: Gemma 4 E2B'), findsOneWidget);
+  });
+
+  test('versões antigas com um modelo baixado continuam com ele', () async {
+    SharedPreferences.setMockInitialValues({'aiok': true, 'aimodel': 'gemma4-e4b'});
+    final store = Store.withPrefs(await SharedPreferences.getInstance());
+    expect(store.aiModelId, 'gemma4-e4b');
+    expect(store.aiModelInstalled, isTrue);
+    expect(store.aiLocalModels['gemma4-e4b'], aiModelById('gemma4-e4b')!.url);
+    expect(store.aiProvider, AiProvider.local);
   });
 
   testWidgets('assistente com pergunta inicial responde sozinho', (
@@ -411,7 +488,7 @@ void main() {
   ) async {
     setBigScreen(tester);
     final store = await makeStore();
-    store.setAiInstalled(true);
+    store.addLocalModel(defaultAiModel.id, defaultAiModel.url);
     final ai = _FakeAi();
     final api = GameApi(store, repo)
       ..connected = true
@@ -453,7 +530,8 @@ void main() {
     await tester.tap(find.text('AJUDA'));
     await tester.pumpAndSettle();
 
-    expect(ai.calls, 1);
+    // Plano (1) + explicação de cada passo (3) e da missão (1), antes de liberar.
+    expect(ai.calls, 5);
     expect(find.text('Plano do conselheiro para agora:'), findsOneWidget);
     expect(find.text('Regar as plantas'), findsOneWidget);
     expect(find.textContaining('Fazenda'), findsWidgets);
@@ -462,8 +540,19 @@ void main() {
     expect(find.text('Minerar cobre'), findsOneWidget);
     expect(find.textContaining('Falta cobre'), findsOneWidget);
 
+    // O AJUDA já prepara a explicação de cada passo (3) e da missão (1).
     await tester.pump(const Duration(seconds: 2));
-    expect(ai.calls, 1, reason: 'sem polling nem chamadas repetidas');
+    expect(ai.calls, 5, reason: 'sem polling nem chamadas repetidas');
+
+    // Tocar no objetivo explica num modal, sem sair do Meu Status e sem chat.
+    await tester.tap(find.text('Minerar cobre'));
+    await tester.pumpAndSettle();
+    expect(find.byType(AssistantScreen), findsNothing);
+    expect(find.byType(StatusScreen), findsOneWidget);
+    expect(find.text('✨'), findsWidgets);
+    expect(ai.calls, 5, reason: 'a explicação já estava pronta');
+    expect(find.textContaining('Preparando'), findsNothing);
+    expect(find.byType(TextField), findsNothing);
   });
 
   testWidgets('a data do jogo muda pelo cartão "Hoje na fazenda"', (
@@ -612,6 +701,9 @@ class _FakeAi extends AiService {
   }
 
   int calls = 0;
+
+  @override
+  Future<void> ensureLocalActive(Store store) async {}
 
   @override
   Stream<String> ask(String prompt, {bool exact = false}) async* {

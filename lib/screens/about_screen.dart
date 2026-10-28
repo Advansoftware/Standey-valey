@@ -2,14 +2,23 @@ import 'package:flutter/material.dart';
 
 import '../widgets/common.dart';
 
+import '../ai_models.dart';
 import '../app_scope.dart';
+import '../store.dart';
 import '../app_theme.dart';
 import '../models.dart';
 import '../widgets/sdv_notice.dart';
 import '../widgets/stardew_ui.dart';
 
+import 'ai_settings_screen.dart';
 import 'update_screen.dart';
 import '../updater_service.dart';
+
+String _aiLabel(Store store) {
+  final p = store.aiProvider;
+  if (p.isCloud) return '${p.label} · ${store.aiCloudModel(p).isEmpty ? 'sem modelo' : store.aiCloudModel(p)}';
+  return 'no celular · ${aiModelById(store.aiModelId)?.name ?? store.aiModelId}';
+}
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
@@ -86,15 +95,25 @@ class AboutScreen extends StatelessWidget {
                 child: _ApiCard(initialUrl: store.apiUrl),
               ),
               _Card(
-                title: 'Assistente (IA local)',
+                title: 'Assistente (IA)',
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(scope.ai.engineReady ? 'Motor de IA: disponível neste aparelho.' : 'Motor de IA: indisponível (${scope.ai.engineError ?? 'inicializando…'}).'),
+                    Text('IA em uso: ${_aiLabel(store)}${scope.ai.available(store) ? '' : ' (não configurada)'}.'),
                     const SizedBox(height: 4),
-                    Text(store.aiModelInstalled ? 'Modelo baixado: sim.' : 'Modelo baixado: não (baixe na aba Assistente).'),
+                    Text(scope.ai.engineReady ? 'Motor de IA local: disponível neste aparelho.' : 'Motor de IA local: indisponível (${scope.ai.engineError ?? 'inicializando…'}).'),
+                    const SizedBox(height: 4),
+                    Text('Modelos baixados no celular: ${store.aiLocalModels.isEmpty ? 'nenhum' : [for (final id in store.aiLocalModels.keys) aiModelById(id)?.name ?? id].join(', ')}.'),
                     const SizedBox(height: 4),
                     Text(scope.search.wikiAvailable ? 'Wiki offline: incluída.' : 'Wiki offline: não incluída nesta versão.'),
+                    const SizedBox(height: 8),
+                    OutlinedButton.icon(
+                      icon: const Icon(Icons.tune_rounded),
+                      label: const Text('Configurar IA'),
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(builder: (_) => const AiSettingsScreen()),
+                      ),
+                    ),
                   ],
                 ),
               ),

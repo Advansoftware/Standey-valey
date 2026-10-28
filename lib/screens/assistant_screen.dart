@@ -2,16 +2,18 @@ import 'package:flutter/material.dart';
 
 import '../widgets/common.dart';
 
-import '../ai_models.dart';
+import '../ai_cloud.dart';
+import '../ai_rag.dart';
 import '../ai_service.dart';
 import '../app_scope.dart';
+import '../game_status.dart';
 import '../search.dart';
 import '../widgets/assistant_bubble.dart';
-import '../widgets/assistant_install_card.dart';
 import '../widgets/stardew_ui.dart';
+import 'ai_settings_screen.dart';
 
-/// Assistente: busca (RAG) no conteúdo do app e, se o modelo estiver instalado,
-/// gera a resposta com a IA local. Sem modelo, mostra os trechos encontrados.
+/// Assistente: busca (RAG) no conteúdo do app e gera a resposta com a IA
+/// escolhida (modelo local ou provedor web). Sem IA, mostra os trechos.
 class AssistantScreen extends StatefulWidget {
   final String? initialQuestion;
   const AssistantScreen({super.key, this.initialQuestion});
@@ -26,25 +28,13 @@ class _AssistantScreenState extends State<AssistantScreen> {
   final _scroll = ScrollController();
   bool _started = false;
   bool _asking = false;
-  String _modelId = defaultAiModel.id;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_started) return;
     _started = true;
-    final scope = AppScope.of(context);
-    scope.search.loadWiki();
-    final savedId = scope.store.aiModelId;
-    if (!scope.store.aiModelInstalled || savedId.isEmpty || aiModelById(savedId) == null) {
-      _modelId = defaultAiModel.id;
-      // Notificar o Store durante o build quebra a árvore: grava depois do frame.
-      if (savedId != defaultAiModel.id) {
-        WidgetsBinding.instance.addPostFrameCallback((_) => scope.store.setAiModelId(defaultAiModel.id));
-      }
-    } else {
-      _modelId = savedId;
-    }
+    AppScope.of(context).search.loadWiki();
     final q = widget.initialQuestion;
     if (q != null && q.trim().isNotEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _ask(q));
@@ -66,6 +56,10 @@ class _AssistantScreenState extends State<AssistantScreen> {
     });
   }
 
+  void _openSettings() {
+    Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const AiSettingsScreen()));
+  }
+
   /// Resposta sem modelo de linguagem: mostra os trechos encontrados.
   String _fallback(List<Hit> hits) {
     final search = AppScope.of(context).search;
@@ -82,11 +76,26 @@ class _AssistantScreenState extends State<AssistantScreen> {
     return b.toString();
   }
 
+  /// Conversa até aqui (perguntas e respostas prontas), para as continuações.
+  List<ChatTurn> _history() => [
+        for (final m in _msgs)
+          if (!m.busy && m.text.trim().isNotEmpty) ChatTurn(m.user, m.text),
+      ];
+
+  /// Resumo do save quando o app está conectado ao jogo (Meu Status).
+  String? _save(AppScope scope) {
+    final snap = scope.api.snapshot;
+    if (!scope.api.connected || snap == null) return null;
+    return saveSummary(snap, scope.repo, inventoryLimit: 36);
+  }
+
   Future<void> _ask(String question) async {
     final q = question.trim();
     if (q.isEmpty || _asking) return;
     final scope = AppScope.of(context);
-    final hits = scope.search.search(q, limit: 8);
+    final history = _history();
+    final cloud = scope.store.aiProvider.isCloud;
+    final hits = retrieveForChat(scope.search, q, history, limit: cloud ? 12 : 8);
     final answer = ChatMessage(user: false, sources: hits, busy: true);
     setState(() {
       _asking = true;
@@ -97,13 +106,10 @@ class _AssistantScreenState extends State<AssistantScreen> {
     });
     _toEnd();
 
-    final useAi = scope.store.aiModelInstalled && scope.ai.engineReady;
-    if (useAi) {
+    if (scope.ai.available(scope.store)) {
       try {
         final buf = StringBuffer();
-        final currentModel = aiModelById(scope.store.aiModelId) ?? defaultAiModel;
-        final prompt = buildPrompt(q, hits, isFineTuned: currentModel.isFineTuned);
-        await for (final tok in scope.ai.ask(prompt, exact: currentModel.isFineTuned)) {
+        await for (final tok in scope.ai.reply(scope.store, scope.search, q, hits, history, save: _save(scope))) {
           buf.write(tok);
           if (!mounted) return;
           setState(() => answer.text = cleanAnswer(buf.toString()));
@@ -111,7 +117,7 @@ class _AssistantScreenState extends State<AssistantScreen> {
         }
         if (answer.text.isEmpty) answer.text = _fallback(hits);
       } catch (e) {
-        answer.text = '${_fallback(hits)}\n\n${_friendlyError(e)}';
+        answer.text = '${_fallback(hits)}\n\n${_friendlyError(e, cloud)}';
       }
     } else {
       answer.text = _fallback(hits);
@@ -124,9 +130,10 @@ class _AssistantScreenState extends State<AssistantScreen> {
     _toEnd();
   }
 
-  /// Traduz erros técnicos do motor de IA para uma mensagem que faz sentido.
-  String _friendlyError(Object e) {
+  /// Traduz erros técnicos da IA para uma mensagem que faz sentido.
+  String _friendlyError(Object e, bool cloud) {
     final msg = '$e';
+    if (cloud) return 'O provedor web falhou: $msg';
     if (msg.contains('arm64') || msg.contains('aarch64')) {
       return 'Este aparelho não consegue rodar o modelo de IA (o motor precisa de '
           'um celular arm64, como os de hoje). Os trechos acima são a resposta '
@@ -139,28 +146,20 @@ class _AssistantScreenState extends State<AssistantScreen> {
     return 'A IA local falhou: $msg';
   }
 
-  Future<void> _install(String urlOverride) async {
-    final scope = AppScope.of(context);
-    final model = aiModelById(_modelId) ?? defaultAiModel;
-    scope.store.setAiModelId(model.id);
-    final custom = urlOverride.trim();
-    if (custom.isNotEmpty) scope.store.setAiUrl(custom);
-    scope.store.setAiDownloading(true);
-    final ok = await scope.ai.install(model, urlOverride: custom);
-    scope.store.setAiDownloading(false);
-    if (ok) scope.store.setAiInstalled(true);
-  }
-
   @override
   Widget build(BuildContext context) {
     final scope = AppScope.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Assistente')),
+      appBar: AppBar(
+        title: const Text('Assistente'),
+        actions: [
+          IconButton(tooltip: 'Configurar IA', icon: const Icon(Icons.tune_rounded), onPressed: _openSettings),
+        ],
+      ),
       body: ContentWidth(child: ListenableBuilder(
         listenable: Listenable.merge([scope.store, scope.ai, scope.search]),
         builder: (context, _) {
-          final installed = scope.store.aiModelInstalled;
-          final downloading = scope.ai.downloading;
+          final ready = scope.ai.available(scope.store);
           return Column(
             children: [
               Expanded(
@@ -168,48 +167,38 @@ class _AssistantScreenState extends State<AssistantScreen> {
                   controller: _scroll,
                   padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
                   children: [
-                    if (!installed)
-                      AssistantInstallCard(
-                        modelId: _modelId,
-                        onModelChanged: (id) {
-                          setState(() => _modelId = id);
-                          scope.store.setAiModelId(id);
-                        },
-                        onInstall: _install,
-                      ),
-                    if (!downloading && _msgs.isEmpty) AssistantSuggestions(onTap: _ask),
+                    if (_msgs.isEmpty) AssistantSuggestions(onTap: _ask),
                     for (final m in _msgs) AssistantBubble(msg: m),
                   ],
                 ),
               ),
-              if (!downloading)
-                SafeArea(
-                  top: false,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: _input,
-                            textInputAction: TextInputAction.send,
-                            onSubmitted: _ask,
-                            decoration: InputDecoration(
-                              hintText: installed ? 'Pergunte qualquer coisa do jogo…' : 'Pergunte (busca inteligente)…',
-                            ),
+              SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _input,
+                          textInputAction: TextInputAction.send,
+                          onSubmitted: _ask,
+                          decoration: InputDecoration(
+                            hintText: ready ? 'Pergunte qualquer coisa do jogo…' : 'Pergunte (busca inteligente)…',
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        SdvIconButton(
-                          tooltip: 'Enviar',
-                          size: 50,
-                          icon: Icons.send_rounded,
-                          onTap: _asking ? null : () => _ask(_input.text),
-                        ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(width: 8),
+                      SdvIconButton(
+                        tooltip: 'Enviar',
+                        size: 50,
+                        icon: Icons.send_rounded,
+                        onTap: _asking ? null : () => _ask(_input.text),
+                      ),
+                    ],
                   ),
                 ),
+              ),
             ],
           );
         },

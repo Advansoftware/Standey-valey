@@ -353,7 +353,7 @@ void showItemDetailDialog(BuildContext context, ApiItem item, Entry? entry) {
           ],
         ),
         const SizedBox(height: 12),
-        if (entry != null && entry.desc.isNotEmpty) ...[
+        if (entry != null && entry.desc.isNotEmpty && !entry.desc.startsWith('Minério do jogo. Use os campos')) ...[
           const Text(
             'SOBRE O ITEM',
             style: TextStyle(
@@ -379,17 +379,58 @@ void showItemDetailDialog(BuildContext context, ApiItem item, Entry? entry) {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('• ID Técnico: ${item.qualifiedItemId.isNotEmpty ? item.qualifiedItemId : item.itemId}',
-                  style: const TextStyle(fontSize: 11, color: Color(0xFF6B5238))),
-              Text('• Quantidade na mochila: ${item.stackSize}',
-                  style: const TextStyle(fontSize: 11, color: Color(0xFF6B5238))),
-              Text('• Qualidade da colheita: $qualityLabel',
-                  style: const TextStyle(fontSize: 11, color: Color(0xFF6B5238))),
+              for (final f in entry?.fields ?? const <List<String>>[])
+                if (f.length >= 2 && f[1].trim().isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Text.rich(
+                      TextSpan(children: [
+                        TextSpan(text: '${f[0]}: ', style: const TextStyle(fontWeight: FontWeight.w700)),
+                        TextSpan(text: f[1]),
+                      ]),
+                      style: const TextStyle(fontSize: 12.5, height: 1.3, color: Color(0xFF3E2818)),
+                    ),
+                  ),
+              Text('Na mochila: ${item.stackSize} · qualidade $qualityLabel'
+                  '${_stackValue(entry, item) == null ? '' : ' · a pilha vale cerca de ${_stackValue(entry, item)}'}',
+                  style: const TextStyle(fontSize: 12, color: Color(0xFF6B5238))),
             ],
+          ),
+        ),
+        const SizedBox(height: 10),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: OutlinedButton.icon(
+            style: OutlinedButton.styleFrom(foregroundColor: _ink, side: const BorderSide(color: _gold, width: 1.5)),
+            icon: const Text('✨'),
+            label: const Text('O que fazer com isso?'),
+            onPressed: () {
+              final scope = AppScope.of(context);
+              showAiExplainDialog(
+                context,
+                title: name,
+                answer: scope.ai.available(scope.store)
+                    ? explainWithAi(scope, 'O que eu faço com $name? Tenho ${item.stackSize} na mochila. '
+                        'Vale mais vender, usar em quê ou guardar para algo, no meu jogo agora? Responda curto.')
+                    : null,
+              );
+            },
           ),
         ),
       ],
     ),
   );
+}
+
+/// Valor da pilha pelo preço de venda da ficha, com o bônus da qualidade.
+String? _stackValue(Entry? entry, ApiItem item) {
+  final price = entry?.fields.firstWhere((f) => f.length >= 2 && f[0].startsWith('Preço de venda'),
+      orElse: () => const []);
+  if (price == null || price.length < 2) return null;
+  final m = RegExp(r'(\d[\d.]*)\s*g').firstMatch(price[1]);
+  final base = int.tryParse(m?.group(1)?.replaceAll('.', '') ?? '');
+  if (base == null || base <= 0) return null;
+  final mult = switch (item.quality) { 1 => 1.25, 2 => 1.5, 4 => 2.0, _ => 1.0 };
+  return moneyLabel((base * mult).floor() * item.stackSize);
 }
 

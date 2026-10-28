@@ -350,6 +350,7 @@ class _TodoBanner extends StatelessWidget {
   final bool busy;
   final VoidCallback onHelp;
   final VoidCallback onOpen;
+  final void Function(AiObjective o) onObjective;
   final bool compact;
 
   const _TodoBanner({
@@ -358,6 +359,7 @@ class _TodoBanner extends StatelessWidget {
     required this.busy,
     required this.onHelp,
     required this.onOpen,
+    required this.onObjective,
     this.compact = false,
   });
 
@@ -395,7 +397,10 @@ class _TodoBanner extends StatelessWidget {
             const SizedBox(height: 5),
             if (ai)
               for (final o in objectives.take(compact ? 2 : 3))
-                Padding(
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => onObjective(o),
+                  child: Padding(
                   padding: const EdgeInsets.only(bottom: 3),
                   child: Text.rich(
                     TextSpan(children: [
@@ -406,6 +411,7 @@ class _TodoBanner extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
+                ),
                 )
             else ...[
               Text(next.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: sdvText(14)),
@@ -495,6 +501,7 @@ extension _StatusGame on _StatusScreenState {
       compact: compact,
       onHelp: canAi ? _askAi : _showAiUnavailable,
       onOpen: () => _selectTab(_Tab.advisor),
+      onObjective: (o) => _explain(o.action, _objectiveDetail(o)),
     );
   }
 

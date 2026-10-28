@@ -240,5 +240,9 @@ class SearchService extends ChangeNotifier {
     return _index.search(q, limit: limit, where: entriesOnly ? (d) => d.entryId != null : null);
   }
 
+  /// Busca só nos documentos que passam no filtro (ex.: uma página da wiki).
+  List<Hit> searchWhere(String q, bool Function(Doc) where, {int limit = 20}) =>
+      _index.search(q, limit: limit, where: where);
+
   Entry? entryOf(Doc d) => d.entryId == null ? null : repo.byId[d.entryId!];
 }

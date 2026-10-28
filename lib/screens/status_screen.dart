@@ -4,7 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../ai_models.dart';
+import '../ai_rag.dart';
 import '../ai_service.dart';
 import '../app_scope.dart';
 import '../game_api.dart';
@@ -14,6 +14,7 @@ import '../models.dart';
 import '../search.dart';
 import '../game_events.dart';
 import '../widgets/common.dart';
+import '../widgets/markdown_lite.dart';
 import '../widgets/stardew_ui.dart';
 
 part 'status_widgets.dart';
@@ -23,6 +24,7 @@ part 'status_hud.dart';
 part 'status_live_map.dart';
 part 'status_menu.dart';
 part 'status_entity_dialogs.dart';
+part 'status_ai_explain.dart';
 
 const _ink = Color(0xFF3A2414);
 const _paper2 = Color(0xFFF0DDAF);
@@ -74,6 +76,10 @@ class _StatusScreenState extends State<StatusScreen>
   final _entryCache = <String, Entry>{};
   String _aiText = '';
   String? _aiError;
+
+  /// Explicações do Meu Status já pedidas à IA (ver status_ai_explain.dart).
+  final _explanations = <String, Future<String>>{};
+  Future<void> _localQueue = Future.value();
   bool _aiBusy = false;
   bool _askedSync = false;
   Timer? _liveTimer;
@@ -151,7 +157,7 @@ class _StatusScreenState extends State<StatusScreen>
     final scope = AppScope.of(context);
     final snap = scope.api.snapshot;
     if (snap == null) return;
-    if (!scope.store.aiModelInstalled || !scope.ai.engineReady) {
+    if (!scope.ai.available(scope.store)) {
       _showAiUnavailable();
       return;
     }
@@ -175,12 +181,16 @@ class _StatusScreenState extends State<StatusScreen>
 
     try {
       final buf = StringBuffer();
-      await for (final token in scope.ai.ask(prompt,
-          exact: (aiModelById(scope.store.aiModelId) ?? defaultAiModel).isFineTuned)) {
+      await for (final token in scope.ai.complete(scope.store, prompt)) {
         buf.write(token);
       }
       if (!mounted) return;
       final answer = cleanAnswer(buf.toString()).trim();
+      // O AJUDA só libera o plano com as explicações prontas: ao tocar num
+      // passo, o modal já abre com o texto completo.
+      _explanations.clear();
+      await _preloadExplanations(parseAiObjectives(answer), next);
+      if (!mounted) return;
       setState(() {
         _aiText = answer;
         if (parseAiObjectives(answer).isEmpty) {
@@ -242,7 +252,7 @@ class _StatusScreenState extends State<StatusScreen>
                         ),
                         const SizedBox(height: 6),
                         const Text(
-                          'Abra o Assistente, instale um modelo e volte para pedir um plano feito para o seu save. '
+                          'Abra o Assistente, configure a IA (no celular ou web) e volte para pedir um plano feito para o seu save. '
                           'Sem IA, o plano do guia acima continua valendo.',
                           style: TextStyle(
                             fontSize: 13,
@@ -324,7 +334,7 @@ class _StatusScreenState extends State<StatusScreen>
       child: Scaffold(
         backgroundColor: Colors.black,
         body: ListenableBuilder(
-          listenable: scope.api,
+          listenable: Listenable.merge([scope.api, scope.store, scope.ai]),
           builder: (context, _) {
             final snap = scope.api.snapshot;
             final live = scope.api.connected && snap != null;

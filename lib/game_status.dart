@@ -839,32 +839,14 @@ List<AiObjective> parseAiObjectives(String raw) {
   return out;
 }
 
-String buildStatusPrompt({
-  required ApiSnapshot snap,
-  required LocationInfo location,
-  required StatusTip next,
-  required List<StatusTip> tips,
-  required Repository repo,
-}) {
+/// Resumo do save (dados ao vivo do jogo), uma linha por assunto. Usado pelo
+/// Conselheiro e pelo chat do Assistente quando o app está conectado ao jogo.
+String saveSummary(ApiSnapshot snap, Repository repo, {LocationInfo? location, int inventoryLimit = 12}) {
   final p = snap.player;
   final w = snap.world;
   final weather = weatherInfo(w.weather);
+  location ??= locationInfo(p.location);
   final b = StringBuffer();
-  b.writeln(
-    'Você é o conselheiro do Guia do Vale, um subagente que ajuda uma pessoa a jogar Stardew Valley 1.6.',
-  );
-  b.writeln(
-    'Fale em português do Brasil, direto, como um amigo que conhece o jogo. Não invente dados.',
-  );
-  b.writeln('Ela está com o celular deitado ao lado do PC enquanto joga.');
-  b.writeln(
-    'Dê prioridade absoluta ao próximo passo prático e diga para onde ir. Não repita a ficha inteira.',
-  );
-  b.writeln(
-    'Se houver missão, fale dela primeiro. Se não houver, escolha a ação mais útil para hoje.',
-  );
-  b.writeln();
-  b.writeln('STATUS:');
   b.writeln(
     '- Data: ${seasonNameFor(w.season)} ${w.day}, Ano ${w.year} (${weekdayPt(w.dayOfWeek)}); clima: ${weather.label}.',
   );
@@ -892,7 +874,7 @@ String buildStatusPrompt({
     b.writeln('- Missões: nenhuma ativa.');
   }
   b.writeln(
-    '- Mochila (${snap.inventory.length} itens): ${snap.inventory.take(12).map((i) => '${i.displayName} x${i.stackSize}').join(', ')}.',
+    '- Mochila (${snap.inventory.length} itens): ${snap.inventory.take(inventoryLimit).map((i) => '${i.displayName} x${i.stackSize}').join(', ')}.',
   );
   final friends = [...p.relationships]
     ..sort((a, b) => b.hearts.compareTo(a.hearts));
@@ -917,6 +899,33 @@ String buildStatusPrompt({
   if (crops.isNotEmpty) {
     b.writeln('- Culturas da estação no guia: ${crops.join(', ')}.');
   }
+  return b.toString();
+}
+
+String buildStatusPrompt({
+  required ApiSnapshot snap,
+  required LocationInfo location,
+  required StatusTip next,
+  required List<StatusTip> tips,
+  required Repository repo,
+}) {
+  final b = StringBuffer();
+  b.writeln(
+    'Você é o conselheiro do Guia do Vale, um subagente que ajuda uma pessoa a jogar Stardew Valley 1.6.',
+  );
+  b.writeln(
+    'Fale em português do Brasil, direto, como um amigo que conhece o jogo. Não invente dados.',
+  );
+  b.writeln('Ela está com o celular deitado ao lado do PC enquanto joga.');
+  b.writeln(
+    'Dê prioridade absoluta ao próximo passo prático e diga para onde ir. Não repita a ficha inteira.',
+  );
+  b.writeln(
+    'Se houver missão, fale dela primeiro. Se não houver, escolha a ação mais útil para hoje.',
+  );
+  b.writeln();
+  b.writeln('STATUS:');
+  b.write(saveSummary(snap, repo, location: location));
   b.writeln();
   b.writeln('SUGESTÃO DO GUIA (use como base, mas escolha a prioridade):');
   b.writeln('- ${next.title}: ${next.body}');

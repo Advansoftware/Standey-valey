@@ -2,7 +2,7 @@
 
 > Arquivo de continuação para qualquer IA/pessoa que pegar o projeto. **Atualize este arquivo
 > a cada etapa concluída** (marque `[x]`, ajuste "Próximos passos") e faça commit + push.
-> Última atualização: 2026-10-26 (sessão 9 — Espírito do Vale treinado sem RAG publicado no Hugging Face e release v1.5.2).
+> Última atualização: 2026-10-28 (sessão 10 — provedores web de IA, troca de modelo, RAG melhor e release v1.6.0).
 
 ## 1. Objetivo (pedido do dono, Bruno)
 
@@ -21,7 +21,42 @@ Requisitos explícitos do dono:
   arquivos); **não perguntar nada**, decidir e seguir; **deixar o app pronto e testado**; **publicar a
   release v1.0.0 no GitHub** com a descrição do que tem na primeira versão.
 
-## 2. Estado atual (sessão 9)
+## 2. Estado atual (sessão 10)
+
+**Sessão 10 (v1.6.0, IA web e troca de modelo):**
+- **Provedores web**: OpenAI (API Responses), Google Gemini (`streamGenerateContent`) e Anthropic
+  (Messages), em `lib/ai_cloud.dart`. A chave é digitada no app e fica nas preferências do celular;
+  a lista de modelos vem da API do provedor (filtra áudio, imagem, embeddings, versões com data etc.)
+  e fica salva. Botão "Testar modelo". Modelo sugerido: o "mini" mais novo da OpenAI, `gemini-2.5-flash`
+  ou o Haiku.
+- **Configurar IA** (`lib/screens/ai_settings_screen.dart`): escolhe o provedor (rádio) e configura
+  cada um. Abre pelo ícone no topo do Assistente e por Sobre e ajustes. O chat não tem mais faixa de
+  "IA em uso" (o dono pediu).
+- **Troca de modelo local corrigida**: antes, o cartão de instalação sumia depois do primeiro download
+  e o modelo nunca mais mudava. Agora o `Store` guarda vários modelos baixados (`ailocal`, id → URL,
+  com migração de `aiok/aimodel/aiurl`) e o `AiService.ensureLocalActive` reativa o arquivo pelo
+  `fromNetwork(url)` (idempotente: "Already installed", sem rede). Dá para apagar modelos.
+- **Bug de tela que não redesenhava**: widgets `const` que leem o `AppScope` não reconstroem, porque
+  o `AppScope` não notifica. Os painéis da IA escutam `Store` e `AiService` com `ListenableBuilder`
+  próprio. Use o mesmo padrão em telas novas.
+- **RAG do chat** (`lib/ai_rag.dart`): tira palavras de conversa, põe primeiro as páginas cujo nome
+  aparece na pergunta, rebaixa falas de moradores, usa a pergunta anterior e as páginas dela nas
+  continuações e, na web, manda até 24 mil caracteres com os trechos vizinhos e as células das
+  tabelas separadas por " | ". `test/rag_test.dart` tem as perguntas reais do dono (fornalha,
+  Feira, argila, galinheiro, isca).
+- **Save no chat**: com a API do jogo conectada, `saveSummary` (extraído de `buildStatusPrompt`, mesmo
+  texto) vai junto da pergunta para os provedores web e para os modelos locais genéricos. O Espírito
+  do Vale continua recebendo só a pergunta.
+- **Meu Status**: missão, dicas e passos do Conselheiro são tocáveis e abrem um quadro no estilo do
+  jogo (`status_ai_explain.dart`), sem sair da tela e sem chat. O AJUDA só libera o plano depois de
+  preparar a explicação de cada passo e da missão, então o quadro abre já completo. O diálogo do
+  item mostra os campos da ficha (utilidade, preço, onde achar) e o valor da pilha, sem o "ID técnico".
+- Respostas sem pergunta de volta nem oferta no final ("se quiser, me diga…"), a pedido do dono.
+- Testado no SM-G781B com a chave real da OpenAI (`gpt-5.4-mini` e `gpt-5.4-nano`), com o mock do jogo
+  e com o Espírito do Vale. Gemini e Anthropic só foram testados contra o servidor simulado
+  (`test/ai_cloud_test.dart`), por falta de chave.
+
+**Sessão 9 (resumo das partes abaixo):**
 
 **Sessão 9, parte 4 (v1.5.4, celular deitado e tablet):** deitado (ou tablet), a barra de baixo vira
 barra lateral (`SdvNavBar(vertical: true)` em `shell.dart`). As telas usam `ContentWidth`

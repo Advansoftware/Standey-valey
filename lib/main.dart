@@ -25,13 +25,10 @@ Future<void> main() async {
 
   // Em segundo plano: motor de IA local, API do jogo e verificação de atualizações.
   updater.checkForUpdates(silent: true);
-  ai.init().then((_) async {
-    if (!store.aiDownloading) return;
-    final model = aiModelById(store.aiModelId) ?? defaultAiModel;
-    final custom = store.aiModelUrl.trim();
-    final ok = await ai.install(model, urlOverride: custom.isEmpty ? null : custom);
-    store.setAiDownloading(false);
-    if (ok) store.setAiInstalled(true);
+  ai.init().then((_) {
+    // Retoma o download interrompido quando o app foi fechado.
+    final model = aiModelById(store.aiDownloadingId);
+    if (model != null) ai.install(store, model);
   });
   api.init();
   WidgetsBinding.instance.addPostFrameCallback((_) => search.loadWiki());

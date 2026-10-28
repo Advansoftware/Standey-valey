@@ -27,19 +27,35 @@ Também tem:
 - **Meu Status**: quando a API está conectada, o item central do menu abre um painel imersivo
   (tela cheia, deitada, com a tela ligada) que reúne localização, vitais, mochila, missões,
   amizades, habilidades, conquistas e o próximo passo do dia. O plano do guia funciona sem IA;
-  o botão **AJUDA** pede até 3 objetivos ao conselheiro local, com lugar e motivo.
+  o botão **AJUDA** pede até 3 objetivos ao conselheiro, com lugar e motivo. Tocar num passo, na
+  missão ou numa dica abre um quadro, sem sair da tela, que explica por que aquele é o próximo passo,
+  como fazer e o que você ganha, com base na wiki e no seu save. As explicações dos passos ficam
+  prontas junto com o plano, então o quadro abre já completo. Tocar num item da mochila mostra para
+  que serve, o preço, onde achar e quanto vale a pilha.
 - **Mapa do Vale** com orientação norte/sul, pinos por região, zoom e uma ficha curta de cada lugar
   (fazenda, vila, montanha, minas, praia, floresta, deserto e Ilha Gengibre), com atalho para a wiki offline.
 - **Checklist** dos pacotes do Centro Comunitário, com barra de progresso.
 - **Tema claro e escuro**, seguindo o sistema.
-- **Assistente com IA local**: você pergunta ("o que faço no primeiro dia?") e a resposta é escrita no
-  próprio celular, sem enviar nada para a internet. O modelo padrão é o **Espírito do Vale**, uma IA
-  treinada só com Stardew Valley que responde sem consultar nada. Sem modelo baixado, o assistente mostra
-  os trechos do app mais parecidos com a pergunta.
+- **Assistente com IA**: você pergunta ("o que faço no primeiro dia?") e escolhe quem responde: um
+  modelo **no celular** (offline) ou um provedor **web** (OpenAI, Google Gemini ou Anthropic, com a sua
+  chave de API). O modelo local padrão é o **Espírito do Vale**, uma IA treinada só com Stardew Valley.
+  Com o jogo conectado, o assistente também enxerga o seu save (data, dinheiro, mochila, missões,
+  amizades) e responde sobre o seu jogo. Sem IA configurada, mostra os trechos do app mais parecidos
+  com a pergunta.
 
 ### Modelos de IA
 
-O assistente deixa você escolher o modelo (o botão fica na aba Assistente):
+A tela **Configurar IA** (ícone no topo do Assistente, ou em Sobre e ajustes) define quem responde.
+Dá para trocar a qualquer momento, e a tela muda na hora.
+
+**Provedores web**: OpenAI, Google Gemini e Anthropic. Cole a sua chave de API; o app busca na API do
+provedor os modelos de texto que a chave pode usar e mostra numa lista para escolher. O botão **Testar
+modelo** faz uma pergunta curta e mostra se respondeu e em quanto tempo. A chave fica salva só no
+celular e o uso é cobrado na sua conta do provedor. Os provedores web entendem melhor perguntas longas
+e difíceis.
+
+**No celular**: baixe um ou mais modelos e escolha qual usar. Trocar para um modelo já baixado não
+baixa de novo nem precisa de internet, e dá para apagar o que não usa:
 
 | Modelo | Download | RAM indicada | Quando usar |
 |---|---|---|---|
@@ -124,9 +140,17 @@ dados de jogo para a internet. O tráfego é HTTP simples, sem TLS, e a API fica
 estiver na mesma rede: use em rede confiável e não exponha a porta 7882 na internet. Sem a API, ou
 com o jogo fechado, o app abre e funciona normalmente com o conteúdo embutido.
 
-## IA local: como funciona
+## IA: como funciona
 
-O assistente não manda a pergunta para nenhum servidor. Há dois modos, escolhidos pelo modelo:
+Com um modelo **no celular**, o assistente não manda a pergunta para nenhum servidor. Com um provedor
+**web**, a pergunta, os trechos do guia e (se o jogo estiver conectado) o resumo do save vão para a API
+escolhida, direto do celular. Há três modos:
+
+- **Provedores web (OpenAI, Gemini, Anthropic) com RAG**: recebem uma instrução de sistema pedindo
+  respostas diretas, sem perguntas de volta, e a pergunta com até 24 mil caracteres de trechos (veja
+  abaixo), o save ao vivo e as últimas falas da conversa, para entender continuações como "e quanto
+  carvão ela gasta?". OpenAI usa a API Responses; Gemini, `streamGenerateContent`; Anthropic, Messages.
+  Todos em streaming.
 
 - **Espírito do Vale (sem RAG)**: o modelo recebe só a pergunta. Os fatos do jogo estão nos pesos do
   modelo, aprendidos no fine-tuning (veja a próxima seção). O mesmo modelo faz o Conselheiro do
@@ -135,8 +159,16 @@ O assistente não manda a pergunta para nenhum servidor. Há dois modos, escolhi
 
 No modo com RAG, o app combina técnicas simples e verificáveis:
 
-- **RAG local**: a pergunta vira uma busca BM25 no conteúdo do app (fichas + cerca de 9.900 trechos da wiki).
-  Os melhores trechos entram no prompt como contexto, com o título e a categoria de cada ficha.
+- **RAG local** (`lib/ai_rag.dart`): a pergunta vira uma busca BM25 no conteúdo do app (fichas + cerca de
+  9.900 trechos da wiki), com quatro ajustes para perguntas escritas como se fala:
+  - palavras de conversa ("estou tentando", "faz tempo", "não consigo") saem da busca;
+  - se a pergunta cita o nome de uma página ou ficha ("fornalha", "argila", "galinheiro"), o começo da
+    página e o trecho dela que mais combina entram primeiro;
+  - trechos de falas de moradores perdem peso, a menos que o morador seja citado;
+  - na continuação de uma conversa, a pergunta anterior e as páginas citadas nela também entram.
+  Nos provedores web, as páginas mais relevantes entram com os trechos vizinhos, e as tabelas da wiki
+  mantêm as células separadas para o modelo não misturar colunas. `test/rag_test.dart` confere as
+  perguntas reais que a busca antiga errava.
 - **Prompt com papel e formato**: o modelo recebe instruções para responder em português, dizer para que serve,
   quanto rende e prós/contras quando esses dados existirem, usar listas com hífen e **negrito**, e não inventar
   o que não está no contexto.
@@ -146,7 +178,11 @@ No modo com RAG, o app combina técnicas simples e verificáveis:
 - **Pós-processamento**: a resposta é limpa de tokens especiais e renderizada por um Markdown leve feito no
   projeto (negrito, itálico, código e listas), sem pacote externo e sem mostrar `*asteriscos*` literais.
 
-A aba Assistente permite trocar de modelo ou colar a URL de outro `.litertlm`.
+A tela Configurar IA permite trocar de modelo, apagar modelos baixados ou colar a URL de outro `.litertlm`.
+
+`test/ai_cloud_test.dart` simula as três APIs num servidor local. Para testar contra a OpenAI de
+verdade: `OPENAI_API_KEY=sk-... flutter test test/ai_cloud_live_test.dart` (sem a variável, o teste é
+pulado; no app a chave é sempre digitada na tela).
 
 ## Espírito do Vale: o modelo treinado
 
